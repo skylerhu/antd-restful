@@ -1,0 +1,236 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Select, Space, Spin } from "antd";
+import { dequal as deepEqual } from "dequal";
+import PropTypes from "prop-types";
+import { isArray, isBlank } from "src/common/utils";
+import CopyView from "src/components/CopyView";
+import { useProtect } from "src/hooks";
+import requests from "src/requests";
+
+const _parseListResponse = (data) => data?.results || [];
+
+// 初始化数据
+const initInnerValue = (value, isMulitple) => {
+  if (isMulitple) {
+    if (isArray(value)) {
+      return value;
+    }
+    if (!isBlank(value)) {
+      return [value];
+    }
+    return [];
+  }
+  return value;
+};
+
+const SelectView = ({
+  style,
+  className,
+
+  value,
+  onChange,
+
+  restful,
+  genDetailUri = null,
+  filters = null,
+  searchKey = "search",
+  parseListResponse = _parseListResponse,
+  options,
+
+  fieldNames,
+
+  disabled = false,
+  mode,
+  antdSpaceProps = {},
+  antdSelectProps = {},
+}) => {
+  const [protect] = useProtect();
+
+  // 是否多选
+  const [isMultiple, setMultiple] = useState(mode === "multiple");
+  // 选中的值
+  const [innerValue, setInnverValue] = useState(initInnerValue(value, mode === "multiple"));
+  // 远程搜索，用户输入的关键字
+  const [searchValue, setSearchValue] = useState();
+  const [loading, setLoading] = useState(false);
+  // 下拉选项列表
+  const [innerOptions, setInnerOptions] = useState(options || []);
+  // 已经初始化过options,有可能会404,不重复获取
+  const fetchedValues = useRef(new Set());
+
+  const optKey = useMemo(() => fieldNames?.value || "value", [fieldNames]);
+  const getOptionValue = useCallback((item) => item[optKey], [optKey]);
+
+  const onValueChange = useCallback(
+    (value, option) => {
+      setInnverValue(value);
+      if (typeof onChange === "function") {
+        onChange(value, option);
+      }
+    },
+    [onChange]
+  );
+
+  // 初始化是否多选
+  useEffect(() => {
+    setMultiple(mode === "multiple");
+  }, [mode]);
+
+  // 初始化值
+  useEffect(() => {
+    setInnverValue((oldValue) => {
+      if (deepEqual(oldValue, value)) {
+        return oldValue;
+      }
+      return initInnerValue(value, mode === "multiple");
+    });
+  }, [value, mode]);
+
+  // 被选中的值
+  const selectedValues = useMemo(() => {
+    if (innerValue === null || innerValue === undefined) {
+      return [];
+    }
+    if (isMultiple) {
+      return innerValue;
+    }
+
+    return [innerValue];
+  }, [innerValue, isMultiple]);
+
+  // 首次初始化
+  useEffect(() => {
+    if (innerValue === null || innerValue === undefined || innerValue === "") {
+      return;
+    }
+    // 初始化已被选中的options
+    const values = isMultiple ? innerValue : [innerValue];
+    const optValues = innerOptions.map((opt) => getOptionValue(opt));
+    // 没有options的选中项
+    const fetchValues = values.filter((v) => !optValues.includes(v) && !fetchedValues.current.has(v));
+    if (!fetchValues.length) {
+      return;
+    }
+    fetchValues.forEach((v) => fetchedValues.current.add(v));
+    // 根据restful接口获取详情数据初始化options
+    let url;
+    if (typeof genDetailUri === "function") {
+      url = genDetailUri(fetchValues);
+    } else {
+      url = `${restful}?${optKey}__in=${fetchValues.join(",")}`;
+    }
+    requests.get(url).then(
+      protect((resp) => {
+        if (resp.data?.results?.length) {
+          setInnerOptions((oldOpts) => {
+            const opts = resp.data.results.concat(oldOpts);
+            return opts;
+          });
+        }
+      })
+    );
+  }, [protect, getOptionValue, innerValue, isMultiple, restful, genDetailUri, innerOptions, optKey]);
+
+  useEffect(() => {
+    // 搜索值变化时
+    if (disabled || !restful || !searchValue) {
+      return;
+    }
+    const timer = setTimeout(
+      protect(() => {
+        let params = { ...filters };
+        if (searchValue) {
+          params[searchKey] = searchValue;
+        }
+        setLoading(true);
+        requests
+          .get(restful, { params })
+          .then(
+            protect((response) => {
+              const results = parseListResponse(response.data);
+              setInnerOptions((oldOpts) => {
+                const selectedOpts = oldOpts.filter((opt) => selectedValues.includes(getOptionValue(opt)));
+                // 之所以再找一次_values，是避免选中的value没有初始化option
+                const _values = selectedOpts.map((opt) => getOptionValue(opt));
+                // 刷选出需要增加的options
+                const addOpts = results.filter((opt) => !_values.includes(getOptionValue(opt)));
+                const opts = selectedOpts.concat(addOpts);
+                return opts;
+              });
+            })
+          )
+          .finally(protect(() => setLoading(false)));
+      }),
+      200
+    );
+    return () => clearTimeout(timer);
+  }, [restful, filters, searchKey, parseListResponse, searchValue, protect, disabled, selectedValues, getOptionValue]);
+
+  const notFoundView = useMemo(() => {
+    let _view = "无更多数据";
+    if (restful) {
+      if (loading) {
+        _view = <Spin size="small" />;
+      } else {
+        _view = "请输入合适的关键字进行搜索";
+      }
+      return _view;
+    }
+  }, [restful, loading]);
+
+  return (
+    <Space.Compact style={style} className={className} {...antdSpaceProps}>
+      <Select
+        notFoundContent={notFoundView}
+        allowClear={true}
+        placeholder="可输入关键内容搜索，从下拉列表中选择"
+        {...antdSelectProps}
+        mode={mode}
+        disabled={disabled}
+        options={innerOptions}
+        fieldNames={fieldNames}
+        value={innerValue}
+        filterOption={false}
+        showSearch={true}
+        onSearch={(v) => setSearchValue(v)}
+        onClear={() => onValueChange(null)}
+        onChange={(value, option) => onValueChange(value, option)}
+      />
+      <CopyView text={innerValue} hiddenValue />
+    </Space.Compact>
+  );
+};
+
+SelectView.propTypes = {
+  style: PropTypes.object,
+  className: PropTypes.string,
+
+  // 选中的值
+  value: PropTypes.any,
+  onChange: PropTypes.func,
+
+  // 远程获取数据的接口
+  restful: PropTypes.string,
+  // 根据value初始化能够get到对应options的接口地址；函数输入参数即初始化的value，多选时是数组
+  genDetailUri: PropTypes.func,
+  // 接口刷选条件
+  filters: PropTypes.object,
+  // 模糊搜索使用的key
+  searchKey: PropTypes.string,
+  // 从接口返回值解析出列表数据，函数输入参数是 response.body 的具体内容
+  parseListResponse: PropTypes.func,
+  // 初始化的下拉选项
+  options: PropTypes.arrayOf(PropTypes.object),
+
+  // 通antd官方配置，配置options的key/value字段
+  fieldNames: PropTypes.object,
+
+  // 默认单选，多选： multiple
+  mode: PropTypes.string,
+  disabled: PropTypes.bool,
+  // antd原生配置项
+  antdSpaceProps: PropTypes.object,
+  antdSelectProps: PropTypes.object,
+};
+
+export default SelectView;

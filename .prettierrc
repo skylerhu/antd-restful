@@ -1,0 +1,27 @@
+{
+  "doubleQuote": true,
+  "jsxSingleQuote": false,
+  "trailingComma": "es5",
+  "printWidth": 120,
+  "jsxBracketSameLine": true,
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "semi": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "endOfLine": "lf",
+  "proseWrap": "never",
+  "importOrder": ["^(react|react-dom)$", "^([a-z]|@[a-z])", "", ".*"],
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+  "overrides": [
+    {
+      "files": ".prettierrc",
+      "options": {
+        "parser": "json"
+      }
+    }
+  ],
+  "jsxWrapAttributes": "force",
+  "jsxWrapAttributesThreshold": 1,
+  "jsxAttributeClosingParen": "new-line"
+}

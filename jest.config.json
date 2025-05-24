@@ -1,0 +1,23 @@
+{
+  "verbose": true,
+  "testEnvironment": "jsdom",
+  "setupFilesAfterEnv": [
+    "<rootDir>/setupTests.js"
+  ],
+  "moduleFileExtensions": [
+    "js",
+    "jsx",
+    "ts",
+    "tsx",
+    "json"
+  ],
+  "testMatch": [
+    "**/tests/**/*.{js,jsx,ts}"
+  ],
+  "collectCoverage": true,
+  "coverageDirectory": "./.coverage",
+  "collectCoverageFrom": [
+    "src/**/*.{js,jsx,ts}",
+    "!**/node_modules/**"
+  ]
+}
