@@ -15,20 +15,9 @@
 
     npm install antd-restful
 
+还需要安装库自身的依赖：
 
-需要注意的是： 内部关于 `query` 序列化的处理，使用的是 `query-string` 库，设置了 `{ arrayFormat: "comma", skipNull: true, skipEmptyString: true }` 等参数。
-
-若是需要调整，可以在入口中修改：
-```jsx
-import antdRestful from "antd-restufl";
-
-const { setGlobalConfig } = antdRestful;
-// 修改成自己需要的处理方式
-setGlobalConfig({
-    queryStringify: (params) => Qs.stringify(params, {arrayFormat: 'brackets'}),
-    queryParse: (string) => Qs.parse(string, {arrayFormat: 'brackets'}),
-})
-```
+    npm install react react-dom antd @ant-design/icons axios
 
 使用示例：
 ```jsx
@@ -43,6 +32,20 @@ const {
 ```
 
 ## 二. 使用(Usage)
+
+需要注意的是： 组件中远程请求，内部关于 `query` 序列化的处理，使用的是 `query-string` 库，设置了 `{ arrayFormat: "comma", skipNull: true, skipEmptyString: true }` 等参数。
+
+若是需要调整，可以在入口中修改：
+```jsx
+import antdRestful from "antd-restufl";
+
+const { setGlobalConfig } = antdRestful;
+// 修改成自己需要的处理方式
+setGlobalConfig({
+    queryStringify: (params) => Qs.stringify(params, {arrayFormat: 'brackets'}),
+    queryParse: (string) => Qs.parse(string, {arrayFormat: 'brackets'}),
+})
+```
 
 - [通用组件](#21-通用组件)
   - [RestTable](./docs/reference/RestTable.md)
@@ -66,6 +69,6 @@ const {
 - [typeTools](./docs/reference/typeTools.md)
 
 
-## 三、示例
+## 三、应用场景
 - [依赖restful接口的列表数据展示](./demo/views/TableDemo.jsx)
 - [动态表单中的应用](./demo/views/JSONForm.jsx)

@@ -92,7 +92,7 @@
     "webpack-dev-server": "^5.2.1"
   },
   "description": "",
-  "keywords": [],
+  "keywords": ["antd", "restful", "resttable", "restselect"],
   "homepage": "https://github.com/SkylerHu/antd-restful",
   "repository": {
     "type": "git",
