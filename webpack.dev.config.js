@@ -22,12 +22,19 @@ const devConfig = {
     proxy: [
       {
         context: ["/api"],
-        target: "http://localhost:8000",
-        pathRewrite: { "^/api": "" },
+        target: "http://localhost:3001",
+        pathRewrite: { "^/api": "/api" },
         changeOrigin: true,
       },
     ],
     open: false, // 自动打开浏览器
+    client: {
+      overlay: {
+        warnings: false,
+        errors: false, // 关闭浏览器中的错误覆盖层
+        runtimeErrors: false, // 关闭运行时错误覆盖层
+      },
+    },
   },
   resolve: {
     extensions: [".js", ".jsx"],

@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, HashRouter as Router, Routes } from "react-router";
+import { Route, HashRouter as Router, Routes, Navigate } from "react-router";
 
 import Main from "./Main";
 
@@ -8,7 +8,8 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<Main />} />
+          <Route path=":tab" element={<Main />} />
+          <Route path="/" element={<Navigate to="form" replace />} />
         </Routes>
       </Router>
     </div>

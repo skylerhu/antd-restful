@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MentionView should render 1`] = `
+<div>
+  <div
+    class="ant-mentions css-dev-only-do-not-override-1kf000u ant-mentions-outlined"
+  >
+    <textarea
+      class="rc-textarea"
+      rows="1"
+    />
+  </div>
+</div>
+`;
+
+exports[`MentionView should render in readOnly mode 1`] = `
+<div>
+  <span
+    class="cls-antd-restful-readonly"
+  >
+    @admin
+  </span>
+</div>
+`;

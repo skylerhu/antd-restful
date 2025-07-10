@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExpansionView should render in readOnly mode 1`] = `
+<div>
+  <div
+    class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small cls-antd-restful-readonly"
+    style="width: 100%;"
+  >
+    <div
+      class="ant-space-item"
+    >
+      user
+    </div>
+    <div
+      class="ant-space-item"
+    >
+      <div
+        class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+      >
+        <div
+          class="ant-spin-container"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ExpansionView should render initial state 1`] = `
+<div>
+  <div
+    class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
+    style="width: 100%;"
+  >
+    <div
+      class="ant-space-item"
+    >
+      <input
+        class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined"
+        type="text"
+        value=""
+      />
+    </div>
+    <div
+      class="ant-space-item"
+    >
+      <div
+        class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+      >
+        <div
+          class="ant-spin-container"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ExpansionView should render with enableBraceExpansion 1`] = `
+<div>
+  <div
+    class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
+    style="width: 100%;"
+  >
+    <div
+      class="ant-space-item"
+    >
+      <input
+        class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined"
+        type="text"
+        value="{{1,{2..4}}}"
+      />
+    </div>
+    <div
+      class="ant-space-item"
+    >
+      <div
+        class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+      >
+        <div
+          class="ant-spin-container"
+        >
+          <div
+            class="ant-alert ant-alert-success ant-alert-no-icon css-dev-only-do-not-override-1kf000u"
+            data-show="true"
+            role="alert"
+          >
+            <div
+              class="ant-alert-content"
+            >
+              <div
+                class="ant-alert-message"
+              >
+                <div>
+                  <p
+                    style="white-space: pre-wrap;"
+                  >
+                    <span>
+                      {1}
+{2}
+{3}
+{4}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

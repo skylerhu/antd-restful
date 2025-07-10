@@ -3,7 +3,7 @@
   "jsxSingleQuote": false,
   "trailingComma": "es5",
   "printWidth": 120,
-  "jsxBracketSameLine": true,
+  "jsxBracketSameLine": false,
   "bracketSpacing": true,
   "arrowParens": "always",
   "semi": true,
@@ -11,7 +11,16 @@
   "useTabs": false,
   "endOfLine": "lf",
   "proseWrap": "never",
-  "importOrder": ["^(react|react-dom)$", "^([a-z]|@[a-z])", "", ".*"],
+  "importOrder": [
+    "^(react|react-dom)$",
+    "^prop-types$",
+    "^(antd|@ant-design)$",
+    "^(string-format)$",
+    "^([a-z-]|@[a-z-])",
+    ".*",
+    "",
+    "^(demo|src)/.*"
+  ],
   "plugins": ["@ianvs/prettier-plugin-sort-imports"],
   "overrides": [
     {

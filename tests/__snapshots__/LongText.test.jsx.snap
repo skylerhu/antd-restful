@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LongText should render array of objects with labelTemplate and maxLength 1`] = `
+<div>
+  <div>
+    <p
+      style="white-space: pre-wrap;"
+    >
+      <span>
+        管理员(admin)
+      </span>
+      <button
+        class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-link ant-btn-color-primary ant-btn-variant-link ant-btn-sm"
+        type="button"
+      >
+        <span
+          aria-label="ellipsis"
+          class="anticon anticon-ellipsis"
+          role="img"
+        >
+          <svg
+            aria-hidden="true"
+            data-icon="ellipsis"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="64 64 896 896"
+            width="1em"
+          >
+            <path
+              d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
+            />
+          </svg>
+        </span>
+        <span
+          style="color: rgba(0, 0, 0, 0.45);"
+        >
+          (长度 
+          2
+          )
+        </span>
+      </button>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`LongText should render array value with maxLength 1`] = `
+<div>
+  <div>
+    <p
+      style="white-space: pre-wrap;"
+    >
+      <span>
+        1, 2
+      </span>
+      <button
+        class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-link ant-btn-color-primary ant-btn-variant-link ant-btn-sm"
+        type="button"
+      >
+        <span
+          aria-label="ellipsis"
+          class="anticon anticon-ellipsis"
+          role="img"
+        >
+          <svg
+            aria-hidden="true"
+            data-icon="ellipsis"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="64 64 896 896"
+            width="1em"
+          >
+            <path
+              d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
+            />
+          </svg>
+        </span>
+        <span
+          style="color: rgba(0, 0, 0, 0.45);"
+        >
+          (长度 
+          10
+          )
+        </span>
+      </button>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`LongText should render basic value 1`] = `
+<div>
+  <div>
+    <p
+      style="white-space: pre-wrap;"
+    >
+      <span>
+        1
+      </span>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`LongText should render object value with labelTemplate 1`] = `
+<div>
+  <div>
+    <p
+      style="white-space: pre-wrap;"
+    >
+      <span>
+        管理员(admin)
+      </span>
+      <button
+        class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-link ant-btn-color-primary ant-btn-variant-link ant-btn-sm"
+        type="button"
+      >
+        <span
+          aria-label="ellipsis"
+          class="anticon anticon-ellipsis"
+          role="img"
+        >
+          <svg
+            aria-hidden="true"
+            data-icon="ellipsis"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="64 64 896 896"
+            width="1em"
+          >
+            <path
+              d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
+            />
+          </svg>
+        </span>
+        <span />
+      </button>
+    </p>
+  </div>
+</div>
+`;
+
+exports[`LongText should render string value with maxLength 1`] = `
+<div>
+  <div>
+    <p
+      style="white-space: pre-wrap;"
+    >
+      <span>
+        我是
+      </span>
+      <button
+        class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-link ant-btn-color-primary ant-btn-variant-link ant-btn-sm"
+        type="button"
+      >
+        <span
+          aria-label="ellipsis"
+          class="anticon anticon-ellipsis"
+          role="img"
+        >
+          <svg
+            aria-hidden="true"
+            data-icon="ellipsis"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="64 64 896 896"
+            width="1em"
+          >
+            <path
+              d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
+            />
+          </svg>
+        </span>
+        <span
+          style="color: rgba(0, 0, 0, 0.45);"
+        >
+          (长度 
+          11
+          )
+        </span>
+      </button>
+    </p>
+  </div>
+</div>
+`;

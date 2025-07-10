@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RestAutoComplete should render in readOnly mode 1`] = `
+<div>
+  <span
+    class="cls-antd-restful-readonly"
+  >
+    apple
+  </span>
+</div>
+`;
