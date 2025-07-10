@@ -1,0 +1,113 @@
+{
+  "restful": "api/cities/",
+  "page_size": 10,
+  "filter_fields": {
+    "id": ["exact", "in"],
+    "belong": ["exact", "in", "isnull"],
+    "key": ["exact", "in"]
+  },
+  "search_fields": ["key", "name"],
+  "ordering_fields": ["id"],
+  "ordering": ["-id"],
+  "pk_field": "id",
+  "rows": [
+    {
+      "id": 1,
+      "key": "anhui",
+      "name": "安徽",
+      "belong": null,
+      "isLeaf": false
+    },
+    {
+      "id": 2,
+      "key": "beijing",
+      "name": "北京",
+      "belong": null,
+      "isLeaf": false
+    },
+    {
+      "id": 3,
+      "key": "shanghai",
+      "name": "上海",
+      "belong": null,
+      "isLeaf": false
+    },
+    {
+      "id": 4,
+      "key": "hubei",
+      "name": "湖北",
+      "belong": null,
+      "isLeaf": false
+    },
+    {
+      "id": 5,
+      "key": "chaoyang",
+      "name": "朝阳",
+      "belong": "beijing",
+      "isLeaf": true
+    },
+    {
+      "id": 6,
+      "key": "haidian",
+      "name": "海淀",
+      "belong": "beijing",
+      "isLeaf": true
+    },
+    {
+      "id": 7,
+      "key": "changping",
+      "name": "昌平",
+      "belong": "beijing",
+      "isLeaf": true
+    },
+    {
+      "id": 8,
+      "key": "hefei",
+      "name": "合肥",
+      "belong": "anhui",
+      "isLeaf": true
+    },
+    {
+      "id": 9,
+      "key": "anqing",
+      "name": "安庆",
+      "belong": "anhui",
+      "isLeaf": false
+    },
+    {
+      "id": 10,
+      "key": "wuhu",
+      "name": "芜湖",
+      "belong": "anhui",
+      "isLeaf": false
+    },
+    {
+      "id": 11,
+      "key": "huangshang",
+      "name": "黄山市",
+      "belong": "anhui",
+      "isLeaf": false
+    },
+    {
+      "id": 12,
+      "key": "taihu",
+      "name": "太湖",
+      "belong": "anqing",
+      "isLeaf": true
+    },
+    {
+      "id": 13,
+      "key": "qianshan",
+      "name": "潜山",
+      "belong": "anqing",
+      "isLeaf": true
+    },
+    {
+      "id": 14,
+      "key": "susong",
+      "name": "宿松",
+      "belong": "anqing",
+      "isLeaf": true
+    }
+  ]
+}

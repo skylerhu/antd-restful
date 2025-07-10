@@ -1,0 +1,66 @@
+{
+  "apis": [
+    {
+      "method": "post",
+      "path": "api/upload/",
+      "response": {
+        "code": 200,
+        "json": {
+          "thumbUrl": "http://gips2.baidu.com/it/u=195724436,3554684702&fm=3028&app=3028&f=JPEG&fmt=auto?w=1280&h=960",
+          "url": "http://gips2.baidu.com/it/u=195724436,3554684702&fm=3028&app=3028&f=JPEG&fmt=auto?w=1280&h=960"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "api/validate/arr/",
+      "response": {
+        "code": 200,
+        "json": {
+          "output": [
+            {
+              "id": 1,
+              "username": "admin",
+              "nickname": "管理员"
+            },
+            {
+              "id": 2,
+              "username": "skyler",
+              "nickname": "Skyler"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "api/validate/err/",
+      "response": {
+        "code": 400,
+        "text": "出现错误"
+      }
+    },
+    {
+      "method": "post",
+      "path": "api/validate/remote/err/",
+      "response": {
+        "code": 200,
+        "json": {
+          "validated": false,
+          "message": "数据不符合要求"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "api/validate/remote/",
+      "response": {
+        "code": 200,
+        "json": {
+          "validated": true,
+          "message": "数据符合要求"
+        }
+      }
+    }
+  ]
+}

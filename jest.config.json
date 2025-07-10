@@ -1,6 +1,6 @@
 {
   "verbose": true,
-  "testEnvironment": "jsdom",
+  "testEnvironment": "jest-environment-jsdom",
   "setupFilesAfterEnv": [
     "<rootDir>/setupTests.js"
   ],
@@ -11,6 +11,12 @@
     "tsx",
     "json"
   ],
+  "modulePaths": [
+    "<rootDir>/src"
+  ],
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
   "testMatch": [
     "**/tests/**/*.{js,jsx,ts}"
   ],

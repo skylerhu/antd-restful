@@ -6,5 +6,5 @@
     "baseUrl": "./", // 基础路径设置为项目根目录
   },
   "exclude": ["node_modules"], // 排除 node_modules 目录
-  "include": ["src/**/*", "demo/**/*"] // 只包括 src 目录下的文件
+  "include": ["src/**/*", "demo/**/*", "tests/**/*"]
 }

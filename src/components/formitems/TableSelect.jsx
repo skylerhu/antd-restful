@@ -1,0 +1,173 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
+import { version as antdVersion, Button, Collapse, Space } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+import { dequal as deepEqual } from "dequal";
+import { isArray, isDict, isFunction } from "src/common/typeTools";
+import RestTable from "src/components/RestTable";
+
+const TableSelect = ({
+  value,
+  onChange,
+  disabled = false,
+  readOnly = false,
+  expandSelected = true,
+  rowKey = "id",
+  columns = [],
+  antdTableProps,
+  antdCollapseProps,
+  antdSpaceProps,
+  ...restProps
+}) => {
+  const [selectedKeys, setSelectedKeys] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  useEffect(() => {
+    setSelectedKeys((oldv) => {
+      let newV = [];
+      if (isArray(value)) {
+        newV = value.map((v) => v[rowKey]);
+      }
+      if (deepEqual(oldv, newV)) {
+        return oldv;
+      }
+      return newV;
+    });
+    setSelectedRows((oldV) => {
+      const newV = value || [];
+      if (deepEqual(oldV, newV)) {
+        return oldV;
+      }
+      return newV;
+    });
+  }, [value, rowKey]);
+
+  const updateSelectedRows = useCallback(
+    (keys, rows) => {
+      setSelectedKeys(keys);
+      // 保留已选中的行
+      let newRows = selectedRows.filter((item) => isDict(item) && keys.includes(item[rowKey]));
+      if (isArray(rows)) {
+        const partKeys = newRows.map((item) => item[rowKey]);
+        // 添加新选中的行
+        const partRows = rows.filter(
+          (item) => isDict(item) && !partKeys.includes(item[rowKey]) && keys.includes(item[rowKey])
+        );
+        newRows = [...newRows, ...partRows];
+      }
+      if (deepEqual(newRows, selectedRows)) {
+        return;
+      }
+      setSelectedRows(newRows);
+      if (isFunction(onChange)) {
+        onChange(newRows);
+      }
+    },
+    [rowKey, onChange, selectedRows]
+  );
+
+  // 添加取消选择按钮
+  const columensWithActions = useMemo(() => {
+    let _columns = [...columns];
+    if (!disabled && !readOnly) {
+      _columns.push({
+        title: "取消",
+        key: "actions",
+        width: 80,
+        render: (text, record) => {
+          return (
+            <Button
+              icon={<CloseOutlined style={{ color: "red" }} />}
+              type="text"
+              onClick={() => updateSelectedRows(selectedKeys.filter((k) => k !== record[rowKey]))}
+            />
+          );
+        },
+      });
+    }
+    return _columns;
+  }, [rowKey, selectedKeys, columns, updateSelectedRows, disabled, readOnly]);
+
+  const readOnlyView = useMemo(() => {
+    return (
+      <RestTable
+        tools={false}
+        {...restProps}
+        baseParams={{}}
+        forceParams={{}}
+        restful={null}
+        dataSource={selectedRows}
+        rowKey={rowKey}
+        columns={columensWithActions}
+      />
+    );
+  }, [selectedRows, rowKey, columensWithActions, restProps]);
+
+  if (disabled || readOnly) {
+    return readOnlyView;
+  }
+  return (
+    <Space.Compact block direction="vertical" gap={0} {...antdSpaceProps}>
+      {antdVersion && antdVersion >= "5" ? (
+        <Collapse
+          defaultActiveKey={expandSelected ? "title" : undefined}
+          {...antdCollapseProps}
+          items={[
+            {
+              key: "title",
+              label: `选中 ${selectedRows?.length || 0} 条数据`,
+              children: readOnlyView,
+            },
+          ]}
+        />
+      ) : (
+        <Collapse defaultActiveKey={expandSelected ? "title" : undefined} {...antdCollapseProps}>
+          <Collapse.Panel key="title" header={`选中 ${selectedRows?.length || 0} 条数据`}>
+            {readOnlyView}
+          </Collapse.Panel>
+        </Collapse>
+      )}
+      <RestTable
+        tools={false}
+        {...restProps}
+        rowKey={rowKey}
+        columns={columns}
+        antdTableProps={{
+          ...antdTableProps,
+          rowSelection: disabled ? undefined : {
+            ...antdTableProps?.rowSelection,
+            hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
+            preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
+            selectedRowKeys: selectedKeys,
+            onChange: (_selectedRowKeys, _selectedRows) => {
+              updateSelectedRows(_selectedRowKeys, _selectedRows);
+            },
+            getCheckboxProps: (record) => ({
+              disabled: disabled || record.disabled,
+            }),
+          },
+        }}
+      />
+    </Space.Compact>
+  );
+};
+
+TableSelect.propTypes = {
+  // 值仅支持 [{}] 格式
+  value: PropTypes.arrayOf(PropTypes.object),
+  onChange: PropTypes.func,
+
+  // 禁用后只读
+  disabled: PropTypes.bool,
+  readOnly: PropTypes.bool,
+  // 是否默认展开显示选中数据
+  expandSelected: PropTypes.bool,
+
+  rowKey: PropTypes.string,
+  columns: PropTypes.array,
+  antdTableProps: PropTypes.object,
+  antdCollapseProps: PropTypes.object,
+  antdSpaceProps: PropTypes.object,
+};
+
+export default TableSelect;

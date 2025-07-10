@@ -1,12 +1,12 @@
 const path = require("path"); // eslint-disable-line
-const CopyPlugin = require("copy-webpack-plugin"); // eslint-disable-line
+// const CopyPlugin = require("copy-webpack-plugin"); // eslint-disable-line
 const TerserPlugin = require("terser-webpack-plugin"); // eslint-disable-line
 
 const PATHS = {
   src: path.join(__dirname, "src"),
   build: path.join(__dirname, "dist"),
-  srcStatic: path.join(__dirname, "src", "static"),
-  buildStatic: path.join(__dirname, "dist", "static"),
+  // srcStatic: path.join(__dirname, "src", "static"),
+  // buildStatic: path.join(__dirname, "dist", "static"),
 };
 
 const config = {
@@ -22,7 +22,7 @@ const config = {
       type: "umd", // 采用通用模块定义
       export: "default", // 兼容 ES6 的模块系统、CommonJS 和 AMD 模块规范
     },
-    globalObject: "this",
+    // globalObject: "this",
   },
   resolve: {
     extensions: [".js", ".jsx"],
@@ -63,17 +63,18 @@ const config = {
       }),
     ],
   },
-  plugins: [
-    new CopyPlugin({
-      patterns: [{ from: PATHS.srcStatic, to: PATHS.buildStatic }],
-    }),
-  ],
+  // plugins: [
+  //   new CopyPlugin({
+  //     patterns: [{ from: PATHS.srcStatic, to: PATHS.buildStatic }],
+  //   }),
+  // ],
   externals: {
     // 定义外部依赖，避免把react和react-dom打包进去
+    axios: "axios",
     react: "react",
     "react-dom": "react-dom",
     antd: "antd",
-    "@ant-design/icons": "@ant-design/icons",
+    "@ant-design/icons": "@ant-design/icons"
   },
 };
 
