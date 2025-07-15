@@ -776,8 +776,8 @@ const RestTable = forwardRef(
             showTotal: (total) => {
               return <span>总计：{total} 条</span>;
             },
-            ...antdTableProps?.pagination,
             pageSizeOptions,
+            ...antdTableProps?.pagination,
             current: innerFilters[fieldPage],
             pageSize: innerFilters[fieldPageSize],
             total: innerData.total,
