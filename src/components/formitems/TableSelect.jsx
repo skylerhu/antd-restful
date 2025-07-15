@@ -14,6 +14,7 @@ const TableSelect = ({
   expandSelected = true,
   rowKey = "id",
   columns = [],
+  antdTableReadProps,
   antdTableProps,
   antdCollapseProps,
   antdSpaceProps,
@@ -93,6 +94,7 @@ const TableSelect = ({
       <RestTable
         tools={false}
         {...restProps}
+        antdTableProps={{ ...antdTableProps, ...antdTableReadProps }}
         baseParams={{}}
         forceParams={{}}
         restful={null}
@@ -101,7 +103,7 @@ const TableSelect = ({
         columns={columensWithActions}
       />
     );
-  }, [selectedRows, rowKey, columensWithActions, restProps]);
+  }, [selectedRows, rowKey, columensWithActions, restProps, antdTableProps, antdTableReadProps]);
 
   if (disabled || readOnly) {
     return readOnlyView;
@@ -165,6 +167,7 @@ TableSelect.propTypes = {
 
   rowKey: PropTypes.string,
   columns: PropTypes.array,
+  antdTableReadProps: PropTypes.object,
   antdTableProps: PropTypes.object,
   antdCollapseProps: PropTypes.object,
   antdSpaceProps: PropTypes.object,

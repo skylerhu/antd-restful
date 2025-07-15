@@ -40,6 +40,7 @@ const RestTable = forwardRef(
       forceParams,
       fieldPage = "page",
       fieldPageSize = "page_size",
+      defaultPageSize = DEFAULT_PAGE_SIZE,
       fieldOrdering = "ordering",
       parseRowsPath = DEFAULT_ROWS_PATH,
       parseTotalPath = "count",
@@ -144,8 +145,8 @@ const RestTable = forwardRef(
     }, [columns]);
 
     const pageSize = useMemo(() => {
-      return parseInt(innerFilters[fieldPageSize] || DEFAULT_PAGE_SIZE);
-    }, [innerFilters, fieldPageSize]);
+      return parseInt(innerFilters[fieldPageSize] || defaultPageSize);
+    }, [innerFilters, fieldPageSize, defaultPageSize]);
 
     const pageSizeOptions = useMemo(() => {
       let opts = antdTableProps?.pagination?.pageSizeOptions || [10, 20, 50, 100];
@@ -153,6 +154,10 @@ const RestTable = forwardRef(
       if (!opts.includes(pageSize)) {
         change = true;
         opts.push(pageSize);
+      }
+      if (!opts.includes(defaultPageSize)) {
+        change = true;
+        opts.push(defaultPageSize);
       }
       if (memBaseParams && memBaseParams[fieldPageSize] && !opts.includes(memBaseParams[fieldPageSize])) {
         change = true;
@@ -162,7 +167,7 @@ const RestTable = forwardRef(
         opts.sort((a, b) => a - b);
       }
       return opts;
-    }, [pageSize, antdTableProps?.pagination?.pageSizeOptions, memBaseParams, fieldPageSize]);
+    }, [pageSize, defaultPageSize, antdTableProps?.pagination?.pageSizeOptions, memBaseParams, fieldPageSize]);
 
     // setInnerFilters
     useEffect(() => {
@@ -174,7 +179,7 @@ const RestTable = forwardRef(
         // forceParams 优先级最高，是用户手动设置的，不会被其他参数覆盖
         let newV = {
           // [fieldPage]: DEFAULT_PAGE,
-          // [fieldPageSize]: DEFAULT_PAGE_SIZE,
+          // [fieldPageSize]: defaultPageSize,
           ...memBaseParams,
           ...memRouteParams,
           ...headerFilters,
@@ -183,7 +188,7 @@ const RestTable = forwardRef(
         };
         // 避免传递过来空字符串的情况
         newV[fieldPage] = newV[fieldPage] || DEFAULT_PAGE;
-        newV[fieldPageSize] = newV[fieldPageSize] || DEFAULT_PAGE_SIZE;
+        newV[fieldPageSize] = newV[fieldPageSize] || defaultPageSize;
         newV = transformFilters(newV, { skipEmpty: true, multipleMap });
         if (deepEqual(oldV, newV)) {
           return oldV;
@@ -193,6 +198,7 @@ const RestTable = forwardRef(
     }, [
       fieldPage,
       fieldPageSize,
+      defaultPageSize,
       memBaseParams,
       memRouteParams,
       memForceParams,
@@ -270,13 +276,13 @@ const RestTable = forwardRef(
             delete filters[fieldPageSize];
           }
         } else {
-          if (filters[fieldPageSize] === DEFAULT_PAGE_SIZE) {
+          if (filters[fieldPageSize] === defaultPageSize) {
             delete filters[fieldPageSize];
           }
         }
         onFiltersChange(filters);
       }
-    }, [fieldPage, fieldPageSize, memBaseParams, innerFilters, onFiltersChange]);
+    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, innerFilters, onFiltersChange]);
 
     useEffect(() => {
       if (!innerFilters[fieldPage]) {
@@ -484,10 +490,12 @@ const RestTable = forwardRef(
         if (!newCloumn.render && (column.labelTemplate || !isEmpty(column.copyProps) || column.fieldName)) {
           // 转换为render函数，处理显示的值
           newCloumn.render = (value, record) => {
-            let label = value;
-            if (label === undefined && column.fieldName) {
+            let label;
+            if (column.fieldName) {
               // 用真实字段值
               label = findDataByPath(record, column.fieldName);
+            } else {
+              label = value;
             }
             if (isEmpty(label)) {
               return label;
@@ -763,16 +771,16 @@ const RestTable = forwardRef(
           dataSource={innerData.dataSource}
           pagination={{
             size: "small",
-            current: innerFilters[fieldPage],
-            pageSize: innerFilters[fieldPageSize],
-            total: innerData.total,
-            pageSizeOptions,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total) => {
               return <span>总计：{total} 条</span>;
             },
             ...antdTableProps?.pagination,
+            pageSizeOptions,
+            current: innerFilters[fieldPage],
+            pageSize: innerFilters[fieldPageSize],
+            total: innerData.total,
           }}
           onChange={(pagination, filters, sorter, extra) => {
             onTableChange(pagination, filters, sorter);
@@ -799,6 +807,7 @@ RestTable.propTypes = {
   forceParams: PropTypes.object,
   fieldPage: PropTypes.string,
   fieldPageSize: PropTypes.string,
+  defaultPageSize: PropTypes.number,
   fieldOrdering: PropTypes.string,
   parseRowsPath: PropTypes.string,
   parseTotalPath: PropTypes.string,
@@ -842,6 +851,8 @@ RestTable.propTypes = {
       fieldName: PropTypes.string,
       // 是否默认显示
       hidden: PropTypes.bool,
+      // 是否开启排序，得配置 dataIndex 字段
+      sorter: PropTypes.bool,
     })
   ),
   dataSource: PropTypes.array,

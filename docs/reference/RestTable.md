@@ -26,6 +26,7 @@
 | forceParams | 强制参数，会覆盖路由参数和表单参数 | `object` | - | - |
 | fieldPage | 分页字段名 | `string` | `'page'` | - |
 | fieldPageSize | 每页条数字段名 | `string` | `'page_size'` | - |
+| defaultPageSize | 默认页数 | `number` | `20` | - |
 | fieldOrdering | 排序字段名 | `string` | `'ordering'` | - |
 | parseRowsPath | 解析数据行的路径 | `string` | `'results'` | - |
 | parseTotalPath | 解析总数的路径 | `string` | `'count'` | - |

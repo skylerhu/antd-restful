@@ -21,6 +21,7 @@
 | columns | 表格列配置 | `array` | `[]` | - |
 | **Ant Design 原生配置** | | | | |
 | antdTableProps | Ant Design Table 组件的原生属性 | `object` | - | - |
+| antdTableReadProps | 用于配置只读的Table，覆盖 antdTableProps | `object` | - | - |
 | antdCollapseProps | Ant Design Collapse 组件的原生属性 | `object` | - | - |
 | antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
 | **RestTable 属性** | | | | |
