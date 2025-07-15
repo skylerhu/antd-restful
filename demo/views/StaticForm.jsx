@@ -203,6 +203,8 @@ export default function StaticForm() {
         <TableSelect
           restful="api/users/"
           {...editProps}
+          defaultPageSize={5}
+          titleTemplate="选中 {count} 个用户"
           baseParams={
             {
               page_size: 2, // eslint-disable-line camelcase

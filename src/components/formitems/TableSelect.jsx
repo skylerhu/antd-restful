@@ -5,6 +5,7 @@ import { CloseOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
 import { isArray, isDict, isFunction } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
+import { commonFormat } from "src/common/parser";
 
 const TableSelect = ({
   value,
@@ -17,6 +18,7 @@ const TableSelect = ({
   antdTableReadProps,
   antdTableProps,
   antdCollapseProps,
+  titleTemplate = "选中 {count} 条数据",
   antdSpaceProps,
   ...restProps
 }) => {
@@ -117,14 +119,14 @@ const TableSelect = ({
           items={[
             {
               key: "title",
-              label: `选中 ${selectedRows?.length || 0} 条数据`,
+              label: commonFormat(titleTemplate, { count: selectedRows?.length || 0 }),
               children: readOnlyView,
             },
           ]}
         />
       ) : (
         <Collapse defaultActiveKey={expandSelected ? "title" : undefined} {...antdCollapseProps}>
-          <Collapse.Panel key="title" header={`选中 ${selectedRows?.length || 0} 条数据`}>
+          <Collapse.Panel key="title" header={commonFormat(titleTemplate, { count: selectedRows?.length || 0 })}>
             {readOnlyView}
           </Collapse.Panel>
         </Collapse>
@@ -167,6 +169,9 @@ TableSelect.propTypes = {
 
   rowKey: PropTypes.string,
   columns: PropTypes.array,
+
+  // 选中数据标题模板, 必须包含 {count} 占位符，count表示选中个数
+  titleTemplate: PropTypes.string,
   antdTableReadProps: PropTypes.object,
   antdTableProps: PropTypes.object,
   antdCollapseProps: PropTypes.object,
