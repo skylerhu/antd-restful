@@ -366,9 +366,13 @@ const RestTable = forwardRef(
                   {...config.dropdownProps}
                   value={selectedKeys}
                   onChange={(value) => {
-                    const keys = value !== null && value !== undefined ? [value] : [];
+                    const keys = isBlank(value) ? [] : (isArray(value) ? value : [value]);
+                    const isMultiple = config.dropdownProps?.mode === "multiple";
                     setSelectedKeys(keys);
-                    confirm();
+                    if (!isMultiple) {
+                      // 单选时，直接确认
+                      confirm();
+                    }
                   }}
                 />
               );

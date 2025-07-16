@@ -223,6 +223,7 @@ export default function StaticForm() {
               filterDropdownConfig: {
                 type: FieldType.SELECT,
                 dropdownProps: {
+                  mode: "multiple",
                   restful: "api/users/",
                   fieldNames: {
                     label: "nickname",
@@ -230,7 +231,7 @@ export default function StaticForm() {
                   },
                 },
               },
-              filterMultiple: false,
+              filterMultiple: true,
             },
             {
               title: "名称",
@@ -275,8 +276,8 @@ export default function StaticForm() {
   ];
 
   // 方便调试单个组件
-  const showFields = [];
-  // const showFields = ["expansion"];
+  // const showFields = [];
+  const showFields = ["table"];
 
   return (
     <div>
@@ -334,7 +335,7 @@ export default function StaticForm() {
           wrapperCol: { span: 20 },
         }}
         antdListProps={{
-          grid: { gutter: 10, column: 2 },
+          grid: { gutter: 10, column: 1 },
         }}
       />
 
