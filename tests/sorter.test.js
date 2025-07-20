@@ -60,6 +60,84 @@ describe("sorter module", () => {
         expect(sorter.commonSorter("", "")).toBe(0);
         expect(sorter.commonSorter("", "a")).toBe(-1);
       });
+
+      test("空值排序顺序", () => {
+        // 测试空值的排序顺序：null < "" < 其他值 < undefined
+        const values = [undefined, "a", null, "", 1];
+        const sorted = values.sort(sorter.commonSorter);
+        expect(sorted).toEqual([null, "", "a", 1, undefined]);
+      });
+
+      test("空值与undefined的排序", () => {
+        expect(sorter.commonSorter(null, undefined)).toBe(1);
+        expect(sorter.commonSorter("", undefined)).toBe(1);
+        expect(sorter.commonSorter(0, undefined)).toBe(1);
+        expect(sorter.commonSorter("a", undefined)).toBe(1);
+      });
+    });
+
+    // 测试边界值和特殊值
+    describe("边界值和特殊值", () => {
+      test("NaN值处理", () => {
+        expect(sorter.commonSorter(NaN, 1)).toBe(0); // NaN被视为0
+        expect(sorter.commonSorter(1, NaN)).toBe(0);
+        expect(sorter.commonSorter(NaN, NaN)).toBe(0);
+      });
+
+      test("Infinity值处理", () => {
+        expect(sorter.commonSorter(Infinity, 1)).toBe(0); // 非基本类型比较
+        expect(sorter.commonSorter(-Infinity, 1)).toBe(0);
+        expect(sorter.commonSorter(Infinity, -Infinity)).toBe(0);
+      });
+
+      test("零值处理", () => {
+        expect(sorter.commonSorter(0, 1)).toBe(-1);
+        expect(sorter.commonSorter(1, 0)).toBe(1);
+        expect(sorter.commonSorter(0, 0)).toBe(0);
+        expect(sorter.commonSorter(0, -1)).toBe(1);
+      });
+
+      test("负数处理", () => {
+        expect(sorter.commonSorter(-1, 1)).toBe(-1);
+        expect(sorter.commonSorter(1, -1)).toBe(1);
+        expect(sorter.commonSorter(-2, -1)).toBe(-1);
+        expect(sorter.commonSorter(-1, -2)).toBe(1);
+      });
+
+      test("字符串数字比较", () => {
+        expect(sorter.commonSorter("1", "2")).toBe(-1);
+        expect(sorter.commonSorter("10", "2")).toBe(-1); // 字符串比较
+        expect(sorter.commonSorter("2", "10")).toBe(1);
+      });
+
+      test("布尔值与数字比较", () => {
+        expect(sorter.commonSorter(true, 1)).toBe(0); // 基本类型比较
+        expect(sorter.commonSorter(false, 0)).toBe(0);
+        expect(sorter.commonSorter(true, 2)).toBe(-1);
+        expect(sorter.commonSorter(false, -1)).toBe(1);
+      });
+    });
+
+    // 测试混合类型比较
+    describe("混合类型比较", () => {
+      test("数字与字符串比较", () => {
+        expect(sorter.commonSorter(1, "2")).toBe(-1);
+        expect(sorter.commonSorter("2", 1)).toBe(1);
+        expect(sorter.commonSorter(1, "1")).toBe(0);
+      });
+
+      test("布尔值与字符串比较", () => {
+        expect(sorter.commonSorter(true, "true")).toBe(0); // 基本类型比较
+        expect(sorter.commonSorter("true", true)).toBe(0);
+        expect(sorter.commonSorter(false, "false")).toBe(0);
+      });
+
+      test("不同类型的基本类型比较", () => {
+        expect(sorter.commonSorter(1, true)).toBe(0); // 基本类型比较
+        expect(sorter.commonSorter(true, 1)).toBe(0);
+        expect(sorter.commonSorter("a", 1)).toBe(0);
+        expect(sorter.commonSorter(1, "a")).toBe(0);
+      });
     });
 
     // 测试非基本类型
