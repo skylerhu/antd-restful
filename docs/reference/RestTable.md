@@ -63,6 +63,7 @@
 | copyProps | 开启复制功能的配置，详见 [CopyView](#copyview) | `object` | - | - |
 | fieldValue | 复制时使用的字段值 | `string` | - | - |
 | filterDropdownConfig | 自定义筛选下拉框配置 | `object` | - | - |
+| dropdownLocalConfig | 前端Table刷选的配置 | `object` | - | - |
 | filterMultiple | 是否支持多选筛选 | `boolean` | - | - |
 | fieldName | 本地筛选时使用的真实字段名 | `string` | - | - |
 | hidden | 是否默认隐藏该列 | `boolean` | `false` | - |
