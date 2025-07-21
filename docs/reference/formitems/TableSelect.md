@@ -19,8 +19,10 @@
 | expandSelected | 是否默认展开显示选中数据 | `boolean` | `true` | - |
 | rowKey | 表格行的唯一键名 | `string` | `'id'` | - |
 | columns | 表格列配置 | `array` | `[]` | - |
+| titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `选中 {count} 条数据` | - |
 | **Ant Design 原生配置** | | | | |
 | antdTableProps | Ant Design Table 组件的原生属性 | `object` | - | - |
+| antdTableReadProps | 用于配置只读的Table，覆盖 antdTableProps | `object` | - | - |
 | antdCollapseProps | Ant Design Collapse 组件的原生属性 | `object` | - | - |
 | antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
 | **RestTable 属性** | | | | |

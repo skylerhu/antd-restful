@@ -6,7 +6,7 @@ import Enum from "js-enumerate";
 const {
   formitems,
   GridForm,
-  constants: { FieldType },
+  constants: { FieldType, FilterType },
   typeTools: { isEmpty },
 } = libs;
 
@@ -203,6 +203,8 @@ export default function StaticForm() {
         <TableSelect
           restful="api/users/"
           {...editProps}
+          defaultPageSize={5}
+          titleTemplate="选中 {count} 个用户"
           baseParams={
             {
               page_size: 2, // eslint-disable-line camelcase
@@ -221,6 +223,7 @@ export default function StaticForm() {
               filterDropdownConfig: {
                 type: FieldType.SELECT,
                 dropdownProps: {
+                  mode: "multiple",
                   restful: "api/users/",
                   fieldNames: {
                     label: "nickname",
@@ -228,7 +231,7 @@ export default function StaticForm() {
                   },
                 },
               },
-              filterMultiple: false,
+              filterMultiple: true,
             },
             {
               title: "名称",
@@ -264,7 +267,13 @@ export default function StaticForm() {
               render: (value, record) => record.age,
               filterDropdownConfig: {
                 type: FieldType.INPUT,
+                dropdownProps: {
+                  placeholder: "输入年龄范围",
+                },
               },
+              dropdownLocalConfig: {
+                filterType: FilterType.RANGE,
+              }
             },
           ]}
         />
@@ -273,8 +282,8 @@ export default function StaticForm() {
   ];
 
   // 方便调试单个组件
-  const showFields = [];
-  // const showFields = ["expansion"];
+  // const showFields = [];
+  const showFields = ["table"];
 
   return (
     <div>
@@ -332,7 +341,7 @@ export default function StaticForm() {
           wrapperCol: { span: 20 },
         }}
         antdListProps={{
-          grid: { gutter: 10, column: 2 },
+          grid: { gutter: 10, column: 1 },
         }}
       />
 

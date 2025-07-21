@@ -30,3 +30,9 @@ export const FieldType = new Enum([
 ]);
 
 export const READ_ONLY_CLASS = "cls-antd-restful-readonly";
+
+export const FilterType = new Enum([
+  { key: "SEARCH", value: "search", label: "模糊搜索" },
+  { key: "EQUAL", value: "equal", label: "精确搜索" },
+  { key: "RANGE", value: "range", label: "范围搜索" },
+]);

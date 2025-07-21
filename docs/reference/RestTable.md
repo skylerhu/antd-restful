@@ -26,6 +26,7 @@
 | forceParams | 强制参数，会覆盖路由参数和表单参数 | `object` | - | - |
 | fieldPage | 分页字段名 | `string` | `'page'` | - |
 | fieldPageSize | 每页条数字段名 | `string` | `'page_size'` | - |
+| defaultPageSize | 默认页数 | `number` | `20` | - |
 | fieldOrdering | 排序字段名 | `string` | `'ordering'` | - |
 | parseRowsPath | 解析数据行的路径 | `string` | `'results'` | - |
 | parseTotalPath | 解析总数的路径 | `string` | `'count'` | - |
@@ -62,6 +63,7 @@
 | copyProps | 开启复制功能的配置，详见 [CopyView](#copyview) | `object` | - | - |
 | fieldValue | 复制时使用的字段值 | `string` | - | - |
 | filterDropdownConfig | 自定义筛选下拉框配置 | `object` | - | - |
+| dropdownLocalConfig | 前端Table刷选的配置 | `object` | - | - |
 | filterMultiple | 是否支持多选筛选 | `boolean` | - | - |
 | fieldName | 本地筛选时使用的真实字段名 | `string` | - | - |
 | hidden | 是否默认隐藏该列 | `boolean` | `false` | - |

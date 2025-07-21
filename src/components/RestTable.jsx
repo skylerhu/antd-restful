@@ -9,7 +9,7 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType } from "src/common/constants";
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
 import {
   apiSorterToTableSorterDict,
   commonFormat,
@@ -40,6 +40,7 @@ const RestTable = forwardRef(
       forceParams,
       fieldPage = "page",
       fieldPageSize = "page_size",
+      defaultPageSize = DEFAULT_PAGE_SIZE,
       fieldOrdering = "ordering",
       parseRowsPath = DEFAULT_ROWS_PATH,
       parseTotalPath = "count",
@@ -144,8 +145,8 @@ const RestTable = forwardRef(
     }, [columns]);
 
     const pageSize = useMemo(() => {
-      return parseInt(innerFilters[fieldPageSize] || DEFAULT_PAGE_SIZE);
-    }, [innerFilters, fieldPageSize]);
+      return parseInt(innerFilters[fieldPageSize] || defaultPageSize);
+    }, [innerFilters, fieldPageSize, defaultPageSize]);
 
     const pageSizeOptions = useMemo(() => {
       let opts = antdTableProps?.pagination?.pageSizeOptions || [10, 20, 50, 100];
@@ -153,6 +154,10 @@ const RestTable = forwardRef(
       if (!opts.includes(pageSize)) {
         change = true;
         opts.push(pageSize);
+      }
+      if (!opts.includes(defaultPageSize)) {
+        change = true;
+        opts.push(defaultPageSize);
       }
       if (memBaseParams && memBaseParams[fieldPageSize] && !opts.includes(memBaseParams[fieldPageSize])) {
         change = true;
@@ -162,7 +167,7 @@ const RestTable = forwardRef(
         opts.sort((a, b) => a - b);
       }
       return opts;
-    }, [pageSize, antdTableProps?.pagination?.pageSizeOptions, memBaseParams, fieldPageSize]);
+    }, [pageSize, defaultPageSize, antdTableProps?.pagination?.pageSizeOptions, memBaseParams, fieldPageSize]);
 
     // setInnerFilters
     useEffect(() => {
@@ -174,7 +179,7 @@ const RestTable = forwardRef(
         // forceParams 优先级最高，是用户手动设置的，不会被其他参数覆盖
         let newV = {
           // [fieldPage]: DEFAULT_PAGE,
-          // [fieldPageSize]: DEFAULT_PAGE_SIZE,
+          // [fieldPageSize]: defaultPageSize,
           ...memBaseParams,
           ...memRouteParams,
           ...headerFilters,
@@ -183,7 +188,7 @@ const RestTable = forwardRef(
         };
         // 避免传递过来空字符串的情况
         newV[fieldPage] = newV[fieldPage] || DEFAULT_PAGE;
-        newV[fieldPageSize] = newV[fieldPageSize] || DEFAULT_PAGE_SIZE;
+        newV[fieldPageSize] = newV[fieldPageSize] || defaultPageSize;
         newV = transformFilters(newV, { skipEmpty: true, multipleMap });
         if (deepEqual(oldV, newV)) {
           return oldV;
@@ -193,6 +198,7 @@ const RestTable = forwardRef(
     }, [
       fieldPage,
       fieldPageSize,
+      defaultPageSize,
       memBaseParams,
       memRouteParams,
       memForceParams,
@@ -270,13 +276,13 @@ const RestTable = forwardRef(
             delete filters[fieldPageSize];
           }
         } else {
-          if (filters[fieldPageSize] === DEFAULT_PAGE_SIZE) {
+          if (filters[fieldPageSize] === defaultPageSize) {
             delete filters[fieldPageSize];
           }
         }
         onFiltersChange(filters);
       }
-    }, [fieldPage, fieldPageSize, memBaseParams, innerFilters, onFiltersChange]);
+    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, innerFilters, onFiltersChange]);
 
     useEffect(() => {
       if (!innerFilters[fieldPage]) {
@@ -334,7 +340,7 @@ const RestTable = forwardRef(
     const columnSearchViewRef = useRef(null);
     // 处理table表头中列的筛选
     const getColumnSearchProps = useCallback((dataIndex, column) => {
-      const { filterDropdownConfig: config } = column;
+      const { filterDropdownConfig: config, dropdownLocalConfig } = column;
       const _props = {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
           let searchItem = null;
@@ -342,9 +348,9 @@ const RestTable = forwardRef(
             case FieldType.INPUT: {
               searchItem = (
                 <Input
-                  placeholder="输入搜索"
                   allowClear={true}
                   {...config.dropdownProps}
+                  placeholder={dropdownLocalConfig?.placeholder || config.dropdownProps?.placeholder || "输入搜索"}
                   ref={(node) => (columnSearchViewRef.current = node)}
                   value={selectedKeys}
                   onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
@@ -360,9 +366,13 @@ const RestTable = forwardRef(
                   {...config.dropdownProps}
                   value={selectedKeys}
                   onChange={(value) => {
-                    const keys = value !== null && value !== undefined ? [value] : [];
+                    const keys = isBlank(value) ? [] : (isArray(value) ? value : [value]);
+                    const isMultiple = config.dropdownProps?.mode === "multiple";
                     setSelectedKeys(keys);
-                    confirm();
+                    if (!isMultiple) {
+                      // 单选时，直接确认
+                      confirm();
+                    }
                   }}
                 />
               );
@@ -484,10 +494,12 @@ const RestTable = forwardRef(
         if (!newCloumn.render && (column.labelTemplate || !isEmpty(column.copyProps) || column.fieldName)) {
           // 转换为render函数，处理显示的值
           newCloumn.render = (value, record) => {
-            let label = value;
-            if (label === undefined && column.fieldName) {
+            let label;
+            if (column.fieldName) {
               // 用真实字段值
               label = findDataByPath(record, column.fieldName);
+            } else {
+              label = value;
             }
             if (isEmpty(label)) {
               return label;
@@ -524,29 +536,39 @@ const RestTable = forwardRef(
             }
           }
         }
-        if (column.filterDropdownConfig) {
-          newCloumn = {
-            ...newCloumn,
-            ...getColumnSearchProps(field, column),
-          };
-          delete newCloumn.filterDropdownConfig;
-        }
-        if (!newCloumn.onFilter && !restful && (newCloumn.filters || column.filterDropdownConfig)) {
-          if (column.fieldName) {
-            // 支持本地筛选
-            newCloumn.onFilter = (input, record) => {
-              const v = findDataByPath(record, column.fieldName);
-              return commonFilter(input, v, { mustEqual: !isEmpty(column.filters) });
+        if (restful) {
+          if (column.filterDropdownConfig) {
+            newCloumn = {
+              ...newCloumn,
+              ...getColumnSearchProps(field, column),
             };
-            if (column.filterDropdownConfig && column.filterDropdownConfig.type !== FieldType.INPUT) {
+            delete newCloumn.filterDropdownConfig;
+          }
+        } else {
+          if (!newCloumn.onFilter && (newCloumn.filters || column.fieldName)) {
+            if (column.fieldName) {
+              newCloumn = {
+                ...newCloumn,
+                ...getColumnSearchProps(field, { ...column, filterDropdownConfig: { type: FieldType.INPUT } }),
+              };
+              // 支持本地筛选
+              newCloumn.onFilter = (input, record) => {
+                const v = findDataByPath(record, column.fieldName);
+                let _filterType = column.dropdownLocalConfig?.filterType || FilterType.SEARCH;
+                if (!isEmpty(column.filters)) {
+                  // 如果配置了精确筛选，则使用精确筛选
+                  _filterType = FilterType.EQUAL;
+                }
+                return commonFilter(input, v, { filterType: _filterType });
+              };
+            } else {
+              // 因为 dataIndex 可能不是 record 里的 field，所以无法正确处理筛选
               delete newCloumn.onFilter;
+              delete newCloumn.filters;
               delete newCloumn.filterDropdown;
             }
-          } else {
-            // 因为 dataIndex 可能不是 record 里的 field，所以无法正确处理筛选
-            delete newCloumn.onFilter;
-            delete newCloumn.filters;
-            delete newCloumn.filterDropdown;
+            delete newCloumn.dropdownLocalConfig;
+            delete newCloumn.filterDropdownConfig;
           }
         }
 
@@ -763,16 +785,17 @@ const RestTable = forwardRef(
           dataSource={innerData.dataSource}
           pagination={{
             size: "small",
-            current: innerFilters[fieldPage],
-            pageSize: innerFilters[fieldPageSize],
-            total: innerData.total,
-            pageSizeOptions,
             showSizeChanger: true,
             showQuickJumper: true,
             showTotal: (total) => {
               return <span>总计：{total} 条</span>;
             },
+            pageSizeOptions,
             ...antdTableProps?.pagination,
+            current: innerFilters[fieldPage],
+            pageSize: innerFilters[fieldPageSize],
+            // 若未开启restful，则不设置总计，否则开启了本地筛选无法正确展示showTotal
+            total: restful ? innerData.total : undefined,
           }}
           onChange={(pagination, filters, sorter, extra) => {
             onTableChange(pagination, filters, sorter);
@@ -799,6 +822,7 @@ RestTable.propTypes = {
   forceParams: PropTypes.object,
   fieldPage: PropTypes.string,
   fieldPageSize: PropTypes.string,
+  defaultPageSize: PropTypes.number,
   fieldOrdering: PropTypes.string,
   parseRowsPath: PropTypes.string,
   parseTotalPath: PropTypes.string,
@@ -840,8 +864,16 @@ RestTable.propTypes = {
       filterMultiple: PropTypes.bool,
       // 在禁用restful时，是否开启本地搜索/筛选，设置真实存在的字段
       fieldName: PropTypes.string,
+      // 禁用restful下，开启下拉选择的配置
+      dropdownLocalConfig: PropTypes.shape({
+        filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
+        placeholder: PropTypes.string,
+      }),
+      range: PropTypes.string,
       // 是否默认显示
       hidden: PropTypes.bool,
+      // 是否开启排序，得配置 dataIndex 字段
+      sorter: PropTypes.bool,
     })
   ),
   dataSource: PropTypes.array,

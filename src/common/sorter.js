@@ -1,5 +1,5 @@
-import { isArray, isBasicType, isEmpty, isString } from "./typeTools";
-
+import { isArray, isBasicType, isEmpty, isNumber, isString } from "./typeTools";
+import { FilterType } from "./constants";
 /**
  * 定义排序顺序的函数。返回值应该是一个数字，其符号表示两个元素的相对顺序;
  *   - 如果 a 小于 b，返回值为负数
@@ -52,7 +52,7 @@ export const commonSorter = (a, b) => {
   return 0;
 };
 
-export const commonFilter = (input, value, { mustEqual = false } = {}) => {
+export const commonFilter = (input, value, { filterType = FilterType.SEARCH } = {}) => {
   if (isEmpty(input)) {
     return true;
   }
@@ -64,10 +64,30 @@ export const commonFilter = (input, value, { mustEqual = false } = {}) => {
     // 非基本类型不支持筛选
     return false;
   }
-  if (isArray(input)) {
-    return input.some((v) => commonFilter(v, value));
+  if (filterType === FilterType.RANGE) {
+    if (!isNumber(value) || isEmpty(input)) {
+      // 非数字值或空值不支持筛选
+      return false;
+    }
+    if (isString(input)) {
+      input = input.split(",").map(Number);
+    }
+    if (!isArray(input)) {
+      input = [input];
+    }
+    if (input.length === 2) {
+      return value >= input[0] && value <= input[1];
+    } else if (input.length === 1) {
+      return value >= input[0];
+    } else {
+      return false;
+    }
   }
-  if (!mustEqual && isString(value) && isString(input)) {
+  if (isArray(input)) {
+    // 数组类型进行递归判断
+    return input.some((v) => commonFilter(v, value, { filterType }));
+  }
+  if (filterType === FilterType.SEARCH && isString(value) && isString(input)) {
     return value.indexOf(input) !== -1;
   }
   return value == input;

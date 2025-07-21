@@ -1,6 +1,6 @@
 {
   "name": "antd-restful",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "SkylerHu",
   "private": false,
   "main": "dist/index.js",
@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@ant-design/icons": ">=4",
-    "antd": ">=4",
+    "antd": ">=4.24",
     "axios": ">=1.x",
     "react": ">=18",
     "react-dom": ">=18"

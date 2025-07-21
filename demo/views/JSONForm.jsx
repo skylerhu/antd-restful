@@ -183,6 +183,12 @@ const testSchema = {
               "x-decorator": "FormItem",
               // "x-read-pretty": true,
               enum: ["male", "female"],
+              "x-component-props": {
+                onChange: (value, option) => {
+                  // eslint-disable-next-line no-console
+                  console.log("Select onChange", value, option);
+                },
+              },
             },
             user: {
               type: "string",

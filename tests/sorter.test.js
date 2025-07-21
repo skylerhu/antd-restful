@@ -1,6 +1,6 @@
 import * as sorter from "src/common/sorter";
 import { tableSorterToApiSorter, apiSorterToTableSorterDict } from "src/common/parser";
-import { SorterEnum } from "src/common/constants";
+import { SorterEnum, FilterType } from "src/common/constants";
 
 describe("sorter module", () => {
   describe("commonSorter", () => {
@@ -59,6 +59,84 @@ describe("sorter module", () => {
         expect(sorter.commonSorter(1, "")).toBe(1);
         expect(sorter.commonSorter("", "")).toBe(0);
         expect(sorter.commonSorter("", "a")).toBe(-1);
+      });
+
+      test("空值排序顺序", () => {
+        // 测试空值的排序顺序：null < "" < 其他值 < undefined
+        const values = [undefined, "a", null, "", 1];
+        const sorted = values.sort(sorter.commonSorter);
+        expect(sorted).toEqual([null, "", "a", 1, undefined]);
+      });
+
+      test("空值与undefined的排序", () => {
+        expect(sorter.commonSorter(null, undefined)).toBe(1);
+        expect(sorter.commonSorter("", undefined)).toBe(1);
+        expect(sorter.commonSorter(0, undefined)).toBe(1);
+        expect(sorter.commonSorter("a", undefined)).toBe(1);
+      });
+    });
+
+    // 测试边界值和特殊值
+    describe("边界值和特殊值", () => {
+      test("NaN值处理", () => {
+        expect(sorter.commonSorter(NaN, 1)).toBe(0); // NaN被视为0
+        expect(sorter.commonSorter(1, NaN)).toBe(0);
+        expect(sorter.commonSorter(NaN, NaN)).toBe(0);
+      });
+
+      test("Infinity值处理", () => {
+        expect(sorter.commonSorter(Infinity, 1)).toBe(0); // 非基本类型比较
+        expect(sorter.commonSorter(-Infinity, 1)).toBe(0);
+        expect(sorter.commonSorter(Infinity, -Infinity)).toBe(0);
+      });
+
+      test("零值处理", () => {
+        expect(sorter.commonSorter(0, 1)).toBe(-1);
+        expect(sorter.commonSorter(1, 0)).toBe(1);
+        expect(sorter.commonSorter(0, 0)).toBe(0);
+        expect(sorter.commonSorter(0, -1)).toBe(1);
+      });
+
+      test("负数处理", () => {
+        expect(sorter.commonSorter(-1, 1)).toBe(-1);
+        expect(sorter.commonSorter(1, -1)).toBe(1);
+        expect(sorter.commonSorter(-2, -1)).toBe(-1);
+        expect(sorter.commonSorter(-1, -2)).toBe(1);
+      });
+
+      test("字符串数字比较", () => {
+        expect(sorter.commonSorter("1", "2")).toBe(-1);
+        expect(sorter.commonSorter("10", "2")).toBe(-1); // 字符串比较
+        expect(sorter.commonSorter("2", "10")).toBe(1);
+      });
+
+      test("布尔值与数字比较", () => {
+        expect(sorter.commonSorter(true, 1)).toBe(0); // 基本类型比较
+        expect(sorter.commonSorter(false, 0)).toBe(0);
+        expect(sorter.commonSorter(true, 2)).toBe(-1);
+        expect(sorter.commonSorter(false, -1)).toBe(1);
+      });
+    });
+
+    // 测试混合类型比较
+    describe("混合类型比较", () => {
+      test("数字与字符串比较", () => {
+        expect(sorter.commonSorter(1, "2")).toBe(-1);
+        expect(sorter.commonSorter("2", 1)).toBe(1);
+        expect(sorter.commonSorter(1, "1")).toBe(0);
+      });
+
+      test("布尔值与字符串比较", () => {
+        expect(sorter.commonSorter(true, "true")).toBe(0); // 基本类型比较
+        expect(sorter.commonSorter("true", true)).toBe(0);
+        expect(sorter.commonSorter(false, "false")).toBe(0);
+      });
+
+      test("不同类型的基本类型比较", () => {
+        expect(sorter.commonSorter(1, true)).toBe(0); // 基本类型比较
+        expect(sorter.commonSorter(true, 1)).toBe(0);
+        expect(sorter.commonSorter("a", 1)).toBe(0);
+        expect(sorter.commonSorter(1, "a")).toBe(0);
       });
     });
 
@@ -138,9 +216,47 @@ describe("sorter module", () => {
         expect(sorter.commonFilter(123, "123")).toBe(true); // 使用 == 比较
       });
 
-      test("mustEqual选项", () => {
-        expect(sorter.commonFilter("te", "test", { mustEqual: true })).toBe(false);
-        expect(sorter.commonFilter("test", "test", { mustEqual: true })).toBe(true);
+      test("filterType选项", () => {
+        expect(sorter.commonFilter("te", "test", { filterType: FilterType.EQUAL })).toBe(false);
+        expect(sorter.commonFilter("test", "test", { filterType: FilterType.EQUAL })).toBe(true);
+      });
+
+      test("SEARCH类型测试", () => {
+        // 默认就是 SEARCH 类型
+        expect(sorter.commonFilter("te", "test")).toBe(true);
+        expect(sorter.commonFilter("test", "test")).toBe(true);
+        expect(sorter.commonFilter("abc", "test")).toBe(false);
+
+        // 明确指定 SEARCH 类型
+        expect(sorter.commonFilter("te", "test", { filterType: FilterType.SEARCH })).toBe(true);
+        expect(sorter.commonFilter("est", "test", { filterType: FilterType.SEARCH })).toBe(true);
+        expect(sorter.commonFilter("TEST", "test", { filterType: FilterType.SEARCH })).toBe(false); // 区分大小写
+      });
+
+      test("RANGE类型测试", () => {
+        // 数字范围测试
+        expect(sorter.commonFilter("10,20", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10,20", 5, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", 25, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", 10, { filterType: FilterType.RANGE })).toBe(true); // 包含边界
+        expect(sorter.commonFilter("10,20", 20, { filterType: FilterType.RANGE })).toBe(true); // 包含边界
+
+        // 单个数字测试（最小值）
+        expect(sorter.commonFilter("10", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10", 5, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10", 10, { filterType: FilterType.RANGE })).toBe(true);
+
+        // 数组格式测试
+        expect(sorter.commonFilter([10, 20], 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter([10], 15, { filterType: FilterType.RANGE })).toBe(true);
+
+        // 非数字值应该返回 false
+        expect(sorter.commonFilter("10,20", "test", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", true, { filterType: FilterType.RANGE })).toBe(false);
+
+        // 空输入应该返回 true
+        expect(sorter.commonFilter("", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(null, 15, { filterType: FilterType.RANGE })).toBe(true);
       });
     });
 
