@@ -794,7 +794,8 @@ const RestTable = forwardRef(
             ...antdTableProps?.pagination,
             current: innerFilters[fieldPage],
             pageSize: innerFilters[fieldPageSize],
-            total: innerData.total,
+            // 若未开启restful，则不设置总计，否则开启了本地筛选无法正确展示showTotal
+            total: restful ? innerData.total : undefined,
           }}
           onChange={(pagination, filters, sorter, extra) => {
             onTableChange(pagination, filters, sorter);
