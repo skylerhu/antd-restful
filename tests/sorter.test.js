@@ -1,6 +1,6 @@
 import * as sorter from "src/common/sorter";
 import { tableSorterToApiSorter, apiSorterToTableSorterDict } from "src/common/parser";
-import { SorterEnum } from "src/common/constants";
+import { SorterEnum, FilterType } from "src/common/constants";
 
 describe("sorter module", () => {
   describe("commonSorter", () => {
@@ -216,9 +216,47 @@ describe("sorter module", () => {
         expect(sorter.commonFilter(123, "123")).toBe(true); // 使用 == 比较
       });
 
-      test("mustEqual选项", () => {
-        expect(sorter.commonFilter("te", "test", { mustEqual: true })).toBe(false);
-        expect(sorter.commonFilter("test", "test", { mustEqual: true })).toBe(true);
+      test("filterType选项", () => {
+        expect(sorter.commonFilter("te", "test", { filterType: FilterType.EQUAL })).toBe(false);
+        expect(sorter.commonFilter("test", "test", { filterType: FilterType.EQUAL })).toBe(true);
+      });
+
+      test("SEARCH类型测试", () => {
+        // 默认就是 SEARCH 类型
+        expect(sorter.commonFilter("te", "test")).toBe(true);
+        expect(sorter.commonFilter("test", "test")).toBe(true);
+        expect(sorter.commonFilter("abc", "test")).toBe(false);
+
+        // 明确指定 SEARCH 类型
+        expect(sorter.commonFilter("te", "test", { filterType: FilterType.SEARCH })).toBe(true);
+        expect(sorter.commonFilter("est", "test", { filterType: FilterType.SEARCH })).toBe(true);
+        expect(sorter.commonFilter("TEST", "test", { filterType: FilterType.SEARCH })).toBe(false); // 区分大小写
+      });
+
+      test("RANGE类型测试", () => {
+        // 数字范围测试
+        expect(sorter.commonFilter("10,20", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10,20", 5, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", 25, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", 10, { filterType: FilterType.RANGE })).toBe(true); // 包含边界
+        expect(sorter.commonFilter("10,20", 20, { filterType: FilterType.RANGE })).toBe(true); // 包含边界
+
+        // 单个数字测试（最小值）
+        expect(sorter.commonFilter("10", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10", 5, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10", 10, { filterType: FilterType.RANGE })).toBe(true);
+
+        // 数组格式测试
+        expect(sorter.commonFilter([10, 20], 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter([10], 15, { filterType: FilterType.RANGE })).toBe(true);
+
+        // 非数字值应该返回 false
+        expect(sorter.commonFilter("10,20", "test", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", true, { filterType: FilterType.RANGE })).toBe(false);
+
+        // 空输入应该返回 true
+        expect(sorter.commonFilter("", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(null, 15, { filterType: FilterType.RANGE })).toBe(true);
       });
     });
 

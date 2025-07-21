@@ -18,7 +18,7 @@ const devConfig = {
       directory: path.join(PATHS.demo, "public"),
     },
     host: "127.0.0.1",
-    port: 3000,
+    port: 3002,
     proxy: [
       {
         context: ["/api"],

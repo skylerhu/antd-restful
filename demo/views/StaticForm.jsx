@@ -6,7 +6,7 @@ import Enum from "js-enumerate";
 const {
   formitems,
   GridForm,
-  constants: { FieldType },
+  constants: { FieldType, FilterType },
   typeTools: { isEmpty },
 } = libs;
 
@@ -267,7 +267,13 @@ export default function StaticForm() {
               render: (value, record) => record.age,
               filterDropdownConfig: {
                 type: FieldType.INPUT,
+                dropdownProps: {
+                  placeholder: "输入年龄范围",
+                },
               },
+              dropdownLocalConfig: {
+                filterType: FilterType.RANGE,
+              }
             },
           ]}
         />

@@ -9,7 +9,7 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType } from "src/common/constants";
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
 import {
   apiSorterToTableSorterDict,
   commonFormat,
@@ -340,7 +340,7 @@ const RestTable = forwardRef(
     const columnSearchViewRef = useRef(null);
     // 处理table表头中列的筛选
     const getColumnSearchProps = useCallback((dataIndex, column) => {
-      const { filterDropdownConfig: config } = column;
+      const { filterDropdownConfig: config, dropdownLocalConfig } = column;
       const _props = {
         filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
           let searchItem = null;
@@ -348,9 +348,9 @@ const RestTable = forwardRef(
             case FieldType.INPUT: {
               searchItem = (
                 <Input
-                  placeholder="输入搜索"
                   allowClear={true}
                   {...config.dropdownProps}
+                  placeholder={dropdownLocalConfig?.placeholder || config.dropdownProps?.placeholder || "输入搜索"}
                   ref={(node) => (columnSearchViewRef.current = node)}
                   value={selectedKeys}
                   onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
@@ -536,29 +536,39 @@ const RestTable = forwardRef(
             }
           }
         }
-        if (column.filterDropdownConfig) {
-          newCloumn = {
-            ...newCloumn,
-            ...getColumnSearchProps(field, column),
-          };
-          delete newCloumn.filterDropdownConfig;
-        }
-        if (!newCloumn.onFilter && !restful && (newCloumn.filters || column.filterDropdownConfig)) {
-          if (column.fieldName) {
-            // 支持本地筛选
-            newCloumn.onFilter = (input, record) => {
-              const v = findDataByPath(record, column.fieldName);
-              return commonFilter(input, v, { mustEqual: !isEmpty(column.filters) });
+        if (restful) {
+          if (column.filterDropdownConfig) {
+            newCloumn = {
+              ...newCloumn,
+              ...getColumnSearchProps(field, column),
             };
-            if (column.filterDropdownConfig && column.filterDropdownConfig.type !== FieldType.INPUT) {
+            delete newCloumn.filterDropdownConfig;
+          }
+        } else {
+          if (!newCloumn.onFilter && (newCloumn.filters || column.fieldName)) {
+            if (column.fieldName) {
+              newCloumn = {
+                ...newCloumn,
+                ...getColumnSearchProps(field, { ...column, filterDropdownConfig: { type: FieldType.INPUT } }),
+              };
+              // 支持本地筛选
+              newCloumn.onFilter = (input, record) => {
+                const v = findDataByPath(record, column.fieldName);
+                let _filterType = column.dropdownLocalConfig?.filterType || FilterType.SEARCH;
+                if (!isEmpty(column.filters)) {
+                  // 如果配置了精确筛选，则使用精确筛选
+                  _filterType = FilterType.EQUAL;
+                }
+                return commonFilter(input, v, { filterType: _filterType });
+              };
+            } else {
+              // 因为 dataIndex 可能不是 record 里的 field，所以无法正确处理筛选
               delete newCloumn.onFilter;
+              delete newCloumn.filters;
               delete newCloumn.filterDropdown;
             }
-          } else {
-            // 因为 dataIndex 可能不是 record 里的 field，所以无法正确处理筛选
-            delete newCloumn.onFilter;
-            delete newCloumn.filters;
-            delete newCloumn.filterDropdown;
+            delete newCloumn.dropdownLocalConfig;
+            delete newCloumn.filterDropdownConfig;
           }
         }
 
@@ -853,6 +863,12 @@ RestTable.propTypes = {
       filterMultiple: PropTypes.bool,
       // 在禁用restful时，是否开启本地搜索/筛选，设置真实存在的字段
       fieldName: PropTypes.string,
+      // 禁用restful下，开启下拉选择的配置
+      dropdownLocalConfig: PropTypes.shape({
+        filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
+        placeholder: PropTypes.string,
+      }),
+      range: PropTypes.string,
       // 是否默认显示
       hidden: PropTypes.bool,
       // 是否开启排序，得配置 dataIndex 字段
