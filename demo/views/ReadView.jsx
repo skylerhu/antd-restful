@@ -20,6 +20,7 @@ const ReadView = () => {
           // { id: 5, username: "user5", nickname: "用户5" },
         ]}
         labelTemplate="{nickname}({username})"
+        titleTemplate="个数：{count} ，按照用户名统计：{stat}"
         titleAggPath="username"
         maxLength={3}
       />
