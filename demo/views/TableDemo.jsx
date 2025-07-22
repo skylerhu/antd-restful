@@ -91,7 +91,10 @@ const TableDemo = () => {
             filterMultiple: false,
             render: (value, record) => record.age,
             filterDropdownConfig: {
-              type: FieldType.INPUT,
+              type: FieldType.NUMBER_RANGE,
+            },
+            dropdownLocalConfig: {
+              type: FieldType.NUMBER,
             },
           },
           {

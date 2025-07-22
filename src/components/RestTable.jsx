@@ -211,7 +211,20 @@ const RestTable = forwardRef(
     // 更新筛选表单的值
     useEffect(() => {
       if (filterFormRef.current) {
-        const values = { ...memRouteParams };
+        const values = {};
+        filterFormProps?.fields?.forEach((field) => {
+          const v = memRouteParams ? memRouteParams[field.key] : undefined;
+          if (v === undefined) {
+            // 需要重置表单的值
+            values[field.key] = null;
+          } else {
+            values[field.key] = v;
+          }
+          if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
+            // 为了能够正确显示“全部”选项
+            values[field.key] = "";
+          }
+        });
         delete values[fieldPage];
         delete values[fieldPageSize];
 
@@ -223,16 +236,6 @@ const RestTable = forwardRef(
           }
         }
 
-        filterFormProps?.fields?.forEach((field) => {
-          if (values[field.key] === undefined) {
-            // 需要重置表单的值
-            values[field.key] = null;
-          }
-          if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
-            // 为了能够正确显示“全部”选项
-            values[field.key] = "";
-          }
-        });
         if (isEmpty(values)) {
           filterFormRef.current.getFormInstance().resetFields();
         } else {
@@ -342,12 +345,11 @@ const RestTable = forwardRef(
     // 处理table表头中列的筛选
     const getColumnSearchProps = useCallback(
       (dataIndex, column) => {
-        const { filterDropdownConfig: config, dropdownLocalConfig } = column;
+        const { filterDropdownConfig: config } = column;
         const _props = {
           filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
             let searchItem = null;
-            const placeholder =
-              (restful ? config.dropdownProps?.placeholder : dropdownLocalConfig?.placeholder) || "输入搜索";
+            const placeholder = config.dropdownProps?.placeholder || "输入搜索";
             switch (config.type) {
               case FieldType.INPUT: {
                 searchItem = (
@@ -366,7 +368,6 @@ const RestTable = forwardRef(
               case FieldType.NUMBER: {
                 searchItem = (
                   <InputNumber
-                    allowClear={true}
                     {...config.dropdownProps}
                     placeholder={placeholder}
                     value={selectedKeys}
@@ -480,7 +481,7 @@ const RestTable = forwardRef(
         };
         return _props;
       },
-      [restful]
+      []
     );
 
     const genColumnKey = useCallback((column) => {
@@ -595,9 +596,10 @@ const RestTable = forwardRef(
         }
         if (restful) {
           if (column.filterDropdownConfig) {
+            delete newCloumn.dropdownLocalConfig;
             newCloumn = {
               ...newCloumn,
-              ...getColumnSearchProps(field, column),
+              ...getColumnSearchProps(field, newCloumn),
             };
             delete newCloumn.filterDropdownConfig;
           }
@@ -608,7 +610,7 @@ const RestTable = forwardRef(
                 ...newCloumn,
                 ...getColumnSearchProps(field, {
                   ...column,
-                  filterDropdownConfig: { type: column.dropdownLocalConfig?.type || FieldType.INPUT },
+                  filterDropdownConfig: { type: FieldType.INPUT, ...column.dropdownLocalConfig },
                 }),
               };
               // 支持本地筛选
@@ -925,14 +927,11 @@ RestTable.propTypes = {
       }),
       // 标记字段开启了多值筛选，处理query参数转化成数组
       filterMultiple: PropTypes.bool,
-      // 在禁用restful时，是否开启本地搜索/筛选，设置真实存在的字段
+      // 在禁用restful时，是否开启本地搜索/筛选，设置真实存在的字段; 也用于配置字段展示，可配合labelTemplate使用
       fieldName: PropTypes.string,
-      // 禁用restful下，开启下拉选择的配置
+      // 禁用restful下，开启下拉选择的配置; 非restful情况下会覆盖 filterDropdownConfig
       dropdownLocalConfig: PropTypes.shape({
-        // 本地筛选的类型，默认都用INPUT
-        type: PropTypes.oneOf(FieldType.map((o) => o.value)),
         filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
-        placeholder: PropTypes.string,
       }),
       range: PropTypes.string,
       // 是否默认显示
