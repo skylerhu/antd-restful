@@ -98,10 +98,8 @@ const TableSelect = ({
       const stat = {};
       selectedRows.forEach((row) => {
         let v = findDataByPath(row, titleAggPath);
-        if (!isEmpty(v)) {
-          v = toBeString(v);
-          stat[v] = (stat[v] || 0) + 1;
-        }
+        v = isEmpty(v) ? "-" : toBeString(v);
+        stat[v] = (stat[v] || 0) + 1;
       });
       // 按数量从高到低排序
       if (!isEmpty(stat)) {
@@ -151,7 +149,7 @@ const TableSelect = ({
         />
       ) : (
         <Collapse defaultActiveKey={expandSelected ? "title" : undefined} {...antdCollapseProps}>
-          <Collapse.Panel key="title" header={commonFormat(titleTemplate, { count: selectedRows?.length || 0 })}>
+          <Collapse.Panel key="title" header={title}>
             {readOnlyView}
           </Collapse.Panel>
         </Collapse>
