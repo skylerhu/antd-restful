@@ -78,7 +78,13 @@ export const findTreeOptionsByValues = (opts, values, optKey = "value", optChild
   return nodes;
 };
 
-export const treeValuesToLabels = (values, treeOpts, optKey = "value", optLabel = "label", optChildren = "children") => {
+export const treeValuesToLabels = (
+  values,
+  treeOpts,
+  optKey = "value",
+  optLabel = "label",
+  optChildren = "children"
+) => {
   if (isEmpty(values)) return [];
   if (!isArray(values)) {
     values = [values];
@@ -104,7 +110,13 @@ export const treeValuesToLabels = (values, treeOpts, optKey = "value", optLabel 
 };
 
 // 根据value从treeData中查找对应的label
-export const findLabelFromTreeData = (value, treeData, optKey = "value", optLabel = "label", optChildren = "children") => {
+export const findLabelFromTreeData = (
+  value,
+  treeData,
+  optKey = "value",
+  optLabel = "label",
+  optChildren = "children"
+) => {
   if (isEmpty(treeData)) return value;
   for (const opt of treeData) {
     if (opt[optKey] === value) {
@@ -307,4 +319,23 @@ export const apiSorterToTableSorterDict = (sorter) => {
     dict[field] = order;
   }
   return dict;
+};
+
+// 根据rows和titleTemplate和titleAggPath获取显示的标题
+export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
+  let label = commonFormat(titleTemplate, { count: rows?.length || 0 });
+  if (titleAggPath) {
+    const stat = {};
+    rows.forEach((row) => {
+      let v = findDataByPath(row, titleAggPath);
+      v = isEmpty(v) ? "-" : toBeString(v);
+      stat[v] = (stat[v] || 0) + 1;
+    });
+    // 按数量从高到低排序
+    if (!isEmpty(stat)) {
+      const sortedEntries = Object.entries(stat).sort(([, a], [, b]) => b - a);
+      label += ` (${sortedEntries.map(([k, v]) => `${k}: ${v}`).join(", ")})`;
+    }
+  }
+  return label;
 };

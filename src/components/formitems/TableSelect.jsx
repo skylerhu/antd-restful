@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { version as antdVersion, Button, Collapse, Space } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { isArray, isDict, isFunction, isEmpty } from "src/common/typeTools";
+import { getShowTitle } from "src/common/parser";
+import { isArray, isDict, isFunction } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
-import { commonFormat, findDataByPath, toBeString } from "src/common/parser";
 
 const TableSelect = ({
   value,
@@ -92,23 +92,10 @@ const TableSelect = ({
     return _columns;
   }, [rowKey, selectedKeys, columns, updateSelectedRows, disabled, readOnly]);
 
-  const title = useMemo(() => {
-    let label = commonFormat(titleTemplate, { count: selectedRows?.length || 0 });
-    if (titleAggPath) {
-      const stat = {};
-      selectedRows.forEach((row) => {
-        let v = findDataByPath(row, titleAggPath);
-        v = isEmpty(v) ? "-" : toBeString(v);
-        stat[v] = (stat[v] || 0) + 1;
-      });
-      // 按数量从高到低排序
-      if (!isEmpty(stat)) {
-        const sortedEntries = Object.entries(stat).sort(([, a], [, b]) => b - a);
-        label += ` (${sortedEntries.map(([k, v]) => `${k}: ${v}`).join(", ")})`;
-      }
-    }
-    return label;
-  }, [titleTemplate, titleAggPath, selectedRows]);
+  const title = useMemo(
+    () => getShowTitle(selectedRows, titleTemplate, titleAggPath),
+    [titleTemplate, titleAggPath, selectedRows]
+  );
 
   const readOnlyView = useMemo(() => {
     const _props = { ...antdTableProps, ...antdTableReadProps };
@@ -129,7 +116,12 @@ const TableSelect = ({
 
   if (disabled || readOnly) {
     if (titleAggPath) {
-      return <div><div style={{ lineHeight: "32px" }}>{title}</div>{readOnlyView}</div>;
+      return (
+        <div>
+          <div style={{ lineHeight: "32px" }}>{title}</div>
+          {readOnlyView}
+        </div>
+      );
     }
     return readOnlyView;
   }
@@ -161,18 +153,20 @@ const TableSelect = ({
         columns={columns}
         antdTableProps={{
           ...antdTableProps,
-          rowSelection: disabled ? undefined : {
-            ...antdTableProps?.rowSelection,
-            hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
-            preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
-            selectedRowKeys: selectedKeys,
-            onChange: (_selectedRowKeys, _selectedRows) => {
-              updateSelectedRows(_selectedRowKeys, _selectedRows);
+          rowSelection: disabled
+            ? undefined
+            : {
+              ...antdTableProps?.rowSelection,
+              hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
+              preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
+              selectedRowKeys: selectedKeys,
+              onChange: (_selectedRowKeys, _selectedRows) => {
+                updateSelectedRows(_selectedRowKeys, _selectedRows);
+              },
+              getCheckboxProps: (record) => ({
+                disabled: disabled || record.disabled,
+              }),
             },
-            getCheckboxProps: (record) => ({
-              disabled: disabled || record.disabled,
-            }),
-          },
         }}
       />
     </Space.Compact>

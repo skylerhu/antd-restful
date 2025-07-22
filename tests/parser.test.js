@@ -425,4 +425,65 @@ describe("Parser", () => {
       expect(parser.apiSorterToTableSorterDict(null)).toEqual({});
     });
   });
+
+  describe("getShowTitle", () => {
+    const testRows = [
+      { id: 1, name: "John", status: "active" },
+      { id: 2, name: "Jane", status: "inactive" },
+      { id: 3, name: "Bob", status: "active" },
+      { id: 4, name: "Alice", status: "active" },
+    ];
+
+    test("should format title with count only", () => {
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据")).toBe("选中 4 条数据");
+      expect(parser.getShowTitle([], "选中 {count} 条数据")).toBe("选中 0 条数据");
+      expect(parser.getShowTitle(null, "选中 {count} 条数据")).toBe("选中 0 条数据");
+    });
+
+    test("should format title with aggregation", () => {
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", "status")).toBe("选中 4 条数据 (active: 3, inactive: 1)");
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", "name")).toBe("选中 4 条数据 (John: 1, Jane: 1, Bob: 1, Alice: 1)");
+    });
+
+    test("should handle empty aggregation path", () => {
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", "")).toBe("选中 4 条数据");
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", null)).toBe("选中 4 条数据");
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", undefined)).toBe("选中 4 条数据");
+    });
+
+    test("should handle empty rows with aggregation", () => {
+      expect(parser.getShowTitle([], "选中 {count} 条数据", "status")).toBe("选中 0 条数据");
+    });
+
+    test("should handle rows with missing aggregation field", () => {
+      const rowsWithMissingField = [
+        { id: 1, name: "John" },
+        { id: 2, name: "Jane", status: "active" },
+        { id: 3, name: "Bob" },
+      ];
+      expect(parser.getShowTitle(rowsWithMissingField, "选中 {count} 条数据", "status")).toBe("选中 3 条数据 (-: 2, active: 1)");
+    });
+
+    test("should handle rows with empty aggregation values", () => {
+      const rowsWithEmptyValues = [
+        { id: 1, name: "John", status: "" },
+        { id: 2, name: "Jane", status: null },
+        { id: 3, name: "Bob", status: undefined },
+        { id: 4, name: "Alice", status: "active" },
+      ];
+      expect(parser.getShowTitle(rowsWithEmptyValues, "选中 {count} 条数据", "status")).toBe("选中 4 条数据 (-: 3, active: 1)");
+    });
+
+    test("should sort aggregation results by count descending", () => {
+      const rowsWithMixedStatus = [
+        { id: 1, status: "active" },
+        { id: 2, status: "inactive" },
+        { id: 3, status: "active" },
+        { id: 4, status: "pending" },
+        { id: 5, status: "active" },
+        { id: 6, status: "inactive" },
+      ];
+      expect(parser.getShowTitle(rowsWithMixedStatus, "选中 {count} 条数据", "status")).toBe("选中 6 条数据 (active: 3, inactive: 2, pending: 1)");
+    });
+  });
 });

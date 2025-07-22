@@ -2,12 +2,22 @@ import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Modal } from "antd";
 import { EllipsisOutlined, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
-import { commonFormat, toBeString } from "src/common/parser";
+import { commonFormat, getShowTitle, toBeString } from "src/common/parser";
 import { isArray, isBlank, isDict, isString } from "src/common/typeTools";
 
 const tipColor = "rgba(0, 0, 0, 0.45)";
 
-const LongText = ({ value, maxLength = 64, labelTemplate, separator = "\n", style, className, antdModalProps }) => {
+const LongText = ({
+  value,
+  maxLength = 64,
+  titleTemplate = "长度：{count}",
+  titleAggPath,
+  labelTemplate,
+  separator = "\n",
+  style,
+  className,
+  antdModalProps,
+}) => {
   const [visible, setVisible] = useState(false);
   const [showOrigin, setShowOrigin] = useState(false);
 
@@ -67,6 +77,13 @@ const LongText = ({ value, maxLength = 64, labelTemplate, separator = "\n", styl
   return (
     <div style={style} className={className}>
       <p style={{ whiteSpace: "pre-wrap" }}>
+        {isArray(value) || isString(value) ? (
+          <div style={{ color: tipColor }} className="antd-restful-long-text-stat">
+            {getShowTitle(value, titleTemplate, titleAggPath)}
+          </div>
+        ) : (
+          ""
+        )}
         <span>{shortConf.shortText}</span>
         {(shortConf.showMore || shortConf.showEye) && (
           <>
@@ -82,7 +99,6 @@ const LongText = ({ value, maxLength = 64, labelTemplate, separator = "\n", styl
               }}
             >
               <EllipsisOutlined />
-              {isArray(value) || isString(value) ? <span style={{ color: tipColor }}>(长度 {value.length})</span> : ""}
             </Button>
           </>
         )}
@@ -116,6 +132,10 @@ LongText.propTypes = {
   style: PropTypes.object,
   className: PropTypes.string,
   value: PropTypes.any,
+
+  titleTemplate: PropTypes.string,
+  // 选中数据根据字段聚合统计显示在title上
+  titleAggPath: PropTypes.string,
   // value为数组时，maxLength为数组长度； 其他情况为字符串长度
   maxLength: PropTypes.number,
   separator: PropTypes.string,

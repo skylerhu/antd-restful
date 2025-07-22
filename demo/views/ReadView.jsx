@@ -20,6 +20,7 @@ const ReadView = () => {
           // { id: 5, username: "user5", nickname: "用户5" },
         ]}
         labelTemplate="{nickname}({username})"
+        titleAggPath="username"
         maxLength={3}
       />
       <LongText value={{ id: 1, username: "admin", nickname: "管理员" }} labelTemplate="{nickname}({username})" />
