@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.1.2
+- feat: 扩展TableSelect
+    - 配置 titleAggPath 支持选中数据根据字段聚合统计显示在title上
+- feat: 扩展 LongText
+    - 配置 titleTemplate 、titleAggPath 可以统计数量展示
+
 ## 0.1.1
 - fix: 扩展 RestTable
     - 配置 defaultPageSize 初始化 pagination 中的页码

@@ -17,6 +17,8 @@
 | className | 自定义类名 | `string` | - | - |
 | value | 要显示的文本内容 | `any` | - | - |
 | maxLength | 最大显示长度，数组时为元素个数，字符串时为字符数 | `number` | `64` | - |
+| titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `"长度：{count}"` | - |
+| titleAggPath | 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 `{stat}` 占位符 | `string` | - | - |
 | separator | 数组元素间的分隔符 | `string` | `'\n'` | - |
 | labelTemplate | 对象或数组对象的显示模板，支持 `{field}` 格式 | `string` | - | - |
 | antdModalProps | Ant Design [Modal](https://ant.design/components/modal-cn) 组件的属性 | `object` | - | - |

@@ -204,7 +204,8 @@ export default function StaticForm() {
           restful="api/users/"
           {...editProps}
           defaultPageSize={5}
-          titleTemplate="选中 {count} 个用户"
+          titleTemplate="选中 {count} 个用户，按照性别统计[ {stat} ]"
+          titleAggPath="gender"
           baseParams={
             {
               page_size: 2, // eslint-disable-line camelcase
@@ -334,7 +335,7 @@ export default function StaticForm() {
           //   { name: "test3", url: "http://gips2.baidu.com/it/u=195724436,355484702&fm=3028&app=3028&f=JPEG&fmt=auto?w=1280&h=960" },
           //   { name: "test4", url: "http://gips2.baidu.com/it/u=195724436,3554684702&fm=3028&app=3028&f=JPEG&fmt=auto?w=1280&h=960" },
           // ],
-          table: [{ id: 1, username: "admin", nickname: "管理员" }],
+          table: [{ id: 1, username: "admin", nickname: "管理员", gender: "female", age: 20 }],
         }}
         antdFormProps={{
           labelCol: { flex: "80px" },

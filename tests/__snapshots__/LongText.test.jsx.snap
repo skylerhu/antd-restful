@@ -6,6 +6,12 @@ exports[`LongText should render array of objects with labelTemplate and maxLengt
     <p
       style="white-space: pre-wrap;"
     >
+      <div
+        class="antd-restful-long-text-stat"
+        style="color: rgba(0, 0, 0, 0.45);"
+      >
+        长度：2
+      </div>
       <span>
         管理员(admin)
       </span>
@@ -32,13 +38,6 @@ exports[`LongText should render array of objects with labelTemplate and maxLengt
             />
           </svg>
         </span>
-        <span
-          style="color: rgba(0, 0, 0, 0.45);"
-        >
-          (长度 
-          2
-          )
-        </span>
       </button>
     </p>
   </div>
@@ -51,6 +50,12 @@ exports[`LongText should render array value with maxLength 1`] = `
     <p
       style="white-space: pre-wrap;"
     >
+      <div
+        class="antd-restful-long-text-stat"
+        style="color: rgba(0, 0, 0, 0.45);"
+      >
+        长度：10
+      </div>
       <span>
         1, 2
       </span>
@@ -76,13 +81,6 @@ exports[`LongText should render array value with maxLength 1`] = `
               d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
             />
           </svg>
-        </span>
-        <span
-          style="color: rgba(0, 0, 0, 0.45);"
-        >
-          (长度 
-          10
-          )
         </span>
       </button>
     </p>
@@ -136,7 +134,6 @@ exports[`LongText should render object value with labelTemplate 1`] = `
             />
           </svg>
         </span>
-        <span />
       </button>
     </p>
   </div>
@@ -149,6 +146,12 @@ exports[`LongText should render string value with maxLength 1`] = `
     <p
       style="white-space: pre-wrap;"
     >
+      <div
+        class="antd-restful-long-text-stat"
+        style="color: rgba(0, 0, 0, 0.45);"
+      >
+        长度：11
+      </div>
       <span>
         我是
       </span>
@@ -174,13 +177,6 @@ exports[`LongText should render string value with maxLength 1`] = `
               d="M176 511a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0zm280 0a56 56 0 10112 0 56 56 0 10-112 0z"
             />
           </svg>
-        </span>
-        <span
-          style="color: rgba(0, 0, 0, 0.45);"
-        >
-          (长度 
-          11
-          )
         </span>
       </button>
     </p>

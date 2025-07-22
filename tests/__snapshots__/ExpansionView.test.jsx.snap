@@ -95,6 +95,12 @@ exports[`ExpansionView should render with enableBraceExpansion 1`] = `
                   <p
                     style="white-space: pre-wrap;"
                   >
+                    <div
+                      class="antd-restful-long-text-stat"
+                      style="color: rgba(0, 0, 0, 0.45);"
+                    >
+                      长度：4
+                    </div>
                     <span>
                       {1}
 {2}

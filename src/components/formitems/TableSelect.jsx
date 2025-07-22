@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { version as antdVersion, Button, Collapse, Space } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
+import { getShowTitle } from "src/common/parser";
 import { isArray, isDict, isFunction } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
-import { commonFormat } from "src/common/parser";
 
 const TableSelect = ({
   value,
@@ -19,6 +19,7 @@ const TableSelect = ({
   antdTableProps,
   antdCollapseProps,
   titleTemplate = "选中 {count} 条数据",
+  titleAggPath,
   antdSpaceProps,
   ...restProps
 }) => {
@@ -91,12 +92,18 @@ const TableSelect = ({
     return _columns;
   }, [rowKey, selectedKeys, columns, updateSelectedRows, disabled, readOnly]);
 
+  const title = useMemo(
+    () => getShowTitle(selectedRows, titleTemplate, titleAggPath),
+    [titleTemplate, titleAggPath, selectedRows]
+  );
+
   const readOnlyView = useMemo(() => {
+    const _props = { ...antdTableProps, ...antdTableReadProps };
     return (
       <RestTable
         tools={false}
         {...restProps}
-        antdTableProps={{ ...antdTableProps, ...antdTableReadProps }}
+        antdTableProps={_props}
         baseParams={{}}
         forceParams={{}}
         restful={null}
@@ -108,6 +115,14 @@ const TableSelect = ({
   }, [selectedRows, rowKey, columensWithActions, restProps, antdTableProps, antdTableReadProps]);
 
   if (disabled || readOnly) {
+    if (titleAggPath) {
+      return (
+        <div>
+          <div style={{ lineHeight: "32px" }}>{title}</div>
+          {readOnlyView}
+        </div>
+      );
+    }
     return readOnlyView;
   }
   return (
@@ -119,14 +134,14 @@ const TableSelect = ({
           items={[
             {
               key: "title",
-              label: commonFormat(titleTemplate, { count: selectedRows?.length || 0 }),
+              label: title,
               children: readOnlyView,
             },
           ]}
         />
       ) : (
         <Collapse defaultActiveKey={expandSelected ? "title" : undefined} {...antdCollapseProps}>
-          <Collapse.Panel key="title" header={commonFormat(titleTemplate, { count: selectedRows?.length || 0 })}>
+          <Collapse.Panel key="title" header={title}>
             {readOnlyView}
           </Collapse.Panel>
         </Collapse>
@@ -138,18 +153,20 @@ const TableSelect = ({
         columns={columns}
         antdTableProps={{
           ...antdTableProps,
-          rowSelection: disabled ? undefined : {
-            ...antdTableProps?.rowSelection,
-            hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
-            preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
-            selectedRowKeys: selectedKeys,
-            onChange: (_selectedRowKeys, _selectedRows) => {
-              updateSelectedRows(_selectedRowKeys, _selectedRows);
+          rowSelection: disabled
+            ? undefined
+            : {
+              ...antdTableProps?.rowSelection,
+              hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
+              preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
+              selectedRowKeys: selectedKeys,
+              onChange: (_selectedRowKeys, _selectedRows) => {
+                updateSelectedRows(_selectedRowKeys, _selectedRows);
+              },
+              getCheckboxProps: (record) => ({
+                disabled: disabled || record.disabled,
+              }),
             },
-            getCheckboxProps: (record) => ({
-              disabled: disabled || record.disabled,
-            }),
-          },
         }}
       />
     </Space.Compact>
@@ -172,6 +189,8 @@ TableSelect.propTypes = {
 
   // 选中数据标题模板, 必须包含 {count} 占位符，count表示选中个数
   titleTemplate: PropTypes.string,
+  // 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 {stat} 占位符
+  titleAggPath: PropTypes.string,
   antdTableReadProps: PropTypes.object,
   antdTableProps: PropTypes.object,
   antdCollapseProps: PropTypes.object,

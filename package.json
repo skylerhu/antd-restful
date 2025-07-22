@@ -1,6 +1,6 @@
 {
   "name": "antd-restful",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "SkylerHu",
   "private": false,
   "main": "dist/index.js",
