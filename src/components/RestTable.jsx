@@ -366,7 +366,7 @@ const RestTable = forwardRef(
                   {...config.dropdownProps}
                   value={selectedKeys}
                   onChange={(value) => {
-                    const keys = isBlank(value) ? [] : (isArray(value) ? value : [value]);
+                    const keys = isBlank(value) ? [] : isArray(value) ? value : [value];
                     const isMultiple = config.dropdownProps?.mode === "multiple";
                     setSelectedKeys(keys);
                     if (!isMultiple) {
@@ -384,27 +384,40 @@ const RestTable = forwardRef(
           if (!searchItem) {
             return undefined;
           }
+          const direction = config.antdSpaceProps?.direction || "vertical";
           const view = (
-            <Space direction="vertical" style={{ padding: 8, ...config.style }}>
+            <Space style={{ padding: 8, ...config.style }} {...config.antdSpaceProps} direction={direction}>
               {searchItem}
               <Row gutter={10}>
-                <Col span={12}>
-                  <Button
-                    size="small"
-                    style={{ width: "100%" }}
-                    onClick={() => {
-                      clearFilters();
-                      confirm();
-                    }}
-                  >
-                    重置
-                  </Button>
-                </Col>
-                <Col span={12}>
-                  <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
-                    搜索
-                  </Button>
-                </Col>
+                {direction === "vertical" ? (
+                  <>
+                    <Col span={12}>
+                      <Button
+                        size="small"
+                        style={{ width: "100%" }}
+                        onClick={() => {
+                          clearFilters();
+                          confirm();
+                        }}
+                      >
+                        重置
+                      </Button>
+                    </Col>
+                    <Col span={12}>
+                      <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
+                        搜索
+                      </Button>
+                    </Col>
+                  </>
+                ) : (
+                  <>
+                    <Col span={24}>
+                      <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
+                        搜索
+                      </Button>
+                    </Col>
+                  </>
+                )}
               </Row>
             </Space>
           );
@@ -474,7 +487,10 @@ const RestTable = forwardRef(
     }, [showColumns, defaultShowColumnKeys, innerTools.settings, allColumnKeys]);
 
     const checkColumnAll = useMemo(() => columns.length === realCheckKeys.length, [columns, realCheckKeys]);
-    const checkColumnIndeterminate = useMemo(() => realCheckKeys.length > 0 && realCheckKeys.length < columns.length, [columns, realCheckKeys]);
+    const checkColumnIndeterminate = useMemo(
+      () => realCheckKeys.length > 0 && realCheckKeys.length < columns.length,
+      [columns, realCheckKeys]
+    );
 
     // 处理table的cloumns
     const memColumns = useMemo(() => {
@@ -857,6 +873,9 @@ RestTable.propTypes = {
       fieldValue: PropTypes.string,
       // 下来筛选自定义view的设置
       filterDropdownConfig: PropTypes.shape({
+        style: PropTypes.object,
+        // 可以控制输入组件和按钮的排列位置
+        antdSpaceProps: PropTypes.object,
         type: PropTypes.oneOf(FieldType.map((o) => o.value)),
         dropdownProps: PropTypes.object,
       }),
@@ -879,8 +898,6 @@ RestTable.propTypes = {
   dataSource: PropTypes.array,
   // 筛选表单的配置
   filterFormProps: PropTypes.object,
-  // 不配置filterFormProps时，可以自定义设置filterView
-  filterView: PropTypes.node,
 
   antdTableProps: PropTypes.object,
   antdSpaceProps: PropTypes.object,

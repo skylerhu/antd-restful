@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { version as antdVersion, Button, Collapse, Space } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { isArray, isDict, isFunction } from "src/common/typeTools";
+import { isArray, isDict, isFunction, isEmpty } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
-import { commonFormat } from "src/common/parser";
+import { commonFormat, findDataByPath, toBeString } from "src/common/parser";
 
 const TableSelect = ({
   value,
@@ -19,6 +19,7 @@ const TableSelect = ({
   antdTableProps,
   antdCollapseProps,
   titleTemplate = "选中 {count} 条数据",
+  titleAggPath,
   antdSpaceProps,
   ...restProps
 }) => {
@@ -91,12 +92,33 @@ const TableSelect = ({
     return _columns;
   }, [rowKey, selectedKeys, columns, updateSelectedRows, disabled, readOnly]);
 
+  const title = useMemo(() => {
+    let label = commonFormat(titleTemplate, { count: selectedRows?.length || 0 });
+    if (titleAggPath) {
+      const stat = {};
+      selectedRows.forEach((row) => {
+        let v = findDataByPath(row, titleAggPath);
+        if (!isEmpty(v)) {
+          v = toBeString(v);
+          stat[v] = (stat[v] || 0) + 1;
+        }
+      });
+      // 按数量从高到低排序
+      if (!isEmpty(stat)) {
+        const sortedEntries = Object.entries(stat).sort(([, a], [, b]) => b - a);
+        label += ` (${sortedEntries.map(([k, v]) => `${k}: ${v}`).join(", ")})`;
+      }
+    }
+    return label;
+  }, [titleTemplate, titleAggPath, selectedRows]);
+
   const readOnlyView = useMemo(() => {
+    const _props = { ...antdTableProps, ...antdTableReadProps };
     return (
       <RestTable
         tools={false}
         {...restProps}
-        antdTableProps={{ ...antdTableProps, ...antdTableReadProps }}
+        antdTableProps={_props}
         baseParams={{}}
         forceParams={{}}
         restful={null}
@@ -108,6 +130,9 @@ const TableSelect = ({
   }, [selectedRows, rowKey, columensWithActions, restProps, antdTableProps, antdTableReadProps]);
 
   if (disabled || readOnly) {
+    if (titleAggPath) {
+      return <div><div style={{ lineHeight: "32px" }}>{title}</div>{readOnlyView}</div>;
+    }
     return readOnlyView;
   }
   return (
@@ -119,7 +144,7 @@ const TableSelect = ({
           items={[
             {
               key: "title",
-              label: commonFormat(titleTemplate, { count: selectedRows?.length || 0 }),
+              label: title,
               children: readOnlyView,
             },
           ]}
@@ -172,6 +197,8 @@ TableSelect.propTypes = {
 
   // 选中数据标题模板, 必须包含 {count} 占位符，count表示选中个数
   titleTemplate: PropTypes.string,
+  // 选中数据根据字段聚合统计显示在title上
+  titleAggPath: PropTypes.string,
   antdTableReadProps: PropTypes.object,
   antdTableProps: PropTypes.object,
   antdCollapseProps: PropTypes.object,
