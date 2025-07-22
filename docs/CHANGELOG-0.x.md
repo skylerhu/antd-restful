@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.1.3
+- feat: 扩展 RestTable
+    - 刷选类型 type 扩展支持 FieldType.NUMBER 和 FieldType.NUMBER_RANGE
+    - fix: 修复刷选输入 placeholder 的展示
+
 ## 0.1.2
 - feat: 扩展TableSelect
     - 配置 titleAggPath 支持选中数据根据字段聚合统计显示在title上

@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Button, Checkbox, Col, Dropdown, Input, Row, Space, Spin, Table, Tooltip } from "antd";
+import { Button, Checkbox, Col, Dropdown, Input, InputNumber, Row, Space, Spin, Table, Tooltip } from "antd";
 import {
   DownloadOutlined,
   ReloadOutlined,
@@ -20,6 +20,7 @@ import {
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
 import CopyView from "src/components/CopyView";
+import NumberRange from "src/components/formitems/NumberRange";
 import RestSelect from "src/components/formitems/RestSelect";
 import GridForm from "src/components/GridForm";
 import globalConfig from "src/config";
@@ -339,110 +340,148 @@ const RestTable = forwardRef(
 
     const columnSearchViewRef = useRef(null);
     // 处理table表头中列的筛选
-    const getColumnSearchProps = useCallback((dataIndex, column) => {
-      const { filterDropdownConfig: config, dropdownLocalConfig } = column;
-      const _props = {
-        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
-          let searchItem = null;
-          switch (config.type) {
-            case FieldType.INPUT: {
-              searchItem = (
-                <Input
-                  allowClear={true}
-                  {...config.dropdownProps}
-                  placeholder={
-                    (restful ? config.dropdownProps?.placeholder : dropdownLocalConfig?.placeholder) || "输入搜索"
-                  }
-                  ref={(node) => (columnSearchViewRef.current = node)}
-                  value={selectedKeys}
-                  onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-                  onPressEnter={() => confirm()}
-                />
-              );
-              break;
-            }
-            case FieldType.SELECT: {
-              searchItem = (
-                <RestSelect
-                  style={{ width: "100%" }}
-                  {...config.dropdownProps}
-                  value={selectedKeys}
-                  onChange={(value) => {
-                    const keys = isBlank(value) ? [] : isArray(value) ? value : [value];
-                    const isMultiple = config.dropdownProps?.mode === "multiple";
-                    setSelectedKeys(keys);
-                    if (!isMultiple) {
-                      // 单选时，直接确认
-                      confirm();
-                    }
-                  }}
-                />
-              );
-              break;
-            }
-            default:
-              break;
-          }
-          if (!searchItem) {
-            return undefined;
-          }
-          const direction = config.antdSpaceProps?.direction || "vertical";
-          const view = (
-            <Space style={{ padding: 8, ...config.style }} {...config.antdSpaceProps} direction={direction}>
-              {searchItem}
-              <Row gutter={10}>
-                {direction === "vertical" ? (
-                  <>
-                    <Col span={12}>
-                      <Button
-                        size="small"
-                        style={{ width: "100%" }}
-                        onClick={() => {
-                          clearFilters();
-                          confirm();
-                        }}
-                      >
-                        重置
-                      </Button>
-                    </Col>
-                    <Col span={12}>
-                      <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
-                        搜索
-                      </Button>
-                    </Col>
-                  </>
-                ) : (
-                  <>
-                    <Col span={24}>
-                      <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
-                        搜索
-                      </Button>
-                    </Col>
-                  </>
-                )}
-              </Row>
-            </Space>
-          );
-          return view;
-        },
-        filterIcon: (filtered) => (
-          <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined, padding: "0 5px" }} />
-        ),
-        filterDropdownProps: {
-          onOpenChange: (visible) => {
-            if (config.type === FieldType.INPUT && visible) {
-              // 让输入框聚焦
-              setTimeout(() => {
-                if (columnSearchViewRef.current) {
-                  columnSearchViewRef.current.select();
+    const getColumnSearchProps = useCallback(
+      (dataIndex, column) => {
+        const { filterDropdownConfig: config, dropdownLocalConfig } = column;
+        const _props = {
+          filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => {
+            let searchItem = null;
+            const placeholder =
+              (restful ? config.dropdownProps?.placeholder : dropdownLocalConfig?.placeholder) || "输入搜索";
+            switch (config.type) {
+              case FieldType.INPUT: {
+                searchItem = (
+                  <Input
+                    allowClear={true}
+                    {...config.dropdownProps}
+                    placeholder={placeholder}
+                    ref={(node) => (columnSearchViewRef.current = node)}
+                    value={selectedKeys}
+                    onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => confirm()}
+                  />
+                );
+                break;
+              }
+              case FieldType.NUMBER: {
+                searchItem = (
+                  <InputNumber
+                    allowClear={true}
+                    {...config.dropdownProps}
+                    placeholder={placeholder}
+                    value={selectedKeys}
+                    onChange={(v) => setSelectedKeys(isBlank(v) ? [] : [v])}
+                    onPressEnter={() => confirm()}
+                  />
+                );
+                break;
+              }
+              case FieldType.NUMBER_RANGE: {
+                let _value = selectedKeys;
+                // table会将数组处理成字符串，所以需要特殊处理
+                if (
+                  isArray(selectedKeys) &&
+                  selectedKeys.length > 0 &&
+                  isString(selectedKeys[0]) && selectedKeys[0].includes(",")
+                ) {
+                  _value = selectedKeys[0];
                 }
-              }, 100);
+                searchItem = (
+                  <NumberRange
+                    allowClear={true}
+                    {...config.dropdownProps}
+                    placeholder={placeholder}
+                    value={_value}
+                    onChange={(v) => setSelectedKeys(isBlank(v) ? [] : isArray(v) ? v : [v])}
+                    onPressEnter={() => confirm()}
+                  />
+                );
+                break;
+              }
+              case FieldType.SELECT: {
+                searchItem = (
+                  <RestSelect
+                    style={{ width: "100%" }}
+                    {...config.dropdownProps}
+                    value={selectedKeys}
+                    onChange={(value) => {
+                      const keys = isBlank(value) ? [] : isArray(value) ? value : [value];
+                      const isMultiple = config.dropdownProps?.mode === "multiple";
+                      setSelectedKeys(keys);
+                      if (!isMultiple) {
+                        // 单选时，直接确认
+                        confirm();
+                      }
+                    }}
+                  />
+                );
+                break;
+              }
+              default:
+                break;
             }
+            if (!searchItem) {
+              return undefined;
+            }
+            const direction = config.antdSpaceProps?.direction || "vertical";
+            const view = (
+              <Space style={{ padding: 8, ...config.style }} {...config.antdSpaceProps} direction={direction}>
+                {searchItem}
+                <Row gutter={10}>
+                  {direction === "vertical" ? (
+                    <>
+                      <Col span={12}>
+                        <Button
+                          size="small"
+                          style={{ width: "100%" }}
+                          onClick={() => {
+                            clearFilters();
+                            confirm();
+                          }}
+                        >
+                          重置
+                        </Button>
+                      </Col>
+                      <Col span={12}>
+                        <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
+                          搜索
+                        </Button>
+                      </Col>
+                    </>
+                  ) : (
+                    <>
+                      <Col span={24}>
+                        <Button type="primary" size="small" style={{ width: "100%" }} onClick={() => confirm()}>
+                          搜索
+                        </Button>
+                      </Col>
+                    </>
+                  )}
+                </Row>
+              </Space>
+            );
+            return view;
           },
-        },
-      };
-      return _props;
-    }, [restful]);
+          filterIcon: (filtered) => (
+            <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined, padding: "0 5px" }} />
+          ),
+          filterDropdownProps: {
+            onOpenChange: (visible) => {
+              if (config.type === FieldType.INPUT && visible) {
+                // 让输入框聚焦
+                setTimeout(() => {
+                  if (columnSearchViewRef.current) {
+                    columnSearchViewRef.current.select();
+                  }
+                }, 100);
+              }
+            },
+          },
+        };
+        return _props;
+      },
+      [restful]
+    );
 
     const genColumnKey = useCallback((column) => {
       let key = column.key || column.dataIndex;
@@ -567,7 +606,10 @@ const RestTable = forwardRef(
             if (column.fieldName) {
               newCloumn = {
                 ...newCloumn,
-                ...getColumnSearchProps(field, { ...column, filterDropdownConfig: { type: FieldType.INPUT } }),
+                ...getColumnSearchProps(field, {
+                  ...column,
+                  filterDropdownConfig: { type: column.dropdownLocalConfig?.type || FieldType.INPUT },
+                }),
               };
               // 支持本地筛选
               newCloumn.onFilter = (input, record) => {
@@ -887,6 +929,8 @@ RestTable.propTypes = {
       fieldName: PropTypes.string,
       // 禁用restful下，开启下拉选择的配置
       dropdownLocalConfig: PropTypes.shape({
+        // 本地筛选的类型，默认都用INPUT
+        type: PropTypes.oneOf(FieldType.map((o) => o.value)),
         filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
         placeholder: PropTypes.string,
       }),

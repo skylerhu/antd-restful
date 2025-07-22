@@ -1,4 +1,4 @@
-import { isArray, isBasicType, isEmpty, isNumber, isString } from "./typeTools";
+import { isArray, isBasicType, isEmpty, isNumber, isString, isBlank } from "./typeTools";
 import { FilterType } from "./constants";
 /**
  * 定义排序顺序的函数。返回值应该是一个数字，其符号表示两个元素的相对顺序;
@@ -70,15 +70,27 @@ export const commonFilter = (input, value, { filterType = FilterType.SEARCH } = 
       return false;
     }
     if (isString(input)) {
-      input = input.split(",").map(Number);
+      input = input.split(",").map(v => isBlank(v) ? undefined : Number(v));
     }
     if (!isArray(input)) {
       input = [input];
     }
     if (input.length === 2) {
-      return value >= input[0] && value <= input[1];
+      if (input[0] === undefined && input[1] === undefined) {
+        return true;
+      } else if (input[0] === undefined) {
+        return value <= input[1];
+      } else if (input[1] === undefined) {
+        return value >= input[0];
+      } else {
+        return value >= input[0] && value <= input[1];
+      }
     } else if (input.length === 1) {
-      return value >= input[0];
+      if (input[0] === undefined) {
+        return true;
+      } else {
+        return value >= input[0];
+      }
     } else {
       return false;
     }

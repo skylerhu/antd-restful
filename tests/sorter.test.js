@@ -254,9 +254,49 @@ describe("sorter module", () => {
         expect(sorter.commonFilter("10,20", "test", { filterType: FilterType.RANGE })).toBe(false);
         expect(sorter.commonFilter("10,20", true, { filterType: FilterType.RANGE })).toBe(false);
 
-        // 空输入应该返回 true
+        // 空输入应该返回 true（实际实现逻辑）
         expect(sorter.commonFilter("", 15, { filterType: FilterType.RANGE })).toBe(true);
         expect(sorter.commonFilter(null, 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(undefined, 15, { filterType: FilterType.RANGE })).toBe(true);
+
+        // 测试字符串分割和转换
+        expect(sorter.commonFilter("10,", 15, { filterType: FilterType.RANGE })).toBe(true); // 只有最小值
+        expect(sorter.commonFilter(",20", 15, { filterType: FilterType.RANGE })).toBe(true); // 只有最大值
+        expect(sorter.commonFilter("10,20", 5, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", 25, { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试边界值
+        expect(sorter.commonFilter("10,20", 10, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10,20", 20, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10,", 10, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(",20", 20, { filterType: FilterType.RANGE })).toBe(true);
+
+        // 测试空字符串分割
+        expect(sorter.commonFilter(" ,20", 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("10, ", 15, { filterType: FilterType.RANGE })).toBe(false); // 空格会被转换为 NaN
+        expect(sorter.commonFilter(" , ", 15, { filterType: FilterType.RANGE })).toBe(false); // 两个空格都会被转换为 NaN
+
+        // 测试非数组输入
+        expect(sorter.commonFilter(10, 15, { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(20, 15, { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试长度不为1和2的数组
+        expect(sorter.commonFilter([], 15, { filterType: FilterType.RANGE })).toBe(true); // 空数组会被 isEmpty 检查返回 true
+        expect(sorter.commonFilter([10, 20, 30], 15, { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试非数字值的情况（覆盖第80行）
+        expect(sorter.commonFilter("10,20", "test", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", true, { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("10,20", null, { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试两个 undefined 的情况（覆盖第90行）
+        expect(sorter.commonFilter([undefined, undefined], 15, { filterType: FilterType.RANGE })).toBe(true); // 两个 undefined
+        expect(sorter.commonFilter([null, null], 15, { filterType: FilterType.RANGE })).toBe(false); // null 会被转换为 0
+
+        // 测试 RANGE 类型中 isEmpty(input) 的情况（覆盖第80行）
+        // 这种情况很难触发，因为如果 isEmpty(input) 为 true，函数会在第47行就返回 true
+        // 但我们可以测试一些边界情况
+        expect(sorter.commonFilter([undefined, undefined], 15, { filterType: FilterType.RANGE })).toBe(true); // 两个 undefined
       });
     });
 
