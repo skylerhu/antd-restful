@@ -350,7 +350,9 @@ const RestTable = forwardRef(
                 <Input
                   allowClear={true}
                   {...config.dropdownProps}
-                  placeholder={dropdownLocalConfig?.placeholder || config.dropdownProps?.placeholder || "输入搜索"}
+                  placeholder={
+                    (restful ? config.dropdownProps?.placeholder : dropdownLocalConfig?.placeholder) || "输入搜索"
+                  }
                   ref={(node) => (columnSearchViewRef.current = node)}
                   value={selectedKeys}
                   onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
@@ -440,7 +442,7 @@ const RestTable = forwardRef(
         },
       };
       return _props;
-    }, []);
+    }, [restful]);
 
     const genColumnKey = useCallback((column) => {
       let key = column.key || column.dataIndex;
