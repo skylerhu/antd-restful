@@ -189,7 +189,7 @@ TableSelect.propTypes = {
 
   // 选中数据标题模板, 必须包含 {count} 占位符，count表示选中个数
   titleTemplate: PropTypes.string,
-  // 选中数据根据字段聚合统计显示在title上
+  // 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 {stat} 占位符
   titleAggPath: PropTypes.string,
   antdTableReadProps: PropTypes.object,
   antdTableProps: PropTypes.object,

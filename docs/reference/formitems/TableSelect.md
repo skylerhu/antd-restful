@@ -20,6 +20,7 @@
 | rowKey | 表格行的唯一键名 | `string` | `'id'` | - |
 | columns | 表格列配置 | `array` | `[]` | - |
 | titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `选中 {count} 条数据` | - |
+| titleAggPath | 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 `{stat}` 占位符 | `string` | - | - |
 | **Ant Design 原生配置** | | | | |
 | antdTableProps | Ant Design Table 组件的原生属性 | `object` | - | - |
 | antdTableReadProps | 用于配置只读的Table，覆盖 antdTableProps | `object` | - | - |

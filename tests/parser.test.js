@@ -441,8 +441,8 @@ describe("Parser", () => {
     });
 
     test("should format title with aggregation", () => {
-      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", "status")).toBe("选中 4 条数据 (active: 3, inactive: 1)");
-      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", "name")).toBe("选中 4 条数据 (John: 1, Jane: 1, Bob: 1, Alice: 1)");
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 4 条数据 (active: 3, inactive: 1)");
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据 ({stat})", "name")).toBe("选中 4 条数据 (John: 1, Jane: 1, Bob: 1, Alice: 1)");
     });
 
     test("should handle empty aggregation path", () => {
@@ -452,7 +452,7 @@ describe("Parser", () => {
     });
 
     test("should handle empty rows with aggregation", () => {
-      expect(parser.getShowTitle([], "选中 {count} 条数据", "status")).toBe("选中 0 条数据");
+      expect(parser.getShowTitle([], "选中 {count} 条数据 ({stat})", "status")).toBe("选中 0 条数据 ()");
     });
 
     test("should handle rows with missing aggregation field", () => {
@@ -461,7 +461,7 @@ describe("Parser", () => {
         { id: 2, name: "Jane", status: "active" },
         { id: 3, name: "Bob" },
       ];
-      expect(parser.getShowTitle(rowsWithMissingField, "选中 {count} 条数据", "status")).toBe("选中 3 条数据 (-: 2, active: 1)");
+      expect(parser.getShowTitle(rowsWithMissingField, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 3 条数据 (-: 2, active: 1)");
     });
 
     test("should handle rows with empty aggregation values", () => {
@@ -471,7 +471,7 @@ describe("Parser", () => {
         { id: 3, name: "Bob", status: undefined },
         { id: 4, name: "Alice", status: "active" },
       ];
-      expect(parser.getShowTitle(rowsWithEmptyValues, "选中 {count} 条数据", "status")).toBe("选中 4 条数据 (-: 3, active: 1)");
+      expect(parser.getShowTitle(rowsWithEmptyValues, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 4 条数据 (-: 3, active: 1)");
     });
 
     test("should sort aggregation results by count descending", () => {
@@ -483,7 +483,20 @@ describe("Parser", () => {
         { id: 5, status: "active" },
         { id: 6, status: "inactive" },
       ];
-      expect(parser.getShowTitle(rowsWithMixedStatus, "选中 {count} 条数据", "status")).toBe("选中 6 条数据 (active: 3, inactive: 2, pending: 1)");
+      expect(parser.getShowTitle(rowsWithMixedStatus, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 6 条数据 (active: 3, inactive: 2, pending: 1)");
+    });
+
+    test("should not show stat when template does not include {stat}", () => {
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据", "status")).toBe("选中 4 条数据");
+    });
+
+    test("should handle empty stat when no aggregation data", () => {
+      const rowsWithNoStatus = [
+        { id: 1, name: "John" },
+        { id: 2, name: "Jane" },
+        { id: 3, name: "Bob" },
+      ];
+      expect(parser.getShowTitle(rowsWithNoStatus, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 3 条数据 (-: 3)");
     });
   });
 });

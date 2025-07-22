@@ -323,7 +323,7 @@ export const apiSorterToTableSorterDict = (sorter) => {
 
 // 根据rows和titleTemplate和titleAggPath获取显示的标题
 export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
-  let label = commonFormat(titleTemplate, { count: rows?.length || 0 });
+  let statStr = "";
   if (titleAggPath) {
     const stat = {};
     rows.forEach((row) => {
@@ -334,8 +334,8 @@ export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
     // 按数量从高到低排序
     if (!isEmpty(stat)) {
       const sortedEntries = Object.entries(stat).sort(([, a], [, b]) => b - a);
-      label += ` (${sortedEntries.map(([k, v]) => `${k}: ${v}`).join(", ")})`;
+      statStr = `${sortedEntries.map(([k, v]) => `${k}: ${v}`).join(", ")}`;
     }
   }
-  return label;
+  return commonFormat(titleTemplate, { count: rows?.length || 0, stat: statStr });
 };

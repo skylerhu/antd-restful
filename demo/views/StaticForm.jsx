@@ -204,7 +204,7 @@ export default function StaticForm() {
           restful="api/users/"
           {...editProps}
           defaultPageSize={5}
-          titleTemplate="选中 {count} 个用户"
+          titleTemplate="选中 {count} 个用户，按照性别统计[ {stat} ]"
           titleAggPath="gender"
           baseParams={
             {
