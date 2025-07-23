@@ -238,7 +238,7 @@ export const transformFilters = (filters, { skipEmpty = false, multipleMap = {} 
     const v = filters[key];
     if (skipEmpty && isEmpty(v)) {
       // 跳过空值
-    } else if (multipleMap[key] === true) {
+    } else if (multipleMap[key]) {
       newV[key] = v;
       if (!isArray(v) && !isBlank(v)) {
         // 转换为数组
@@ -248,11 +248,9 @@ export const transformFilters = (filters, { skipEmpty = false, multipleMap = {} 
           newV[key] = [v];
         }
       }
-    } else if (multipleMap[key] === false) {
+    } else {
       // 不是多选的值; 空数组在上面已经删除过了
       newV[key] = isArray(v) ? v.join(DEFAULT_SEPARATOR) : v;
-    } else {
-      newV[key] = v;
     }
   });
   if (skipEmpty) {

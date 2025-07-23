@@ -267,7 +267,7 @@ export default function StaticForm() {
               filterMultiple: false,
               render: (value, record) => record.age,
               filterDropdownConfig: {
-                type: FieldType.NUMBER,
+                type: FieldType.NUMBER_RANGE,
                 dropdownProps: {
                   placeholder: "输入年龄范围",
                 },
@@ -276,6 +276,18 @@ export default function StaticForm() {
                 type: FieldType.NUMBER_RANGE,
                 filterType: FilterType.RANGE,
               }
+            },
+            {
+              title: "创建日期",
+              dataIndex: "created_at__range",
+              filterDropdownConfig: {
+                type: FieldType.DATE_RANGE_PICKER,
+              },
+              fieldName: "created_at",
+              dropdownLocalConfig: {
+                type: FieldType.DATE_RANGE_PICKER,
+                filterType: FilterType.RANGE,
+              },
             },
           ]}
         />

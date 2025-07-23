@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.1.4
+- feat: 扩展 RestTable
+    - 刷选类型 type 扩展支持 FieldType.DATE_RANGE_PICKER 时间筛选
+- fix: 修复 RestTable cloumns.filterMultiple 默认值时处理数组数据问题
+- fix: 调整 RangeStrPicker 增加默认值 `allowClear={true}` `allowEmpty={[true, true]}`
+
 ## 0.1.3
 - feat: 扩展 RestTable
     - 刷选类型 type 扩展支持 FieldType.NUMBER 和 FieldType.NUMBER_RANGE

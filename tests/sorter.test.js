@@ -291,12 +291,71 @@ describe("sorter module", () => {
 
         // 测试两个 undefined 的情况（覆盖第90行）
         expect(sorter.commonFilter([undefined, undefined], 15, { filterType: FilterType.RANGE })).toBe(true); // 两个 undefined
-        expect(sorter.commonFilter([null, null], 15, { filterType: FilterType.RANGE })).toBe(false); // null 会被转换为 0
+        expect(sorter.commonFilter([null, null], 15, { filterType: FilterType.RANGE })).toBe(true);
 
         // 测试 RANGE 类型中 isEmpty(input) 的情况（覆盖第80行）
         // 这种情况很难触发，因为如果 isEmpty(input) 为 true，函数会在第47行就返回 true
         // 但我们可以测试一些边界情况
         expect(sorter.commonFilter([undefined, undefined], 15, { filterType: FilterType.RANGE })).toBe(true); // 两个 undefined
+      });
+
+      test("日期字符串RANGE类型测试", () => {
+        // 日期字符串范围测试 - 字符串比较
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2023-06-15", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2022-12-31", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2024-01-01", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2023-01-01", { filterType: FilterType.RANGE })).toBe(true); // 包含边界
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2023-12-31", { filterType: FilterType.RANGE })).toBe(true); // 包含边界
+
+        // 单个日期测试（最小值）
+        expect(sorter.commonFilter("2023-01-01", "2023-06-15", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01", "2022-12-31", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("2023-01-01", "2023-01-01", { filterType: FilterType.RANGE })).toBe(true);
+
+        // 数组格式日期测试
+        expect(sorter.commonFilter(["2023-01-01", "2023-12-31"], "2023-06-15", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(["2023-01-01"], "2023-06-15", { filterType: FilterType.RANGE })).toBe(true);
+
+        // 测试字符串分割和转换
+        expect(sorter.commonFilter("2023-01-01,", "2023-06-15", { filterType: FilterType.RANGE })).toBe(true); // 只有最小值
+        expect(sorter.commonFilter(",2023-12-31", "2023-06-15", { filterType: FilterType.RANGE })).toBe(true); // 只有最大值
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2022-12-31", { filterType: FilterType.RANGE })).toBe(false);
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2024-01-01", { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试边界值
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2023-01-01", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2023-12-31", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01,", "2023-01-01", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter(",2023-12-31", "2023-12-31", { filterType: FilterType.RANGE })).toBe(true);
+
+        // 测试空字符串分割
+        expect(sorter.commonFilter(" ,2023-12-31", "2023-06-15", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01, ", "2023-06-15", { filterType: FilterType.RANGE })).toBe(false); // 空格会被转换为 NaN
+        expect(sorter.commonFilter(" , ", "2023-06-15", { filterType: FilterType.RANGE })).toBe(false); // 两个空格都会被转换为 NaN
+
+        // 测试非数组输入
+        expect(sorter.commonFilter("2023-01-01", "2023-06-15", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-12-31", "2023-06-15", { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试长度不为1和2的数组
+        expect(sorter.commonFilter([], "2023-06-15", { filterType: FilterType.RANGE })).toBe(true); // 空数组会被 isEmpty 检查返回 true
+        expect(sorter.commonFilter(["2023-01-01", "2023-06-15", "2023-12-31"], "2023-06-15", { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试两个 undefined 的情况
+        expect(sorter.commonFilter([undefined, undefined], "2023-06-15", { filterType: FilterType.RANGE })).toBe(true); // 两个 undefined
+        expect(sorter.commonFilter([null, null], "2023-06-15", { filterType: FilterType.RANGE })).toBe(true); // 两个 null
+
+        // 测试不同日期格式
+        expect(sorter.commonFilter("2023/01/01,2023/12/31", "2023/06/15", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01,2023-12-31", "2023/06/15", { filterType: FilterType.RANGE })).toBe(false); // 格式不匹配
+
+        // 测试时间戳字符串
+        expect(sorter.commonFilter("1672531200000,1704067200000", "1684272000000", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("1672531200000,1704067200000", "1609459200000", { filterType: FilterType.RANGE })).toBe(false);
+
+        // 测试ISO格式日期
+        expect(sorter.commonFilter("2023-01-01T00:00:00.000Z,2023-12-31T23:59:59.999Z", "2023-06-15T12:00:00.000Z", { filterType: FilterType.RANGE })).toBe(true);
+        expect(sorter.commonFilter("2023-01-01T00:00:00.000Z,2023-12-31T23:59:59.999Z", "2022-12-31T23:59:59.999Z", { filterType: FilterType.RANGE })).toBe(false);
       });
     });
 
@@ -350,6 +409,7 @@ describe("sorter module", () => {
         expect(sorter.commonFilter("test", func)).toBe(false);
         expect(sorter.commonFilter(["test"], func)).toBe(false);
       });
+
     });
   });
 

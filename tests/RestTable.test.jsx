@@ -1,8 +1,8 @@
 import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { DEFAULT_PAGE_SIZE } from "src/common/constants";
-import RestTable from "src/components/RestTable";
+import { DEFAULT_PAGE_SIZE, FieldType } from "src/common/constants";
+import RestTable, { getColumnSearchProps } from "src/components/RestTable";
 
 // Mock useSafeRequest hook
 const mockMakeRequest = jest.fn();
@@ -1000,6 +1000,173 @@ describe("RestTable", () => {
         />
       );
       expect(container.firstChild).toMatchSnapshot();
+    });
+
+  });
+
+  describe("getColumnSearchProps 测试", () => {
+    it("should return valid filter props for input type", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.INPUT,
+          dropdownProps: {
+            placeholder: "输入搜索",
+          },
+        },
+      };
+
+      const result = getColumnSearchProps("name", column, null);
+
+      expect(result).toBeDefined();
+      expect(result.filterDropdown).toBeDefined();
+      expect(result.filterIcon).toBeDefined();
+      expect(result.filterDropdownProps).toBeDefined();
+      expect(typeof result.filterDropdown).toBe("function");
+      expect(typeof result.filterIcon).toBe("function");
+    });
+
+    it("should return valid filter props for number type", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.NUMBER,
+          dropdownProps: {
+            placeholder: "输入数字",
+          },
+        },
+      };
+
+      const result = getColumnSearchProps("age", column, null);
+
+      expect(result).toBeDefined();
+      expect(result.filterDropdown).toBeDefined();
+      expect(result.filterIcon).toBeDefined();
+      expect(result.filterDropdownProps).toBeDefined();
+    });
+
+    it("should return valid filter props for select type", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.SELECT,
+          dropdownProps: {
+            restful: "/api/categories/",
+            fieldNames: { label: "name", value: "id" },
+          },
+        },
+      };
+
+      const result = getColumnSearchProps("category", column, null);
+
+      expect(result).toBeDefined();
+      expect(result.filterDropdown).toBeDefined();
+      expect(result.filterIcon).toBeDefined();
+      expect(result.filterDropdownProps).toBeDefined();
+    });
+
+    it("should return valid filter props for number_range type", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.NUMBER_RANGE,
+          dropdownProps: {
+            placeholder: "输入范围",
+          },
+        },
+      };
+
+      const result = getColumnSearchProps("price", column, null);
+
+      expect(result).toBeDefined();
+      expect(result.filterDropdown).toBeDefined();
+      expect(result.filterIcon).toBeDefined();
+      expect(result.filterDropdownProps).toBeDefined();
+    });
+
+    it("should return valid filter props for date_range_picker type", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.DATE_RANGE_PICKER,
+          dropdownProps: {
+            placeholder: "选择日期范围",
+          },
+        },
+      };
+
+      const result = getColumnSearchProps("created_at", column, null);
+
+      expect(result).toBeDefined();
+      expect(result.filterDropdown).toBeDefined();
+      expect(result.filterIcon).toBeDefined();
+      expect(result.filterDropdownProps).toBeDefined();
+    });
+
+    it("should return undefined filterDropdown for unsupported type", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: "unsupported_type",
+        },
+      };
+
+      const result = getColumnSearchProps("field", column, null);
+
+      expect(result).toBeDefined();
+      // 对于不支持的类型，filterDropdown 应该返回 undefined
+      const mockSetSelectedKeys = jest.fn();
+      const mockSelectedKeys = [];
+      const mockConfirm = jest.fn();
+      const mockClearFilters = jest.fn();
+
+      const filterDropdown = result.filterDropdown({
+        setSelectedKeys: mockSetSelectedKeys,
+        selectedKeys: mockSelectedKeys,
+        confirm: mockConfirm,
+        clearFilters: mockClearFilters,
+      });
+
+      expect(filterDropdown).toBeUndefined();
+    });
+
+    it("should handle custom style and antdSpaceProps", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.INPUT,
+          style: { padding: "16px" },
+          antdSpaceProps: {
+            direction: "horizontal",
+            size: "large",
+          },
+        },
+      };
+
+      const result = getColumnSearchProps("name", column, null);
+
+      expect(result).toBeDefined();
+      expect(result.filterDropdown).toBeDefined();
+    });
+
+    it("should handle array to string conversion in handleValue", () => {
+      const column = {
+        filterDropdownConfig: {
+          type: FieldType.NUMBER_RANGE,
+        },
+      };
+
+      const result = getColumnSearchProps("field", column, null);
+
+      // 测试 filterDropdown 函数是否能正确处理数组值
+      const mockSetSelectedKeys = jest.fn();
+      const mockSelectedKeys = ["10,20"];
+      const mockConfirm = jest.fn();
+      const mockClearFilters = jest.fn();
+
+      const filterDropdown = result.filterDropdown({
+        setSelectedKeys: mockSetSelectedKeys,
+        selectedKeys: mockSelectedKeys,
+        confirm: mockConfirm,
+        clearFilters: mockClearFilters,
+      });
+
+      expect(filterDropdown).toBeDefined();
+      // 验证返回的是一个有效的 React 元素
+      expect(filterDropdown).toBeTruthy();
     });
   });
 });

@@ -56,6 +56,8 @@ const RangeStrPicker = ({
     <RangePicker
       style={style}
       className={className}
+      allowClear={true}
+      allowEmpty={[true, true]}
       {...antdRangePickerProps}
       disabled={disabled}
       value={getDayjsValue(value)}
