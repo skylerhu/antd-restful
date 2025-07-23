@@ -603,7 +603,7 @@ const RestTable = forwardRef(
           }
         } else {
           if (!newCloumn.onFilter && (newCloumn.filters || column.dropdownLocalConfig)) {
-            const fieldName = column.dropdownLocalConfig?.fieldName || column.fieldName;
+            const fieldName = column.dropdownLocalConfig?.fieldName || column.fieldName || field;
             if (fieldName) {
               newCloumn = {
                 ...newCloumn,
