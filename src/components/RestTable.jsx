@@ -602,8 +602,9 @@ const RestTable = forwardRef(
             delete newCloumn.filterDropdownConfig;
           }
         } else {
-          if (!newCloumn.onFilter && (newCloumn.filters || column.fieldName)) {
-            if (column.fieldName) {
+          if (!newCloumn.onFilter && (newCloumn.filters || column.dropdownLocalConfig)) {
+            const fieldName = column.dropdownLocalConfig?.fieldName || column.fieldName;
+            if (fieldName) {
               newCloumn = {
                 ...newCloumn,
                 ...getColumnSearchProps(field, {
@@ -613,7 +614,7 @@ const RestTable = forwardRef(
               };
               // 支持本地筛选
               newCloumn.onFilter = (input, record) => {
-                const v = findDataByPath(record, column.fieldName);
+                const v = findDataByPath(record, fieldName);
                 let _filterType = column.dropdownLocalConfig?.filterType || FilterType.SEARCH;
                 if (!isEmpty(column.filters)) {
                   // 如果配置了精确筛选，则使用精确筛选
@@ -911,6 +912,8 @@ RestTable.propTypes = {
     PropTypes.shape({
       // 若是某列是字典，可以用此模板格式化显示
       labelTemplate: PropTypes.string,
+      // 用于配置字段展示，可配合labelTemplate使用
+      fieldName: PropTypes.string,
       // 开启复制功能
       copyProps: PropTypes.object,
       // 如果某列是字典，则需要指定字段值用于copy
@@ -925,10 +928,10 @@ RestTable.propTypes = {
       }),
       // 标记字段开启了多值筛选，处理query参数转化成数组
       filterMultiple: PropTypes.bool,
-      // 在禁用restful时，是否开启本地搜索/筛选，设置真实存在的字段; 也用于配置字段展示，可配合labelTemplate使用
-      fieldName: PropTypes.string,
       // 禁用restful下，开启下拉选择的配置; 非restful情况下会覆盖 filterDropdownConfig
       dropdownLocalConfig: PropTypes.shape({
+        // 配置本地筛选字段，比外层配置优先级高
+        fieldName: PropTypes.string,
         filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
       }),
       range: PropTypes.string,

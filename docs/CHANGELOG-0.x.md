@@ -3,7 +3,9 @@
 ## 0.1.3
 - feat: 扩展 RestTable
     - 刷选类型 type 扩展支持 FieldType.NUMBER 和 FieldType.NUMBER_RANGE
-    - fix: 修复刷选输入 placeholder 的展示
+- fix: 修复 RestTable 个别问题
+    - 修复刷选输入 placeholder 的展示
+    - 本地开启搜索必须配置 dropdownLocalConfig
 
 ## 0.1.2
 - feat: 扩展TableSelect

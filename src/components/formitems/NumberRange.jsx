@@ -77,6 +77,7 @@ const NumberRange = ({
   return (
     <Space.Compact block style={style} className={className} {...antdSpaceProps}>
       <InputNumber
+        placeholder={"最小值"}
         {...antdInputProps}
         {...antdStartProps}
         disabled={disabled}
@@ -85,6 +86,7 @@ const NumberRange = ({
       />
       <span style={{ margin: "0 8px" }}>~</span>
       <InputNumber
+        placeholder={"最大值"}
         {...antdInputProps}
         {...antdEndProps}
         disabled={disabled}
