@@ -267,7 +267,7 @@ export default function StaticForm() {
               filterMultiple: false,
               render: (value, record) => record.age,
               filterDropdownConfig: {
-                type: FieldType.NUMBER,
+                type: FieldType.NUMBER_RANGE,
                 dropdownProps: {
                   placeholder: "输入年龄范围",
                 },
