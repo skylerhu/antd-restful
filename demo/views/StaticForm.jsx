@@ -277,6 +277,18 @@ export default function StaticForm() {
                 filterType: FilterType.RANGE,
               }
             },
+            {
+              title: "创建日期",
+              dataIndex: "created_at__range",
+              filterDropdownConfig: {
+                type: FieldType.DATE_RANGE_PICKER,
+              },
+              fieldName: "created_at",
+              dropdownLocalConfig: {
+                type: FieldType.DATE_RANGE_PICKER,
+                filterType: FilterType.RANGE,
+              },
+            },
           ]}
         />
       ),

@@ -65,28 +65,28 @@ export const commonFilter = (input, value, { filterType = FilterType.SEARCH } = 
     return false;
   }
   if (filterType === FilterType.RANGE) {
-    if (!isNumber(value) || isEmpty(input)) {
-      // 非数字值或空值不支持筛选
+    if ((!isNumber(value) && !isString(value)) || isEmpty(input)) {
+      // 非数字值、字符串；或空值不支持筛选
       return false;
     }
     if (isString(input)) {
-      input = input.split(",").map(v => isBlank(v) ? undefined : Number(v));
+      input = input.split(",");
     }
     if (!isArray(input)) {
       input = [input];
     }
     if (input.length === 2) {
-      if (input[0] === undefined && input[1] === undefined) {
+      if (isBlank(input[0]) && isBlank(input[1])) {
         return true;
-      } else if (input[0] === undefined) {
+      } else if (isBlank(input[0])) {
         return value <= input[1];
-      } else if (input[1] === undefined) {
+      } else if (isBlank(input[1])) {
         return value >= input[0];
       } else {
         return value >= input[0] && value <= input[1];
       }
     } else if (input.length === 1) {
-      if (input[0] === undefined) {
+      if (isBlank(input[0])) {
         return true;
       } else {
         return value >= input[0];
