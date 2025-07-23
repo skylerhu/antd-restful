@@ -1,6 +1,6 @@
 # antd-restful
 
-[![NPM Version](https://img.shields.io/npm/v/antd-restful)](https://github.com/SkylerHu/antd-restful)
+[![NPM Version](https://img.shields.io/npm/v/antd-restful)](https://www.npmjs.com/package/antd-restful)
 [![GitHub Actions Workflow Status](https://github.com/SkylerHu/antd-restful/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/SkylerHu/antd-restful)
 [![Coveralls](https://img.shields.io/coverallsCoverage/github/SkylerHu/antd-restful)](https://github.com/SkylerHu/antd-restful)
 [![GitHub License](https://img.shields.io/github/license/SkylerHu/antd-restful)](https://github.com/SkylerHu/antd-restful)
@@ -8,7 +8,7 @@
 
 基于 `React` + `Antd Design` 组件，扩展组件支持配置即可支持远程获取restful接口的数据。对接远程接口根据restful标准化、降低使用成本，也可以用于动态表单中的JSON配置。
 
-可查看版本变更记录[ChangeLog](./docs/CHANGELOG-1.x.md)
+可查看版本变更记录[ChangeLog](./docs/CHANGELOG-0.x.md)
 
 
 ## 一. 安装
