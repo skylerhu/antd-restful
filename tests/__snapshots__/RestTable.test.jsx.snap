@@ -10,11 +10,11 @@ exports[`RestTable 快照测试 should match snapshot with all tools enabled 1`]
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header"
+      class="cls-resttable-header"
       style="position: relative;"
     >
       <div
-        class="cls-antd-restful-tools"
+        class="cls-resttable-tools"
         style="position: absolute; right: 10px; bottom: 0px;"
       >
         <div
@@ -238,11 +238,11 @@ exports[`RestTable 快照测试 should match snapshot with basic props 1`] = `
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header"
+      class="cls-resttable-header"
       style="position: relative;"
     >
       <div
-        class="cls-antd-restful-tools"
+        class="cls-resttable-tools"
         style="position: absolute; right: 10px; bottom: 0px;"
       >
         <div
@@ -569,11 +569,11 @@ exports[`RestTable 快照测试 should match snapshot with custom pagination 1`]
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header"
+      class="cls-resttable-header"
       style="position: relative;"
     >
       <div
-        class="cls-antd-restful-tools"
+        class="cls-resttable-tools"
         style="position: absolute; right: 10px; bottom: 0px;"
       >
         <div
@@ -765,7 +765,7 @@ exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header"
+      class="cls-resttable-header"
       style="position: relative;"
     >
       <div
@@ -876,7 +876,7 @@ exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
         </div>
       </div>
       <div
-        class="cls-antd-restful-tools"
+        class="cls-resttable-tools"
         style="position: absolute; right: 10px; bottom: 0px;"
       >
         <div
@@ -1100,11 +1100,11 @@ exports[`RestTable 快照测试 should match snapshot with showHeaderTags 1`] = 
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header"
+      class="cls-resttable-header"
       style="position: relative;"
     >
       <div
-        class="cls-antd-restful-tools"
+        class="cls-resttable-tools"
         style="position: absolute; right: 10px; bottom: 0px;"
       >
         <div
@@ -1150,13 +1150,13 @@ exports[`RestTable 快照测试 should match snapshot with showHeaderTags 1`] = 
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header-tags"
+      class="cls-resttable-header-tags"
     >
       <span
         class="ant-tag css-dev-only-do-not-override-1kf000u"
       >
         <span
-          class="cls-antd-restful-header-tag-label"
+          class="cls-resttable-header-tag-label"
           style="color: rgb(140, 140, 140);"
         >
           姓名
@@ -1164,7 +1164,7 @@ exports[`RestTable 快照测试 should match snapshot with showHeaderTags 1`] = 
            
         </span>
         <span
-          class="cls-antd-restful-header-tag-value"
+          class="cls-resttable-header-tag-value"
           style="white-space: pre-wrap;"
         >
           u
@@ -1471,7 +1471,7 @@ exports[`RestTable 快照测试 should match snapshot with tools disabled 1`] = 
     class="ant-space-item"
   >
     <div
-      class="cls-antd-restful-header"
+      class="cls-resttable-header"
       style="position: relative;"
     />
   </div>

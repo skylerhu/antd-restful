@@ -64,7 +64,7 @@ exports[`TableSelect should render 1`] = `
                 class="ant-space-item"
               >
                 <div
-                  class="cls-antd-restful-header"
+                  class="cls-resttable-header"
                   style="position: relative;"
                 />
               </div>
@@ -365,7 +365,7 @@ exports[`TableSelect should render 1`] = `
         class="ant-space-item"
       >
         <div
-          class="cls-antd-restful-header"
+          class="cls-resttable-header"
           style="position: relative;"
         />
       </div>
@@ -748,7 +748,7 @@ exports[`TableSelect should render in disabled mode 1`] = `
       class="ant-space-item"
     >
       <div
-        class="cls-antd-restful-header"
+        class="cls-resttable-header"
         style="position: relative;"
       />
     </div>
@@ -1003,7 +1003,7 @@ exports[`TableSelect should render in readOnly mode 1`] = `
       class="ant-space-item"
     >
       <div
-        class="cls-antd-restful-header"
+        class="cls-resttable-header"
         style="position: relative;"
       />
     </div>
@@ -1311,7 +1311,7 @@ exports[`TableSelect should render with expandSelected 1`] = `
                 class="ant-space-item"
               >
                 <div
-                  class="cls-antd-restful-header"
+                  class="cls-resttable-header"
                   style="position: relative;"
                 />
               </div>
@@ -1612,7 +1612,7 @@ exports[`TableSelect should render with expandSelected 1`] = `
         class="ant-space-item"
       >
         <div
-          class="cls-antd-restful-header"
+          class="cls-resttable-header"
           style="position: relative;"
         />
       </div>

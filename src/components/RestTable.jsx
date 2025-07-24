@@ -733,7 +733,7 @@ const RestTable = forwardRef(
 
     return (
       <Space direction="vertical" gap={10} {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
-        <div style={{ position: "relative" }} className="cls-antd-restful-header">
+        <div style={{ position: "relative" }} className="cls-resttable-header">
           {restful && filterFormProps && (
             <Spin spinning={loading}>
               <GridForm
@@ -767,7 +767,7 @@ const RestTable = forwardRef(
           {!isEmpty(innerTools) && (
             <div
               style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
-              className="cls-antd-restful-tools"
+              className="cls-resttable-tools"
             >
               <Space key="tools">
                 {restful && filterFormProps && innerTools.advancedSearch && (
@@ -867,7 +867,7 @@ const RestTable = forwardRef(
           )}
         </div>
         {headerTags.length > 0 && (
-          <div className="cls-antd-restful-header-tags">
+          <div className="cls-resttable-header-tags">
             {headerTags.map((item) => {
               return (
                 <Tag
@@ -879,10 +879,10 @@ const RestTable = forwardRef(
                     });
                   }}
                 >
-                  <span style={{ color: "#8c8c8c" }} className="cls-antd-restful-header-tag-label">
+                  <span style={{ color: "#8c8c8c" }} className="cls-resttable-header-tag-label">
                     {item.label}:{" "}
                   </span>
-                  <span style={{ whiteSpace: "pre-wrap" }} className="cls-antd-restful-header-tag-value">
+                  <span style={{ whiteSpace: "pre-wrap" }} className="cls-resttable-header-tag-value">
                     {item.value}
                   </span>
                 </Tag>

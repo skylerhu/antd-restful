@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.1.6
+## 0.1.7
 - style: 调整 RestTable 中 showHeaderTags 的样式
 
 ## 0.1.5
