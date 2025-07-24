@@ -17,22 +17,22 @@ export default function Main() {
       items={[
         {
           key: "form",
-          label: "自定义表单",
+          label: "StaticForm",
           children: <DynamicForm />,
         },
         {
           key: "read",
-          label: "只读",
+          label: "ReadView",
           children: <ReadView />,
         },
         {
           key: "jsonform",
-          label: "JSON表单",
+          label: "JSONForm",
           children: <JSONForm />,
         },
         {
           key: "table",
-          label: "路由列表",
+          label: "TableDemo & RouteTable",
           children: <TableDemo />,
         },
       ]}

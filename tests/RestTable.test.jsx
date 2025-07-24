@@ -1002,6 +1002,49 @@ describe("RestTable", () => {
       expect(container.firstChild).toMatchSnapshot();
     });
 
+    it("should match snapshot with showHeaderTags", () => {
+      const columns = [
+        {
+          title: "姓名",
+          dataIndex: "name",
+          filterDropdownConfig: {
+            type: "input",
+            dropdownProps: {
+              placeholder: "输入姓名搜索",
+            },
+          },
+        },
+        {
+          title: "分类",
+          dataIndex: "category",
+          filterDropdownConfig: {
+            type: "select",
+            dropdownProps: {
+              restful: "/api/categories/",
+              fieldNames: { label: "name", value: "id" },
+            },
+          },
+        },
+        {
+          title: "价格",
+          dataIndex: "price",
+          filterDropdownConfig: {
+            type: "number_range",
+            dropdownProps: {
+              placeholder: "输入价格范围",
+            },
+          },
+        },
+      ];
+      const dataSource = [
+        { id: 1, name: "张三", category: "技术", price: 100 },
+        { id: 2, name: "李四", category: "管理", price: 200 },
+      ];
+
+      const { container } = render(<RestTable columns={columns} dataSource={dataSource} showHeaderTags={true} baseParams={{ name: "u" }} />);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
   });
 
   describe("getColumnSearchProps 测试", () => {

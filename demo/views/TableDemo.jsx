@@ -32,6 +32,7 @@ const TableDemo = () => {
           // age__range: [0, 100], // eslint-disable-line camelcase
           // gender: "female",
         }}
+        showHeaderTags={true}
         tools={{
           downloadKey: "_download",
           advancedSearch: true,

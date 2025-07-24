@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Button, Checkbox, Col, Dropdown, Input, InputNumber, Row, Space, Spin, Table, Tooltip } from "antd";
+import { Button, Checkbox, Col, Dropdown, Input, InputNumber, Row, Space, Spin, Table, Tag, Tooltip } from "antd";
 import {
   DownloadOutlined,
   ReloadOutlined,
@@ -15,6 +15,7 @@ import {
   commonFormat,
   findDataByPath,
   tableSorterToApiSorter,
+  toBeString,
   transformFilters,
 } from "src/common/parser";
 import { commonFilter, commonSorter } from "src/common/sorter";
@@ -197,6 +198,7 @@ const RestTable = forwardRef(
       parseTotalPath = "count",
       isActive = true,
       tools = true,
+      showHeaderTags = false,
       onDataSourceChange,
       onFiltersChange,
 
@@ -219,22 +221,25 @@ const RestTable = forwardRef(
       dataSource: [],
     });
 
-    // table内置header上的筛选条件
-    const [headerFilters, setHeaderFilters] = useState({});
     // 表单筛选条件
     const filterFormRef = useRef();
-    const [formFilters, setFormFilters] = useState({});
+
+    // 筛选参数，优先级从低到高，innerFilters 是最终用于请求的筛选条件
     // 基础参数
     const memBaseParams = useDeepCompareMemoize(baseParams);
     // 路由参数
     const memRouteParams = useDeepCompareMemoize(routeParams);
+    // table内置header上的筛选条件
+    const [headerFilters, setHeaderFilters] = useState({});
+    const [formFilters, setFormFilters] = useState({});
     // 强制参数
     const memForceParams = useDeepCompareMemoize(forceParams);
+    // 真实用于请求的筛选条件
+    const [innerFilters, setInnerFilters] = useState({});
+
     // 标记字段 是否开启了 多选，用于处理query参数转化成数组
     const [multipleMap, setMultipleMap] = useState({});
 
-    // 真实用于请求的筛选条件
-    const [innerFilters, setInnerFilters] = useState({});
     // 默认开启高级搜索和列显示隐藏设置
     const innerTools = useDeepCompareMemoize(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
@@ -664,15 +669,23 @@ const RestTable = forwardRef(
         return newCloumn;
       });
       return arr.filter((item) => !item.hidden);
-    }, [
-      columns,
-      innerFilters,
-      fieldOrdering,
-      restful,
-      realCheckKeys,
-      innerTools.settings,
-      genColumnKey,
-    ]);
+    }, [columns, innerFilters, fieldOrdering, restful, realCheckKeys, innerTools.settings, genColumnKey]);
+
+    // 表头上的筛选条件，按照Tags的形式都展示出来
+    const headerTags = useMemo(() => {
+      if (!showHeaderTags) {
+        return [];
+      }
+      const arr = columns
+        .filter((column) => column.filterDropdownConfig || column.dropdownLocalConfig || column.filters)
+        .map((column) => {
+          let field = genColumnKey(column);
+          const v = innerFilters[field];
+          return { key: field, value: toBeString(v, ",", 1), label: column.title || field };
+        })
+        .filter((item) => !isEmpty(item.value));
+      return arr;
+    }, [genColumnKey, innerFilters, columns, showHeaderTags]);
 
     // 处理table的onChange事件
     const onTableChange = useCallback(
@@ -850,6 +863,42 @@ const RestTable = forwardRef(
             </div>
           )}
         </div>
+        {headerTags.length > 0 && (
+          <div>
+            {headerTags.map((item) => {
+              return (
+                <Tag
+                  key={item.key}
+                  closeIcon
+                  onClose={() => {
+                    setHeaderFilters((oldV) => {
+                      return { ...oldV, [item.key]: null };
+                    });
+                  }}
+                >
+                  <span style={{ color: "#8c8c8c" }}>{item.label}: </span>
+                  <span>{item.value}</span>
+                </Tag>
+              );
+            })}
+            <Button
+              type="link"
+              size="small"
+              style={{ fontSize: 12 }}
+              onClick={() => {
+                setHeaderFilters((oldV) => {
+                  const newV = { ...oldV };
+                  headerTags.forEach((item) => {
+                    newV[item.key] = null;
+                  });
+                  return newV;
+                });
+              }}
+            >
+              清除
+            </Button>
+          </div>
+        )}
         <Table
           style={style}
           className={className}
@@ -901,6 +950,8 @@ RestTable.propTypes = {
   fieldOrdering: PropTypes.string,
   parseRowsPath: PropTypes.string,
   parseTotalPath: PropTypes.string,
+  // 是否展示表头上的筛选条件
+  showHeaderTags: PropTypes.bool,
   // 是否激活，如果为false，则不更新数据; 主要在Tab组件中使用
   isActive: PropTypes.bool,
   // 工具栏的配置
