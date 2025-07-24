@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.5
+- feat: 扩展 RestTable 配置 showHeaderTags 可显示表头筛选值
+
 ## 0.1.4
 - feat: 扩展 RestTable
     - 刷选类型 type 扩展支持 FieldType.DATE_RANGE_PICKER 时间筛选

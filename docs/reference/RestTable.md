@@ -30,6 +30,7 @@
 | fieldOrdering | 排序字段名 | `string` | `'ordering'` | - |
 | parseRowsPath | 解析数据行的路径 | `string` | `'results'` | - |
 | parseTotalPath | 解析总数的路径 | `string` | `'count'` | - |
+| showHeaderTags | 是否显示表格header上的筛选条件 | `boolean` | `false` | 0.1.5 |
 | **显示和交互** | | | | |
 | isActive | 是否激活，为 false 时不更新数据 | `boolean` | `true` | - |
 | tools | 工具栏配置 | `object \| boolean` | `{ advancedSearch: true, refreshInterval: 0, settings: true }` | - |
