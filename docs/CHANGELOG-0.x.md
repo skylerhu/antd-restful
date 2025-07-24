@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.6
+- style: 调整 RestTable 中 showHeaderTags 的样式
+
 ## 0.1.5
 - feat: 扩展 RestTable 配置 showHeaderTags 可显示表头筛选值
 

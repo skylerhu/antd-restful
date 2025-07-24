@@ -733,7 +733,7 @@ const RestTable = forwardRef(
 
     return (
       <Space direction="vertical" gap={10} {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative" }} className="cls-antd-restful-header">
           {restful && filterFormProps && (
             <Spin spinning={loading}>
               <GridForm
@@ -765,7 +765,10 @@ const RestTable = forwardRef(
             </Spin>
           )}
           {!isEmpty(innerTools) && (
-            <div style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}>
+            <div
+              style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
+              className="cls-antd-restful-tools"
+            >
               <Space key="tools">
                 {restful && filterFormProps && innerTools.advancedSearch && (
                   <Tooltip title="高级搜索">
@@ -864,7 +867,7 @@ const RestTable = forwardRef(
           )}
         </div>
         {headerTags.length > 0 && (
-          <div>
+          <div className="cls-antd-restful-header-tags">
             {headerTags.map((item) => {
               return (
                 <Tag
@@ -876,8 +879,12 @@ const RestTable = forwardRef(
                     });
                   }}
                 >
-                  <span style={{ color: "#8c8c8c" }}>{item.label}: </span>
-                  <span>{item.value}</span>
+                  <span style={{ color: "#8c8c8c" }} className="cls-antd-restful-header-tag-label">
+                    {item.label}:{" "}
+                  </span>
+                  <span style={{ whiteSpace: "pre-wrap" }} className="cls-antd-restful-header-tag-value">
+                    {item.value}
+                  </span>
                 </Tag>
               );
             })}
