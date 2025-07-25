@@ -771,6 +771,7 @@ const RestTable = forwardRef(
               className="cls-resttable-tools"
             >
               <Space key="tools">
+                {innerTools.children}
                 {restful && filterFormProps && innerTools.advancedSearch && (
                   <Tooltip title="高级搜索">
                     <Button
@@ -973,6 +974,8 @@ RestTable.propTypes = {
       refreshInterval: PropTypes.number,
       // 默认开启列显示隐藏设置, 配置存储localStorage的key, 如果为true，则使用restful的值作为key; 当clumns配置列的key发生改动时，之前的设置会失效
       settings: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+      // 其他工具
+      children: PropTypes.node,
     }),
     PropTypes.bool,
   ]),

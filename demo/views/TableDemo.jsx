@@ -153,6 +153,14 @@ const TableDemo = () => {
               type: FieldType.INPUT,
             },
             {
+              key: "search_",
+              label: "搜索",
+              antdFormItemProps: {
+                // 隐藏占位使用
+                hidden: true,
+              },
+            },
+            {
               key: "gender",
               type: FieldType.RADIO,
               antdFieldProps: {

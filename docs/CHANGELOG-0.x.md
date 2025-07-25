@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.1.9
+- feat: 扩展 RestTable
+    - 配置 tools.children 可以自定义其他操作按钮
+
 ## 0.1.8
 - fix: 修复RestTable header筛选选择多值初始化数据的问题
 
