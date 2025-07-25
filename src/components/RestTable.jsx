@@ -246,7 +246,7 @@ const RestTable = forwardRef(
     const innerTools = useDeepCompareMemoize(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
     );
-    const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(false);
+    const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(tools?.advancedDefaultOpen || false);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
     const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     const storageKey = useMemo(() => {
@@ -969,6 +969,8 @@ RestTable.propTypes = {
     PropTypes.shape({
       // 开启高级搜索，默认会开启
       advancedSearch: PropTypes.bool,
+      // 高级搜索的默认展开状态
+      advancedDefaultOpen: PropTypes.bool,
       // 下载的key，如果为true，则使用默认的 _download
       downloadKey: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
       // 刷新数据的间隔，单位 ms，小于0时隐藏刷新按钮，等于0时手动刷新，大于0时自动刷新

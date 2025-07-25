@@ -38,7 +38,9 @@ const TableDemo = () => {
           advancedSearch: true,
           settings: true,
           // refreshInterval: 3000,
+          advancedDefaultOpen: true,
         }}
+        // tools={false}
         extraTools={
           <>
             <Button>按钮1</Button>

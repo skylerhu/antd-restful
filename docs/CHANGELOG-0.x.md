@@ -3,6 +3,7 @@
 ## 0.1.9
 - feat: 扩展 RestTable
     - 配置 extraTools 可以自定义其他操作按钮
+    - 配置 tools.advancedDefaultOpen 可以定义默认打开高级搜索
 
 ## 0.1.8
 - fix: 修复RestTable header筛选选择多值初始化数据的问题
