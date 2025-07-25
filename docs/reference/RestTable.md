@@ -34,6 +34,7 @@
 | **显示和交互** | | | | |
 | isActive | 是否激活，为 false 时不更新数据 | `boolean` | `true` | - |
 | tools | 工具栏配置 | `object \| boolean` | `{ advancedSearch: true, refreshInterval: 0, settings: true }` | - |
+| extraTools | 其他操作工具 | `node` | - | 0.1.9 |
 | onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - |
 | onDataSourceChange | 数据源变化回调 | `function(dataSource)` | - | - |
 | rowKey | 行数据的 key | `string` | `'id'` | - |
@@ -52,7 +53,6 @@
 | refreshInterval | 刷新间隔（毫秒），0为手动刷新，>0为自动刷新，<0为隐藏刷新按钮 | `number` | `0` | - |
 | downloadKey | 下载功能的参数名，true时使用'_download'，字符串时使用自定义参数名，false时禁用下载 | `boolean \| string` | `false` | - |
 | settings | 列显示设置，true时使用restful作为存储key，字符串时使用自定义key，false时禁用 | `boolean \| string` | `true` | - |
-| tools | 其他操作工具 | `node` | - | 0.1.9 |
 
 **columns 配置项：**
 

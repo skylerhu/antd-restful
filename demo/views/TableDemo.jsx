@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Checkbox } from "antd";
+import { Button, Checkbox } from "antd";
 import libs from "demo/libs";
 import RouteTable from "./RouteTable";
 
@@ -39,6 +39,12 @@ const TableDemo = () => {
           settings: true,
           // refreshInterval: 3000,
         }}
+        extraTools={
+          <>
+            <Button>按钮1</Button>
+            <Button>按钮2</Button>
+          </>
+        }
         columns={[
           {
             title: "ID",
@@ -136,9 +142,9 @@ const TableDemo = () => {
           //   key: "key7",
           //   title: "key7",
           // },
-
         ]}
         filterFormProps={{
+          advancedSearch: true,
           antdListProps: {
             grid: { gutter: 30, column: 3 },
           },
