@@ -36,7 +36,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
   const handleValue = (v) => {
     let _value = v;
     if (isArray(v) && v.length > 0 && isString(v[0]) && v[0].includes(",")) {
-      _value = v[0];
+      _value = v[0].split(",");
     }
     return _value;
   };
@@ -98,14 +98,15 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           break;
         }
         case FieldType.SELECT: {
+          const isMultiple = config.dropdownProps?.mode === "multiple";
+          let _value = isMultiple ? handleValue(selectedKeys) : selectedKeys;
           searchItem = (
             <RestSelect
               style={{ width: "100%" }}
               {...config.dropdownProps}
-              value={selectedKeys}
+              value={_value}
               onChange={(value) => {
                 const keys = isBlank(value) ? [] : isArray(value) ? value : [value];
-                const isMultiple = config.dropdownProps?.mode === "multiple";
                 setSelectedKeys(keys);
                 if (!isMultiple) {
                   // 单选时，直接确认

@@ -48,17 +48,21 @@ const TableDemo = () => {
             title: "唯一标识",
             dataIndex: "username",
             sorter: true,
+            filterMultiple: true,
             filterDropdownConfig: {
               type: FieldType.SELECT,
               dropdownProps: {
+                mode: "multiple",
                 restful: "api/users/",
                 fieldNames: {
                   label: "nickname",
                   value: "username",
                 },
               },
+              antdSpaceProps: {
+                direction: "horizontal",
+              },
             },
-            filterMultiple: false,
           },
           {
             title: "名称",

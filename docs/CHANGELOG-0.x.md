@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.8
+- fix: 修复RestTable header筛选选择多值初始化数据的问题
+
 ## 0.1.7
 - style: 调整 RestTable 中 showHeaderTags 的样式
 
