@@ -162,7 +162,7 @@ const TableDemo = () => {
             },
             {
               key: "search_",
-              label: "搜索",
+              label: "占位",
               antdFormItemProps: {
                 // 隐藏占位使用
                 hidden: true,

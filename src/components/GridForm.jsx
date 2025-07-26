@@ -28,23 +28,21 @@ const GridForm = forwardRef(
     const [activeFieldKey, setActiveFieldKey] = useState();
     // 单项模式下，表单项的选项
     const options = useMemo(() => {
-      if (advancedSearch) {
-        return [];
-      }
-      return fields?.map((item) => ({
+      return fields?.filter(item => !item.antdFormItemProps?.hidden).map((item) => ({
         label: item.label || item.key,
         value: item.key,
       }));
-    }, [fields, advancedSearch]);
+    }, [fields]);
 
-    const fieldKeys = useDeepCompareMemoize(fields?.map((item) => item.key));
+    const fieldKeys = useDeepCompareMemoize(options.map((item) => item.value));
 
     const initKeyRef = useRef();
     // 初始化激活的表单项的key
     const initActiveKey = useCallback((values) => {
-      if (!fieldKeys?.length || advancedSearch) {
+      if (!fieldKeys?.length) {
         return;
       }
+      // console.log("fieldKeys", fieldKeys);
       const changedKeys = Object.keys(values).filter((key) => !isEmpty(values[key]) && fieldKeys.includes(key));
       // console.log("changedKeys", changedKeys, values);
       if (changedKeys.length >= 1) {
@@ -56,7 +54,7 @@ const GridForm = forwardRef(
         initKeyRef.current = fieldKeys[0];
         setActiveFieldKey(fieldKeys[0]);
       }
-    }, [fieldKeys, advancedSearch]);
+    }, [fieldKeys]);
 
     const activeItem = useMemo(() => {
       return fields?.find((item) => item.key === activeFieldKey);
