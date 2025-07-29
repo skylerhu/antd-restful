@@ -42,6 +42,7 @@
 | dataSource | 静态数据源，设置后不使用 restful | `array` | - | - |
 | expandFieldPath | 根据字段判断是否使用展开，不配置字段默认根据columns的配置展示 | `boolean` | - | 0.1.9 |
 | expandAntdProps | 展开列使用Descptions展示，配置其props | `objects` | - | 0.1.9 |
+| expandedAllRows | 未启用tools时也可以配置展开所有行 | `boolean` | - | 0.1.9 |
 | filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | - |
 | **Ant Design 原生配置** | | | | |
 | antdTableProps | Ant Design [Table](https://ant.design/components/table-cn) 组件的属性 | `object` | - | - |
@@ -56,7 +57,7 @@
 | refreshInterval | 刷新间隔（毫秒），0为手动刷新，>0为自动刷新，<0为隐藏刷新按钮 | `number` | `0` | - |
 | downloadKey | 下载功能的参数名，true时使用'_download'，字符串时使用自定义参数名，false时禁用下载 | `boolean \| string` | `false` | - |
 | settings | 列显示设置，true时使用restful作为存储key，字符串时使用自定义key，false时禁用 | `boolean \| string` | `true` | - |
-| expandedAllRows | 设置是否默认展开所有行 | `boolean` | - | 0.1.9 |
+| expandedAllRows | 控制是否默认展开所有行，为false时默认不展开 | `boolean` | - | 0.1.9 |
 
 **columns 配置项：**
 

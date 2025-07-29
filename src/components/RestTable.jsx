@@ -283,6 +283,7 @@ const RestTable = forwardRef(
       columns,
       expandFieldPath,
       expandAntdProps,
+      expandedAllRows = false,
       dataSource,
       antdTableProps,
       filterFormProps,
@@ -749,7 +750,7 @@ const RestTable = forwardRef(
         .filter((item) => !item.hidden);
     }, [columns, innerTools.settings, realCheckKeys]);
 
-    const [isExpandedAll, setIsExpandedAll] = useState(innerTools.expandedAllRows);
+    const [isExpandedAll, setIsExpandedAll] = useState(expandedAllRows || innerTools.expandedAllRows);
     const [expandedRows, setExpandedRows] = useState();
     useEffect(() => {
       if (isExpandedAll) {
@@ -1084,6 +1085,7 @@ RestTable.propTypes = {
       refreshInterval: PropTypes.number,
       // 默认开启列显示隐藏设置, 配置存储localStorage的key, 如果为true，则使用restful的值作为key; 当clumns配置列的key发生改动时，之前的设置会失效
       settings: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+      expandedAllRows: PropTypes.bool,
     }),
     PropTypes.bool,
   ]),
@@ -1134,6 +1136,8 @@ RestTable.propTypes = {
   // 设置是否开启展开功能的字段
   expandFieldPath: PropTypes.string,
   expandAntdProps: PropTypes.object,
+  // 未启用tools时也可以配置展开所有行
+  expandedAllRows: PropTypes.bool,
   dataSource: PropTypes.array,
   // 筛选表单的配置
   filterFormProps: PropTypes.object,

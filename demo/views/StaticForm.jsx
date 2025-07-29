@@ -213,6 +213,7 @@ export default function StaticForm() {
               // is_active: false, // eslint-disable-line camelcase
             }
           }
+          // expandedAllRows={true}
           columns={[
             {
               title: "ID",
@@ -259,6 +260,7 @@ export default function StaticForm() {
                   value: "female",
                 },
               ],
+              expandable: true,
             },
             {
               title: "年龄",
