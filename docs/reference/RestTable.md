@@ -40,6 +40,8 @@
 | rowKey | 行数据的 key | `string` | `'id'` | - |
 | columns | 表格列配置 | `array` | - | - |
 | dataSource | 静态数据源，设置后不使用 restful | `array` | - | - |
+| expandFieldPath | 根据字段判断是否使用展开，不配置字段默认根据columns的配置展示 | `boolean` | - | - |
+| expandAntdProps | 展开列使用Descptions展示，配置其props | `objects` | - | - |
 | filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | - |
 | **Ant Design 原生配置** | | | | |
 | antdTableProps | Ant Design [Table](https://ant.design/components/table-cn) 组件的属性 | `object` | - | - |
@@ -72,6 +74,8 @@
 | hidden | 是否默认隐藏该列 | `boolean` | `false` | - |
 | sorter | 排序配置 | `boolean \| function` | - | - |
 | filters | 筛选选项 | `array` | - | - |
+| expandable | 是否在展开功能中显示 | `boolean` | - | - |
+| expandableItemProps | 展示样式配置 | `object` | - | - |
 | render | 自定义渲染函数 | `function(text, record, index)` | - | - |
 
 **filterDropdownConfig 配置项：**

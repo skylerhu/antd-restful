@@ -96,6 +96,14 @@ const TableDemo = () => {
                 value: "female",
               },
             ],
+            showTag: true,
+          },
+          {
+            dataIndex: "groups",
+            title: "组",
+            labelTemplate: "{name}",
+            fieldValue: "name",
+            copyProps: {},
           },
           {
             title: "年龄",
@@ -113,38 +121,21 @@ const TableDemo = () => {
           {
             title: "城市",
             dataIndex: "city",
-            labelTemplate: "城市：{name}",
-            hidden: true,
+            labelTemplate: "{name}",
+            expandable: true,
           },
           {
             key: "key1",
             title: "key1",
+            hidden: true,
           },
           {
             key: "key2",
             title: "key2",
+            expandable: true,
           },
-          // {
-          //   key: "key3",
-          //   title: "key3",
-          // },
-          // {
-          //   key: "key4",
-          //   title: "key4",
-          // },
-          // {
-          //   key: "key5",
-          //   title: "key5",
-          // },
-          // {
-          //   key: "key6",
-          //   title: "key6",
-          // },
-          // {
-          //   key: "key7",
-          //   title: "key7",
-          // },
         ]}
+        expandFieldPath="city.name"
         filterFormProps={{
           advancedSearch: true,
           antdListProps: {
