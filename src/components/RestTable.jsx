@@ -217,9 +217,13 @@ export const renderRowLabel = (record, column) => {
   let copyV; // 复制值
   if (!isArray(label)) {
     data = [label];
-    copyV = column.fieldValue && isDict(label) ? label[column.fieldValue] : label;
+    if (column.copyProps) {
+      copyV = column.copyField && isDict(label) ? label[column.copyField] : label;
+    }
   } else {
-    copyV = label.map((d) => (column.fieldValue && isDict(d) ? d[column.fieldValue] : d));
+    if (column.copyProps) {
+      copyV = label.map((d) => (column.copyField && isDict(d) ? d[column.copyField] : d));
+    }
   }
   let show = data.map((d, i) => {
     // 格式化label
@@ -1072,8 +1076,8 @@ RestTable.propTypes = {
       fieldName: PropTypes.string,
       // 开启复制功能
       copyProps: PropTypes.object,
-      // 如果某列是字典，则需要指定字段值用于copy
-      fieldValue: PropTypes.string,
+      // 如果某列根据dataIndex获取到的是字典，则需要指定字段中某个字段值用于copy
+      copyField: PropTypes.string,
       // 是否按照Tag展示，数据是数组时有用
       showTag: PropTypes.bool,
       // 下来筛选自定义view的设置
@@ -1092,7 +1096,6 @@ RestTable.propTypes = {
         fieldName: PropTypes.string,
         filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
       }),
-      range: PropTypes.string,
       // 是否默认显示
       hidden: PropTypes.bool,
       // 是否开启排序，得配置 dataIndex 字段

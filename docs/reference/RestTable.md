@@ -66,7 +66,7 @@
 | key | 列的唯一标识 | `string` | - | - |
 | labelTemplate | 列值显示模板，支持 `{field}` 格式 | `string` | - | - |
 | copyProps | 开启复制功能的配置，详见 [CopyView](#copyview) | `object` | - | - |
-| fieldValue | 复制时使用的字段值 | `string` | - | - |
+| copyField | dataIndex配置的值是字典时，可以用此配置复制时使用的字段 | `string` | - | - |
 | filterDropdownConfig | 自定义筛选下拉框配置 | `object` | - | - |
 | dropdownLocalConfig | 前端Table刷选的配置 | `object` | - | - |
 | filterMultiple | 是否支持多选筛选 | `boolean` | - | - |

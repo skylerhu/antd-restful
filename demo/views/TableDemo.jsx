@@ -102,7 +102,7 @@ const TableDemo = () => {
             dataIndex: "groups",
             title: "组",
             labelTemplate: "{name}",
-            fieldValue: "name",
+            copyField: "name",
             copyProps: {},
           },
           {

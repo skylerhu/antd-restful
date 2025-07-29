@@ -1333,11 +1333,11 @@ describe("RestTable", () => {
       expect(typeof result.type).toBe("function");
     });
 
-    it("should handle fieldValue for copy", () => {
+    it("should handle copyField for copy", () => {
       const record = { id: 1, user: { name: "张三", id: 123 } };
       const column = {
         dataIndex: "user",
-        fieldValue: "id",
+        copyField: "id",
         copyProps: { showIcon: true }
       };
       const result = renderRowLabel(record, column);
