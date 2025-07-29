@@ -17,6 +17,7 @@ import {
 } from "antd";
 import {
   DownloadOutlined,
+  NodeExpandOutlined,
   ReloadOutlined,
   SearchOutlined,
   SecurityScanOutlined,
@@ -748,6 +749,16 @@ const RestTable = forwardRef(
         .filter((item) => !item.hidden);
     }, [columns, innerTools.settings, realCheckKeys]);
 
+    const [isExpandedAll, setIsExpandedAll] = useState(innerTools.expandedAllRows);
+    const [expandedRows, setExpandedRows] = useState();
+    useEffect(() => {
+      if (isExpandedAll) {
+        setExpandedRows(innerData.dataSource.map((row) => row[rowKey]));
+      } else {
+        setExpandedRows([]);
+      }
+    }, [innerData.dataSource, rowKey, isExpandedAll]);
+
     // 处理table的onChange事件
     const onTableChange = useCallback(
       (pagination, filters, sorter) => {
@@ -832,6 +843,17 @@ const RestTable = forwardRef(
             >
               <Space key="tools">
                 {extraTools}
+                {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
+                  <Tooltip title={isExpandedAll ? "收起所有行" : "展开所有行"}>
+                    <Button
+                      icon={<NodeExpandOutlined />}
+                      type={isExpandedAll ? "primary" : undefined}
+                      onClick={() => {
+                        setIsExpandedAll((oldV) => !oldV);
+                      }}
+                    />
+                  </Tooltip>
+                )}
                 {restful && filterFormProps && innerTools.advancedSearch && (
                   <Tooltip title="高级搜索">
                     <Button
@@ -1014,6 +1036,10 @@ const RestTable = forwardRef(
                   );
                 },
                 rowExpandable: (record) => !expandFieldPath || findDataByPath(record, expandFieldPath),
+                expandedRowKeys: expandedRows,
+                onExpandedRowsChange: (rowKeys) => {
+                  setExpandedRows(rowKeys);
+                },
                 ...antdTableProps?.expandable,
               }
               : antdTableProps?.expandable

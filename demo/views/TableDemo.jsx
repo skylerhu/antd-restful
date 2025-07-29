@@ -39,6 +39,7 @@ const TableDemo = () => {
           settings: true,
           // refreshInterval: 3000,
           advancedDefaultOpen: true,
+          expandedAllRows: false,
         }}
         // tools={false}
         extraTools={
@@ -135,7 +136,11 @@ const TableDemo = () => {
             expandable: true,
           },
         ]}
-        expandFieldPath="city.name"
+        // expandedAllRows={true}
+        expandAntdProps={{
+          // bordered: true,
+        }}
+        // expandFieldPath="city.name"
         filterFormProps={{
           advancedSearch: true,
           antdListProps: {

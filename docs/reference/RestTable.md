@@ -40,8 +40,8 @@
 | rowKey | 行数据的 key | `string` | `'id'` | - |
 | columns | 表格列配置 | `array` | - | - |
 | dataSource | 静态数据源，设置后不使用 restful | `array` | - | - |
-| expandFieldPath | 根据字段判断是否使用展开，不配置字段默认根据columns的配置展示 | `boolean` | - | - |
-| expandAntdProps | 展开列使用Descptions展示，配置其props | `objects` | - | - |
+| expandFieldPath | 根据字段判断是否使用展开，不配置字段默认根据columns的配置展示 | `boolean` | - | 0.1.9 |
+| expandAntdProps | 展开列使用Descptions展示，配置其props | `objects` | - | 0.1.9 |
 | filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | - |
 | **Ant Design 原生配置** | | | | |
 | antdTableProps | Ant Design [Table](https://ant.design/components/table-cn) 组件的属性 | `object` | - | - |
@@ -56,6 +56,7 @@
 | refreshInterval | 刷新间隔（毫秒），0为手动刷新，>0为自动刷新，<0为隐藏刷新按钮 | `number` | `0` | - |
 | downloadKey | 下载功能的参数名，true时使用'_download'，字符串时使用自定义参数名，false时禁用下载 | `boolean \| string` | `false` | - |
 | settings | 列显示设置，true时使用restful作为存储key，字符串时使用自定义key，false时禁用 | `boolean \| string` | `true` | - |
+| expandedAllRows | 设置是否默认展开所有行 | `boolean` | - | 0.1.9 |
 
 **columns 配置项：**
 
@@ -66,7 +67,7 @@
 | key | 列的唯一标识 | `string` | - | - |
 | labelTemplate | 列值显示模板，支持 `{field}` 格式 | `string` | - | - |
 | copyProps | 开启复制功能的配置，详见 [CopyView](#copyview) | `object` | - | - |
-| copyField | dataIndex配置的值是字典时，可以用此配置复制时使用的字段 | `string` | - | - |
+| copyField | dataIndex配置的值是字典时，可以用此配置复制时使用的字段 | `string` | - | 0.1.9 |
 | filterDropdownConfig | 自定义筛选下拉框配置 | `object` | - | - |
 | dropdownLocalConfig | 前端Table刷选的配置 | `object` | - | - |
 | filterMultiple | 是否支持多选筛选 | `boolean` | - | - |
@@ -74,8 +75,8 @@
 | hidden | 是否默认隐藏该列 | `boolean` | `false` | - |
 | sorter | 排序配置 | `boolean \| function` | - | - |
 | filters | 筛选选项 | `array` | - | - |
-| expandable | 是否在展开功能中显示 | `boolean` | - | - |
-| expandableItemProps | 展示样式配置 | `object` | - | - |
+| expandable | 是否在展开功能中显示 | `boolean` | - | 0.1.9 |
+| expandableItemProps | 展示样式配置 | `object` | - | 0.1.9 |
 | render | 自定义渲染函数 | `function(text, record, index)` | - | - |
 
 **filterDropdownConfig 配置项：**
