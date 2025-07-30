@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Checkbox } from "antd";
+import { Button, Checkbox } from "antd";
 import libs from "demo/libs";
 import RouteTable from "./RouteTable";
 
@@ -38,7 +38,16 @@ const TableDemo = () => {
           advancedSearch: true,
           settings: true,
           // refreshInterval: 3000,
+          advancedDefaultOpen: true,
+          expandedAllRows: false,
         }}
+        // tools={false}
+        extraTools={
+          <>
+            <Button>按钮1</Button>
+            <Button>按钮2</Button>
+          </>
+        }
         columns={[
           {
             title: "ID",
@@ -88,6 +97,14 @@ const TableDemo = () => {
                 value: "female",
               },
             ],
+            showTag: true,
+          },
+          {
+            dataIndex: "groups",
+            title: "组",
+            labelTemplate: "{name}",
+            copyField: "name",
+            copyProps: {},
           },
           {
             title: "年龄",
@@ -105,40 +122,27 @@ const TableDemo = () => {
           {
             title: "城市",
             dataIndex: "city",
-            labelTemplate: "城市：{name}",
-            hidden: true,
+            labelTemplate: "{name}",
+            expandable: true,
           },
           {
             key: "key1",
             title: "key1",
+            hidden: true,
           },
           {
             key: "key2",
             title: "key2",
+            expandable: true,
           },
-          // {
-          //   key: "key3",
-          //   title: "key3",
-          // },
-          // {
-          //   key: "key4",
-          //   title: "key4",
-          // },
-          // {
-          //   key: "key5",
-          //   title: "key5",
-          // },
-          // {
-          //   key: "key6",
-          //   title: "key6",
-          // },
-          // {
-          //   key: "key7",
-          //   title: "key7",
-          // },
-
         ]}
+        // expandedAllRows={true}
+        expandAntdProps={{
+          // bordered: true,
+        }}
+        // expandFieldPath="city.name"
         filterFormProps={{
+          advancedSearch: true,
           antdListProps: {
             grid: { gutter: 30, column: 3 },
           },
@@ -151,6 +155,14 @@ const TableDemo = () => {
               key: "search",
               label: "搜索",
               type: FieldType.INPUT,
+            },
+            {
+              key: "search_",
+              label: "占位",
+              antdFormItemProps: {
+                // 隐藏占位使用
+                hidden: true,
+              },
             },
             {
               key: "gender",

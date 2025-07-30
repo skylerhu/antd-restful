@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.1.9
+- feat: 扩展 RestTable
+    - 配置 extraTools 可以自定义其他操作按钮
+    - 配置 tools.advancedDefaultOpen 可以定义默认打开高级搜索
+    - 配置 columns.expandable 定义是否启用展开功能
+    - columns.fieldValue 变更为 columns.copyField
+- fix: 修复 GridFrom 关闭高级搜索时选项初始化的问题
+
 ## 0.1.8
 - fix: 修复RestTable header筛选选择多值初始化数据的问题
 

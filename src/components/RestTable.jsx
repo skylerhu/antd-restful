@@ -1,8 +1,23 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Button, Checkbox, Col, Dropdown, Input, InputNumber, Row, Space, Spin, Table, Tag, Tooltip } from "antd";
+import {
+  Button,
+  Checkbox,
+  Col,
+  Descriptions,
+  Dropdown,
+  Input,
+  InputNumber,
+  Row,
+  Space,
+  Spin,
+  Table,
+  Tag,
+  Tooltip,
+} from "antd";
 import {
   DownloadOutlined,
+  NodeExpandOutlined,
   ReloadOutlined,
   SearchOutlined,
   SecurityScanOutlined,
@@ -179,6 +194,66 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
   return _props;
 };
 
+export const genColumnKey = (column) => {
+  let key = column.key || column.dataIndex;
+  if (isArray(key)) {
+    key = key.join("__");
+  }
+  return key;
+};
+
+export const renderRowLabel = (record, column) => {
+  let label;
+  if (column.fieldName) {
+    // 用真实字段值
+    label = findDataByPath(record, column.fieldName);
+  } else {
+    label = record[genColumnKey(column)];
+  }
+  if (isEmpty(label)) {
+    return label;
+  }
+  // 处理显示的值, 转换成数组方便统一处理
+  let data = label;
+  let copyV; // 复制值
+  if (!isArray(label)) {
+    data = [label];
+    if (column.copyProps) {
+      copyV = column.copyField && isDict(label) ? label[column.copyField] : label;
+    }
+  } else {
+    if (column.copyProps) {
+      copyV = label.map((d) => (column.copyField && isDict(d) ? d[column.copyField] : d));
+    }
+  }
+  let show = data.map((d, i) => {
+    // 格式化label
+    let _label = commonFormat(column.labelTemplate, d);
+    if (column.showTag) {
+      // 按照Tag展示
+      _label = (
+        <Tag color="blue" key={i}>
+          {_label}
+        </Tag>
+      );
+    }
+    return _label;
+  });
+  if (!column.showTag) {
+    // 按照逗号展示
+    show = toBeString(show, ",", 1);
+  }
+  if (column.copyProps) {
+    // 复制值
+    show = (
+      <CopyView {...column.copyProps} value={copyV}>
+        {show}
+      </CopyView>
+    );
+  }
+  return show;
+};
+
 const RestTable = forwardRef(
   (
     {
@@ -199,12 +274,16 @@ const RestTable = forwardRef(
       parseTotalPath = "count",
       isActive = true,
       tools = true,
+      extraTools,
       showHeaderTags = false,
       onDataSourceChange,
       onFiltersChange,
 
       rowKey = "id",
       columns,
+      expandFieldPath,
+      expandAntdProps,
+      expandedAllRows = false,
       dataSource,
       antdTableProps,
       filterFormProps,
@@ -245,7 +324,7 @@ const RestTable = forwardRef(
     const innerTools = useDeepCompareMemoize(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
     );
-    const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(false);
+    const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(tools?.advancedDefaultOpen || false);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
     const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     const storageKey = useMemo(() => {
@@ -497,14 +576,6 @@ const RestTable = forwardRef(
       [rowKey, restful, urlDetailTemplate, fetchData, makeRequest]
     );
 
-    const genColumnKey = useCallback((column) => {
-      let key = column.key || column.dataIndex;
-      if (isArray(key)) {
-        key = key.join("__");
-      }
-      return key;
-    }, []);
-
     // 所有列的选项, 用于列显示设置
     const allColumnOptions = useMemo(() => {
       return columns.map((column) => {
@@ -514,7 +585,7 @@ const RestTable = forwardRef(
           value: key,
         };
       });
-    }, [columns, genColumnKey]);
+    }, [columns]);
 
     const allColumnKeys = useMemo(() => {
       return allColumnOptions.map((item) => item.value);
@@ -525,7 +596,7 @@ const RestTable = forwardRef(
         return [];
       }
       return columns.filter((column) => !column.hidden).map((column) => genColumnKey(column));
-    }, [columns, innerTools.settings, genColumnKey]);
+    }, [columns, innerTools.settings]);
 
     // 实际显示的列，处理没有本地设置时需要有默认值
     const realCheckKeys = useMemo(() => {
@@ -552,125 +623,100 @@ const RestTable = forwardRef(
     // 处理table的cloumns
     const memColumns = useMemo(() => {
       const sorterDict = apiSorterToTableSorterDict(innerFilters[fieldOrdering]);
-      const arr = columns.map((column) => {
-        // 获取唯一字段; antd默认dataIndex优先，但其取值可能是数组，不能作为key使用
-        const field = genColumnKey(column);
-        let newCloumn = { ...column };
-        if (innerTools.settings && realCheckKeys?.length > 0) {
-          // 设置了显示，则不隐藏
-          newCloumn.hidden = !realCheckKeys.includes(field);
-        }
-        if (newCloumn.hidden) {
-          // 隐藏的字段后续无需处理
-          return newCloumn;
-        }
-        if (!newCloumn.render && (column.labelTemplate || !isEmpty(column.copyProps) || column.fieldName)) {
-          // 转换为render函数，处理显示的值
-          newCloumn.render = (value, record) => {
-            let label;
-            if (column.fieldName) {
-              // 用真实字段值
-              label = findDataByPath(record, column.fieldName);
-            } else {
-              label = value;
-            }
-            if (isEmpty(label)) {
-              return label;
-            }
-            let data = label;
-            if (!isArray(label)) {
-              data = [label];
-            }
-            return data.map((d, i) => {
-              const _label = commonFormat(column.labelTemplate, d);
-              if (column.copyProps) {
-                const v = column.fieldValue && isDict(d) ? d[column.fieldValue] : d;
-                return (
-                  <CopyView key={i} value={v} {...column.copyProps}>
-                    {_label}
-                  </CopyView>
-                );
+      const arr = columns
+        .filter((item) => !item.expandable)
+        .map((column) => {
+          // 获取唯一字段; antd默认dataIndex优先，但其取值可能是数组，不能作为key使用
+          const field = genColumnKey(column);
+          let newCloumn = { ...column };
+          if (innerTools.settings && realCheckKeys?.length > 0) {
+            // 设置了显示，则不隐藏
+            newCloumn.hidden = !realCheckKeys.includes(field);
+          }
+          if (newCloumn.hidden) {
+            // 隐藏的字段后续无需处理
+            return newCloumn;
+          }
+          if (!newCloumn.render && (column.labelTemplate || !isEmpty(column.copyProps) || column.fieldName)) {
+            // 转换为render函数，处理显示的值
+            newCloumn.render = (value, record) => renderRowLabel(record, column);
+          }
+          if (column.sorter) {
+            // 设置是降序还是升序
+            newCloumn.sortOrder = sorterDict[field];
+            if (!restful && column.sorter === true) {
+              if (column.fieldName) {
+                // 如果未开启restful，且配置的是bool值，开启本地排序
+                newCloumn.sorter = (a, b) =>
+                  commonSorter(findDataByPath(a, column.fieldName), findDataByPath(b, column.fieldName));
+              } else {
+                // 又因为配置的dataIndex并不一定是record里的field，所以无法正确排序
+                delete newCloumn.sorter;
               }
-              return _label;
-            });
-          };
-        }
-        if (column.sorter) {
-          // 设置是降序还是升序
-          newCloumn.sortOrder = sorterDict[field];
-          if (!restful && column.sorter === true) {
-            if (column.fieldName) {
-              // 如果未开启restful，且配置的是bool值，开启本地排序
-              newCloumn.sorter = (a, b) =>
-                commonSorter(findDataByPath(a, column.fieldName), findDataByPath(b, column.fieldName));
-            } else {
-              // 又因为配置的dataIndex并不一定是record里的field，所以无法正确排序
-              delete newCloumn.sorter;
             }
           }
-        }
-        if (restful) {
-          if (column.filterDropdownConfig) {
-            delete newCloumn.dropdownLocalConfig;
-            newCloumn = {
-              ...newCloumn,
-              ...getColumnSearchProps(field, newCloumn, columnSearchViewRef.current),
-            };
-            delete newCloumn.filterDropdownConfig;
-          }
-        } else {
-          if (!newCloumn.onFilter && (newCloumn.filters || column.dropdownLocalConfig)) {
-            const fieldName = column.dropdownLocalConfig?.fieldName || column.fieldName || field;
-            if (fieldName) {
+          if (restful) {
+            if (column.filterDropdownConfig) {
+              delete newCloumn.dropdownLocalConfig;
               newCloumn = {
                 ...newCloumn,
-                ...getColumnSearchProps(
-                  field,
-                  {
-                    ...column,
-                    filterDropdownConfig: { type: FieldType.INPUT, ...column.dropdownLocalConfig },
-                  },
-                  columnSearchViewRef.current
-                ),
+                ...getColumnSearchProps(field, newCloumn, columnSearchViewRef.current),
               };
-              // 支持本地筛选
-              newCloumn.onFilter = (input, record) => {
-                const v = findDataByPath(record, fieldName);
-                let _filterType = column.dropdownLocalConfig?.filterType || FilterType.SEARCH;
-                if (!isEmpty(column.filters)) {
-                  // 如果配置了精确筛选，则使用精确筛选
-                  _filterType = FilterType.EQUAL;
-                }
-                return commonFilter(input, v, { filterType: _filterType });
-              };
-            } else {
-              // 因为 dataIndex 可能不是 record 里的 field，所以无法正确处理筛选
-              delete newCloumn.onFilter;
-              delete newCloumn.filters;
-              delete newCloumn.filterDropdown;
+              delete newCloumn.filterDropdownConfig;
             }
-            delete newCloumn.dropdownLocalConfig;
-            delete newCloumn.filterDropdownConfig;
+          } else {
+            if (!newCloumn.onFilter && (newCloumn.filters || column.dropdownLocalConfig)) {
+              const fieldName = column.dropdownLocalConfig?.fieldName || column.fieldName || field;
+              if (fieldName) {
+                newCloumn = {
+                  ...newCloumn,
+                  ...getColumnSearchProps(
+                    field,
+                    {
+                      ...column,
+                      filterDropdownConfig: { type: FieldType.INPUT, ...column.dropdownLocalConfig },
+                    },
+                    columnSearchViewRef.current
+                  ),
+                };
+                // 支持本地筛选
+                newCloumn.onFilter = (input, record) => {
+                  const v = findDataByPath(record, fieldName);
+                  let _filterType = column.dropdownLocalConfig?.filterType || FilterType.SEARCH;
+                  if (!isEmpty(column.filters)) {
+                    // 如果配置了精确筛选，则使用精确筛选
+                    _filterType = FilterType.EQUAL;
+                  }
+                  return commonFilter(input, v, { filterType: _filterType });
+                };
+              } else {
+                // 因为 dataIndex 可能不是 record 里的 field，所以无法正确处理筛选
+                delete newCloumn.onFilter;
+                delete newCloumn.filters;
+                delete newCloumn.filterDropdown;
+              }
+              delete newCloumn.dropdownLocalConfig;
+              delete newCloumn.filterDropdownConfig;
+            }
           }
-        }
 
-        // 初始刷选值
-        newCloumn.filteredValue = [];
-        if (newCloumn.filterDropdown !== undefined || newCloumn.filters !== undefined) {
-          // 开启了刷选的字段
-          let value = innerFilters[field];
-          // 不是数组需要转成数组
-          if (isBlank(value)) {
-            value = [];
-          } else if (!isArray(value)) {
-            value = [value];
+          // 初始刷选值
+          newCloumn.filteredValue = [];
+          if (newCloumn.filterDropdown !== undefined || newCloumn.filters !== undefined) {
+            // 开启了刷选的字段
+            let value = innerFilters[field];
+            // 不是数组需要转成数组
+            if (isBlank(value)) {
+              value = [];
+            } else if (!isArray(value)) {
+              value = [value];
+            }
+            newCloumn.filteredValue = value;
           }
-          newCloumn.filteredValue = value;
-        }
-        return newCloumn;
-      });
+          return newCloumn;
+        });
       return arr.filter((item) => !item.hidden);
-    }, [columns, innerFilters, fieldOrdering, restful, realCheckKeys, innerTools.settings, genColumnKey]);
+    }, [columns, innerFilters, fieldOrdering, restful, realCheckKeys, innerTools.settings]);
 
     // 表头上的筛选条件，按照Tags的形式都展示出来
     const headerTags = useMemo(() => {
@@ -686,7 +732,33 @@ const RestTable = forwardRef(
         })
         .filter((item) => !isEmpty(item.value));
       return arr;
-    }, [genColumnKey, innerFilters, columns, showHeaderTags]);
+    }, [innerFilters, columns, showHeaderTags]);
+
+    // 展开的列
+    const memExpandableColumns = useMemo(() => {
+      return columns
+        .filter((item) => item.expandable && !item.hidden)
+        .map((column) => {
+          const newCloumn = { ...column };
+          const field = genColumnKey(newCloumn);
+          if (innerTools.settings && realCheckKeys?.length > 0) {
+            // 设置了显示，则不隐藏
+            newCloumn.hidden = !realCheckKeys.includes(field);
+          }
+          return newCloumn;
+        })
+        .filter((item) => !item.hidden);
+    }, [columns, innerTools.settings, realCheckKeys]);
+
+    const [isExpandedAll, setIsExpandedAll] = useState(expandedAllRows || innerTools.expandedAllRows);
+    const [expandedRows, setExpandedRows] = useState();
+    useEffect(() => {
+      if (isExpandedAll) {
+        setExpandedRows(innerData.dataSource.map((row) => row[rowKey]));
+      } else {
+        setExpandedRows([]);
+      }
+    }, [innerData.dataSource, rowKey, isExpandedAll]);
 
     // 处理table的onChange事件
     const onTableChange = useCallback(
@@ -765,12 +837,24 @@ const RestTable = forwardRef(
               />
             </Spin>
           )}
-          {!isEmpty(innerTools) && (
+          {(!isEmpty(innerTools) || extraTools) && (
             <div
               style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
               className="cls-resttable-tools"
             >
               <Space key="tools">
+                {extraTools}
+                {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
+                  <Tooltip title={isExpandedAll ? "收起所有行" : "展开所有行"}>
+                    <Button
+                      icon={<NodeExpandOutlined />}
+                      type={isExpandedAll ? "primary" : undefined}
+                      onClick={() => {
+                        setIsExpandedAll((oldV) => !oldV);
+                      }}
+                    />
+                  </Tooltip>
+                )}
                 {restful && filterFormProps && innerTools.advancedSearch && (
                   <Tooltip title="高级搜索">
                     <Button
@@ -935,6 +1019,32 @@ const RestTable = forwardRef(
               antdTableProps.onChange(pagination, filters, sorter, extra);
             }
           }}
+          expandable={
+            memExpandableColumns.length > 0
+              ? {
+                expandedRowRender: (record) => {
+                  return (
+                    <Descriptions {...expandAntdProps}>
+                      {memExpandableColumns.map((column) => {
+                        const _key = genColumnKey(column);
+                        return (
+                          <Descriptions.Item key={_key} {...column.expandItemProps} label={column.title}>
+                            {renderRowLabel(record, column)}
+                          </Descriptions.Item>
+                        );
+                      })}
+                    </Descriptions>
+                  );
+                },
+                rowExpandable: (record) => !expandFieldPath || findDataByPath(record, expandFieldPath),
+                expandedRowKeys: expandedRows,
+                onExpandedRowsChange: (rowKeys) => {
+                  setExpandedRows(rowKeys);
+                },
+                ...antdTableProps?.expandable,
+              }
+              : antdTableProps?.expandable
+          }
         />
       </Space>
     );
@@ -967,15 +1077,20 @@ RestTable.propTypes = {
     PropTypes.shape({
       // 开启高级搜索，默认会开启
       advancedSearch: PropTypes.bool,
+      // 高级搜索的默认展开状态
+      advancedDefaultOpen: PropTypes.bool,
       // 下载的key，如果为true，则使用默认的 _download
       downloadKey: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
       // 刷新数据的间隔，单位 ms，小于0时隐藏刷新按钮，等于0时手动刷新，大于0时自动刷新
       refreshInterval: PropTypes.number,
       // 默认开启列显示隐藏设置, 配置存储localStorage的key, 如果为true，则使用restful的值作为key; 当clumns配置列的key发生改动时，之前的设置会失效
       settings: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+      expandedAllRows: PropTypes.bool,
     }),
     PropTypes.bool,
   ]),
+  // 其他工具
+  extraTools: PropTypes.node,
 
   onFiltersChange: PropTypes.func,
   onDataSourceChange: PropTypes.func,
@@ -989,8 +1104,10 @@ RestTable.propTypes = {
       fieldName: PropTypes.string,
       // 开启复制功能
       copyProps: PropTypes.object,
-      // 如果某列是字典，则需要指定字段值用于copy
-      fieldValue: PropTypes.string,
+      // 如果某列根据dataIndex获取到的是字典，则需要指定字段中某个字段值用于copy
+      copyField: PropTypes.string,
+      // 是否按照Tag展示，数据是数组时有用
+      showTag: PropTypes.bool,
       // 下来筛选自定义view的设置
       filterDropdownConfig: PropTypes.shape({
         style: PropTypes.object,
@@ -1007,13 +1124,20 @@ RestTable.propTypes = {
         fieldName: PropTypes.string,
         filterType: PropTypes.oneOf(FilterType.map((o) => o.value)),
       }),
-      range: PropTypes.string,
       // 是否默认显示
       hidden: PropTypes.bool,
       // 是否开启排序，得配置 dataIndex 字段
       sorter: PropTypes.bool,
+      // 是否开启展开功能
+      expandable: PropTypes.bool,
+      expandableItemProps: PropTypes.object,
     })
   ),
+  // 设置是否开启展开功能的字段
+  expandFieldPath: PropTypes.string,
+  expandAntdProps: PropTypes.object,
+  // 未启用tools时也可以配置展开所有行
+  expandedAllRows: PropTypes.bool,
   dataSource: PropTypes.array,
   // 筛选表单的配置
   filterFormProps: PropTypes.object,

@@ -2,7 +2,7 @@ import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DEFAULT_PAGE_SIZE, FieldType } from "src/common/constants";
-import RestTable, { getColumnSearchProps } from "src/components/RestTable";
+import RestTable, { getColumnSearchProps, genColumnKey, renderRowLabel } from "src/components/RestTable";
 
 // Mock useSafeRequest hook
 const mockMakeRequest = jest.fn();
@@ -1210,6 +1210,190 @@ describe("RestTable", () => {
       expect(filterDropdown).toBeDefined();
       // 验证返回的是一个有效的 React 元素
       expect(filterDropdown).toBeTruthy();
+    });
+  });
+
+  describe("genColumnKey 测试", () => {
+    it("should return key when column has key", () => {
+      const column = { key: "custom_key", dataIndex: "name" };
+      const result = genColumnKey(column);
+      expect(result).toBe("custom_key");
+    });
+
+    it("should return dataIndex when column has no key", () => {
+      const column = { dataIndex: "name" };
+      const result = genColumnKey(column);
+      expect(result).toBe("name");
+    });
+
+    it("should join array key with double underscore", () => {
+      const column = { key: ["user", "name"], dataIndex: "name" };
+      const result = genColumnKey(column);
+      expect(result).toBe("user__name");
+    });
+
+    it("should join array dataIndex with double underscore", () => {
+      const column = { dataIndex: ["user", "info", "name"] };
+      const result = genColumnKey(column);
+      expect(result).toBe("user__info__name");
+    });
+
+    it("should handle empty array", () => {
+      const column = { key: [], dataIndex: "name" };
+      const result = genColumnKey(column);
+      expect(result).toBe("");
+    });
+
+    it("should handle undefined values", () => {
+      const column = {};
+      const result = genColumnKey(column);
+      expect(result).toBeUndefined();
+    });
+
+    it("should prioritize key over dataIndex", () => {
+      const column = { key: "priority_key", dataIndex: "fallback_name" };
+      const result = genColumnKey(column);
+      expect(result).toBe("priority_key");
+    });
+  });
+
+  describe("renderRowLabel 测试", () => {
+    it("should render simple value without template", () => {
+      const record = { id: 1, name: "张三" };
+      const column = { dataIndex: "name" };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("张三");
+    });
+
+    it("should render value with labelTemplate", () => {
+      const record = { id: 1, user: { name: "张三", age: 25 } };
+      const column = {
+        dataIndex: "user",
+        labelTemplate: "用户：{name}，年龄：{age}"
+      };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("用户：张三，年龄：25");
+    });
+
+    it("should use fieldName when provided", () => {
+      const record = { id: 1, user: { name: "张三" } };
+      const column = {
+        dataIndex: "name",
+        fieldName: "user",
+        labelTemplate: "用户：{name}"
+      };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("用户：张三");
+    });
+
+    it("should handle empty values", () => {
+      const record = { id: 1, name: null };
+      const column = { dataIndex: "name" };
+      const result = renderRowLabel(record, column);
+      expect(result).toBeNull();
+    });
+
+    it("should render array values with comma separator", () => {
+      const record = { id: 1, tags: ["技术", "前端", "React"] };
+      const column = { dataIndex: "tags" };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("技术,前端,React");
+    });
+
+    it("should render array values with labelTemplate", () => {
+      const record = { id: 1, users: [{ name: "张三" }, { name: "李四" }] };
+      const column = {
+        dataIndex: "users",
+        labelTemplate: "用户：{name}"
+      };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("用户：张三,用户：李四");
+    });
+
+    it("should render with showTag", () => {
+      const record = { id: 1, tags: ["技术", "前端"] };
+      const column = { dataIndex: "tags", showTag: true };
+      const result = renderRowLabel(record, column);
+
+      // 验证返回的是 React 元素数组
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(2);
+    });
+
+    it("should handle copyProps", () => {
+      const record = { id: 1, email: "test@example.com" };
+      const column = {
+        dataIndex: "email",
+        copyProps: { showIcon: true }
+      };
+      const result = renderRowLabel(record, column);
+
+      // 验证返回的是 React 元素
+      expect(result).toBeDefined();
+      expect(typeof result.type).toBe("function");
+    });
+
+    it("should handle copyField for copy", () => {
+      const record = { id: 1, user: { name: "张三", id: 123 } };
+      const column = {
+        dataIndex: "user",
+        copyField: "id",
+        copyProps: { showIcon: true }
+      };
+      const result = renderRowLabel(record, column);
+
+      // 验证返回的是 React 元素
+      expect(result).toBeDefined();
+      expect(typeof result.type).toBe("function");
+    });
+
+    it("should handle complex nested data", () => {
+      const record = {
+        id: 1,
+        profile: {
+          personal: {
+            name: "张三",
+            contact: { email: "zhang@example.com" }
+          }
+        }
+      };
+      const column = {
+        dataIndex: "profile",
+        fieldName: "profile.personal",
+        labelTemplate: "姓名：{name}，邮箱：{contact.email}"
+      };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("姓名：张三，邮箱：zhang@example.com");
+    });
+
+    it("should handle mixed array and object data", () => {
+      const record = {
+        id: 1,
+        items: [
+          { name: "项目1", status: "active" },
+          { name: "项目2", status: "inactive" }
+        ]
+      };
+      const column = {
+        dataIndex: "items",
+        labelTemplate: "{name}({status})"
+      };
+      const result = renderRowLabel(record, column);
+      expect(result).toBe("项目1(active),项目2(inactive)");
+    });
+
+    it("should handle empty array", () => {
+      const record = { id: 1, tags: [] };
+      const column = { dataIndex: "tags" };
+      const result = renderRowLabel(record, column);
+      expect(result).toEqual([]);
+    });
+
+    it("should handle undefined column properties", () => {
+      const record = { id: 1, name: "张三" };
+      const column = {};
+      const result = renderRowLabel(record, column);
+      expect(result).toBeUndefined();
     });
   });
 });
