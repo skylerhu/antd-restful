@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.1.10
+- fix: 修复RestTable tools配置为空时样式问题
+    - tools配置的显示依赖配置restful
+
 ## 0.1.9
 - feat: 扩展 RestTable
     - 配置 extraTools 可以自定义其他操作按钮
