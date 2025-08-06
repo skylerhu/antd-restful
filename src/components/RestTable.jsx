@@ -804,12 +804,22 @@ const RestTable = forwardRef(
       [restful, innerFilters, fieldPage, fieldPageSize, innerTools.downloadKey]
     );
 
+    const hasHeader = useMemo(() => {
+      if (!isEmpty(innerTools) || extraTools) {
+        return true;
+      }
+      if (restful && !isEmpty(filterFormProps)) {
+        return true;
+      }
+      return false;
+    }, [innerTools, extraTools, filterFormProps, restful]);
+
     return (
       <Space direction="vertical" gap={10} {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
         {
-          restful && (
+          hasHeader && (
             <div style={{ position: "relative" }} className="cls-resttable-header">
-              {filterFormProps && (
+              {restful && filterFormProps && (
                 <Spin spinning={loading}>
                   <GridForm
                     key="filterForm"
@@ -857,7 +867,7 @@ const RestTable = forwardRef(
                         />
                       </Tooltip>
                     )}
-                    {filterFormProps && innerTools.advancedSearch && (
+                    {restful && filterFormProps && innerTools.advancedSearch && (
                       <Tooltip title="高级搜索">
                         <Button
                           icon={<SecurityScanOutlined />}
@@ -866,7 +876,7 @@ const RestTable = forwardRef(
                         />
                       </Tooltip>
                     )}
-                    {innerTools.refreshInterval >= 0 && (
+                    {restful && innerTools.refreshInterval >= 0 && (
                       <Tooltip
                         title={
                           innerTools.refreshInterval > 0
@@ -887,7 +897,7 @@ const RestTable = forwardRef(
                         />
                       </Tooltip>
                     )}
-                    {innerTools.downloadKey && (
+                    {restful && innerTools.downloadKey && (
                       <Dropdown
                         menu={{
                           items: [

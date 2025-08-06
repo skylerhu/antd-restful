@@ -1,6 +1,8 @@
 ## ExpansionView
 支持文本扩展和远程验证的输入组件，可以将用户输入进行扩展处理或远程验证，适用于需要实时处理输入内容的场景。
 
+在表单中使用时，可结合校验 [expansionValidator](../validators.md#expansionValidator) 一起使用。
+
 **功能特性：**
 - 支持 brace-expansion 语法扩展
 - 支持远程验证和处理

@@ -178,6 +178,7 @@ function makeSafeRequest() {
   };
 
   const wrapAxios = (options, reqConfig) => {
+    // 配置delay可以防抖
     let { delay = 0, key } = options || {};
     // 默认每次自增1
     if (!key) {
@@ -187,19 +188,22 @@ function makeSafeRequest() {
       // 不允许指定key为数字，因为数字会被认为是reqId
       key = `key-${key}`;
     }
+
+    let isFirst = true; // 固定key的情况下 是否是第一次请求
     // 清除之前的定时器和请求
     if (reqMapRef[key]) {
       reqMapRef[key].promise?.abort();
       reqMapRef[key].controller?.abort();
       clearTimeout(reqMapRef[key].timer);
       delete reqMapRef[key];
+      isFirst = false;
     }
 
     // 创建新的 AbortController
     const controller = new AbortController();
     reqMapRef[key] = { controller };
 
-    if (delay <= 0) {
+    if (delay <= 0 || isFirst) {
       const promise = new AbortablePromise((resolve, reject) => doRequest(resolve, reject, { key }, reqConfig));
       reqMapRef[key].promise = promise;
       return promise;

@@ -26,91 +26,13 @@ import libs from "demo/libs";
 
 const {
   formitems,
-  request,
-  apiTools: { formatRequestError },
-  typeTools: { isEmpty, isNumber, isArray, isString, isDict },
+  validators: { expansionValidator, remoteValidator },
 } = libs;
 
 // https://core.formilyjs.org/zh-CN/api/entry/form-validator-registry
 registerValidateRules({
-  /**
-   * 扩展 ExpansionView 组件的校验
-   * eg:
-      {
-        expansionValidator: true,
-        message: "请按照要求输入数据",
-      } or
-      {
-        expansionValidator: {
-          min: 1,
-          max: 10,
-        },
-        message: "请按照要求输入数据",
-      }
-
-   */
-  expansionValidator: (value, rule) => {
-    const config = rule.expansionValidator;
-    if (!config || isEmpty(config) || isEmpty(value)) {
-      return Promise.resolve();
-    }
-    if (isDict(config) && (isArray(value.output) || isString(value.output))) {
-      const { max, min } = config;
-      if (isNumber(max) && max > 0) {
-        if (value.output.length > max) {
-          return Promise.reject(`最大长度为 ${max}`);
-        }
-      }
-      if (isNumber(min) && min > 0) {
-        if (value.output.length < min) {
-          return Promise.reject(`最小长度为 ${min}`);
-        }
-      }
-    }
-    if (isEmpty(value.error)) {
-      return Promise.resolve();
-    }
-    return Promise.reject(value.error || rule.message || "请按照要求输入数据");
-  },
-  /**
-   * 扩展 ExpansionView 组件的校验
-   * eg:
-      {
-        remoteValidator: {
-          withForm: true,  // 是否带上表单所有数据
-          extraParams: {},  // 请求参数
-          restful: "api/validate/remote/",
-          reqConfig: {},  // 请求配置
-        }
-      }
-   */
-  remoteValidator: (value, rule, ctx) => {
-    // const { field, form } = ctx;
-    const config = rule.remoteValidator;
-    if (isEmpty(value) || isEmpty(config) || !config.restful) {
-      return Promise.resolve();
-    }
-    const { withForm, restful, reqConfig, extraParams } = config;
-    // value 和 表单的key
-    const data = { value, field: ctx.field.path.entire, extraParams };
-    if (withForm) {
-      // 带上表单值
-      data.form = ctx.form.values;
-    }
-    return request.post(restful, data, { disableNotiError: true, ...reqConfig }).then(
-      (res) => {
-        // 校验成功/失败都返回200，避免http接口4xx过多； validated=True表示成功
-        if (res.status === 200 && res.data.validated) {
-          return Promise.resolve();
-        }
-        return Promise.reject(res.data.message || rule.message || "请按照要求输入数据");
-      },
-      (error) => {
-        const { message, description } = formatRequestError(error);
-        return Promise.reject(`${message}: ${description}`);
-      }
-    );
-  },
+  expansionValidator,
+  remoteValidator,
 });
 
 // https://react.formilyjs.org/zh-CN/api/shared/map-read-pretty
@@ -167,7 +89,7 @@ const testSchema = {
           properties: {
             text: {
               type: "string",
-              title: "源数据",
+              title: "远程校验",
               "x-component": "Input",
               "x-decorator": "FormItem",
               "x-validator": [
@@ -177,6 +99,9 @@ const testSchema = {
                     restful: "api/validate/remote/",
                     withForm: true,
                     // restful: "api/validate/arr/",
+                    makeRequestOptions: {
+                      delay: 1000,
+                    }
                   },
                 },
               ],

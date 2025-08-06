@@ -1471,14 +1471,6 @@ exports[`RestTable 快照测试 should match snapshot with tools disabled 1`] = 
     class="ant-space-item"
   >
     <div
-      class="cls-resttable-header"
-      style="position: relative;"
-    />
-  </div>
-  <div
-    class="ant-space-item"
-  >
-    <div
       class="ant-table-wrapper css-dev-only-do-not-override-1kf000u"
     >
       <div

@@ -64,14 +64,6 @@ exports[`TableSelect should render 1`] = `
                 class="ant-space-item"
               >
                 <div
-                  class="cls-resttable-header"
-                  style="position: relative;"
-                />
-              </div>
-              <div
-                class="ant-space-item"
-              >
-                <div
                   class="ant-table-wrapper css-dev-only-do-not-override-1kf000u"
                 >
                   <div
@@ -361,14 +353,6 @@ exports[`TableSelect should render 1`] = `
       gap="10"
       style="width: 100%;"
     >
-      <div
-        class="ant-space-item"
-      >
-        <div
-          class="cls-resttable-header"
-          style="position: relative;"
-        />
-      </div>
       <div
         class="ant-space-item"
       >
@@ -748,14 +732,6 @@ exports[`TableSelect should render in disabled mode 1`] = `
       class="ant-space-item"
     >
       <div
-        class="cls-resttable-header"
-        style="position: relative;"
-      />
-    </div>
-    <div
-      class="ant-space-item"
-    >
-      <div
         class="ant-table-wrapper css-dev-only-do-not-override-1kf000u"
       >
         <div
@@ -999,14 +975,6 @@ exports[`TableSelect should render in readOnly mode 1`] = `
     gap="10"
     style="width: 100%;"
   >
-    <div
-      class="ant-space-item"
-    >
-      <div
-        class="cls-resttable-header"
-        style="position: relative;"
-      />
-    </div>
     <div
       class="ant-space-item"
     >
@@ -1311,14 +1279,6 @@ exports[`TableSelect should render with expandSelected 1`] = `
                 class="ant-space-item"
               >
                 <div
-                  class="cls-resttable-header"
-                  style="position: relative;"
-                />
-              </div>
-              <div
-                class="ant-space-item"
-              >
-                <div
                   class="ant-table-wrapper css-dev-only-do-not-override-1kf000u"
                 >
                   <div
@@ -1608,14 +1568,6 @@ exports[`TableSelect should render with expandSelected 1`] = `
       gap="10"
       style="width: 100%;"
     >
-      <div
-        class="ant-space-item"
-      >
-        <div
-          class="cls-resttable-header"
-          style="position: relative;"
-        />
-      </div>
       <div
         class="ant-space-item"
       >
