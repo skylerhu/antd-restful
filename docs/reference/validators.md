@@ -27,6 +27,7 @@ expansionValidator(value, rule) => Promise
 - `value` - 要验证的值，通常包含 `output` 和 `error` 属性
 - `rule` - 验证规则配置对象
   - `rule.expansionValidator` - 扩展校验配置，可以是布尔值或对象
+  - `rule.expansionValidator.required` - value.output不能为空（可选）
   - `rule.expansionValidator.min` - 最小长度限制（可选）
   - `rule.expansionValidator.max` - 最大长度限制（可选）
   - `rule.message` - 校验失败时的错误提示信息（可选）
@@ -41,6 +42,7 @@ expansionValidator(value, rule) => Promise
 ### 配置选项
 
 - `expansionValidator` - 验证配置，可以是布尔值或对象
+  - `required` - value.output不能为空（可选）
   - `min` - 最小长度限制（可选）
   - `max` - 最大长度限制（可选）
 - `message` - 自定义错误消息（可选）
@@ -62,6 +64,7 @@ const rule = {
 ```javascript
 const rule = {
   expansionValidator: {
+    required: true,
     min: 1,
     max: 10
   },

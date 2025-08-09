@@ -1,4 +1,4 @@
-import { isArray, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
+import { isDict, isEmpty, isNumber } from "src/common/typeTools";
 import { formatRequestError, makeSafeRequest } from "src/requests";
 
 /**
@@ -6,6 +6,7 @@ import { formatRequestError, makeSafeRequest } from "src/requests";
  * @param {*} value - 要校验的值，通常是一个包含 output 和 error 属性的对象
  * @param {Object} rule - 校验规则对象
  * @param {boolean|Object} rule.expansionValidator - 扩展校验配置
+ * @param {number} [rule.expansionValidator.required] - value.output不为空
  * @param {number} [rule.expansionValidator.min] - 最小长度限制
  * @param {number} [rule.expansionValidator.max] - 最大长度限制
  * @param {string} [rule.message] - 校验失败时的错误提示信息
@@ -31,12 +32,18 @@ export const expansionValidator = (value, rule) => {
     return Promise.resolve();
   }
   let errMsg = value.error;
-  if (!errMsg && isDict(config) && (isArray(value.output) || isString(value.output))) {
-    const { max, min } = config;
-    if (isNumber(max) && value.output.length > max) {
-      errMsg = `最大长度为 ${max}`;
-    } else if (isNumber(min) && value.output.length < min) {
-      errMsg = `最小长度为 ${min}`;
+  if (!errMsg && isDict(config)) {
+    const { max, min, required } = config;
+    if (required && isEmpty(value.output)) {
+      errMsg = "请按照要求输入数据";
+    }
+    if (!errMsg) {
+      const len = value.output?.length || 0;
+      if (isNumber(max) && len > max) {
+        errMsg = `最大长度为 ${max}`;
+      } else if (isNumber(min) && len < min) {
+        errMsg = `最小长度为 ${min}`;
+      }
     }
   }
   if (!errMsg) {

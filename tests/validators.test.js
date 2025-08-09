@@ -123,15 +123,105 @@ describe("validators", () => {
       await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
     });
 
-    it("should resolve when value.output is not array or string", async () => {
-      const value = { output: 123 };
+    it("should reject when required is true and value.output is empty", async () => {
+      const value = { output: "" };
       const rule = {
-        expansionValidator: { min: 1, max: 10 },
+        expansionValidator: { required: true },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("custom message");
+    });
+
+    it("should reject when required is true and value.output is null", async () => {
+      const value = { output: null };
+      const rule = {
+        expansionValidator: { required: true },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("custom message");
+    });
+
+    it("should reject when required is true and value.output is undefined", async () => {
+      const value = { output: undefined };
+      const rule = {
+        expansionValidator: { required: true },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("custom message");
+    });
+
+    it("should reject when required is true and value.output is empty array", async () => {
+      const value = { output: [] };
+      const rule = {
+        expansionValidator: { required: true },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("custom message");
+    });
+
+    it("should resolve when required is true and value.output has content", async () => {
+      const value = { output: "test content" };
+      const rule = {
+        expansionValidator: { required: true },
         message: "custom message",
       };
 
       await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
     });
+
+    it("should resolve when required is true and value.output is non-empty array", async () => {
+      const value = { output: ["item1"] };
+      const rule = {
+        expansionValidator: { required: true },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should use custom message when required validation fails and custom message provided", async () => {
+      const value = { output: "" };
+      const rule = {
+        expansionValidator: { required: true },
+        message: "This field is required",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("This field is required");
+    });
+
+    it("should use default message when required validation fails and no custom message", async () => {
+      const value = { output: "" };
+      const rule = {
+        expansionValidator: { required: true },
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("请按照要求输入数据");
+    });
+
+    it("should combine required with min/max validation", async () => {
+      const value = { output: "ab" };
+      const rule = {
+        expansionValidator: { required: true, min: 5 },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("custom message");
+    });
+
+    it("should prioritize error over required validation", async () => {
+      const value = { output: "", error: "processing error" };
+      const rule = {
+        expansionValidator: { required: true },
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("processing error");
+    });
+
   });
 
   describe("remoteValidator", () => {
