@@ -42,6 +42,34 @@ describe("validators", () => {
       await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
     });
 
+    it("should resolve when value is empty array", async () => {
+      const value = [];
+      const rule = { expansionValidator: true, message: "test message" };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should resolve when value is empty object", async () => {
+      const value = {};
+      const rule = { expansionValidator: true, message: "test message" };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should resolve when value is empty string", async () => {
+      const value = "";
+      const rule = { expansionValidator: true, message: "test message" };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should resolve when value is undefined", async () => {
+      const value = undefined;
+      const rule = { expansionValidator: true, message: "test message" };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
     it("should resolve when value has no error and no length constraints", async () => {
       const value = { output: "test" };
       const rule = { expansionValidator: true, message: "test message" };
@@ -222,6 +250,56 @@ describe("validators", () => {
       await expect(expansionValidator(value, rule)).rejects.toBe("processing error");
     });
 
+    it("should handle non-dict config with error", async () => {
+      const value = { output: "test", error: "processing error" };
+      const rule = {
+        expansionValidator: true, // boolean instead of object
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).rejects.toBe("processing error");
+    });
+
+    it("should handle non-dict config without error", async () => {
+      const value = { output: "test" };
+      const rule = {
+        expansionValidator: true, // boolean instead of object
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should handle string config without error", async () => {
+      const value = { output: "test" };
+      const rule = {
+        expansionValidator: "some string", // string instead of object
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should handle null config without error", async () => {
+      const value = { output: "test" };
+      const rule = {
+        expansionValidator: null, // null instead of object
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
+    it("should handle array config without error", async () => {
+      const value = { output: "test" };
+      const rule = {
+        expansionValidator: [1, 2, 3], // array instead of object
+        message: "custom message",
+      };
+
+      await expect(expansionValidator(value, rule)).resolves.toBeUndefined();
+    });
+
   });
 
   describe("remoteValidator", () => {
@@ -249,6 +327,22 @@ describe("validators", () => {
       await expect(remoteValidator(value, rule, ctx)).resolves.toBeUndefined();
     });
 
+    it("should resolve when config has falsy restful", async () => {
+      const value = "test";
+      const rule = { remoteValidator: { restful: null } };
+      const ctx = {};
+
+      await expect(remoteValidator(value, rule, ctx)).resolves.toBeUndefined();
+    });
+
+    it("should resolve when config has empty string restful", async () => {
+      const value = "test";
+      const rule = { remoteValidator: { restful: "" } };
+      const ctx = {};
+
+      await expect(remoteValidator(value, rule, ctx)).resolves.toBeUndefined();
+    });
+
     it("should create client with default options when validation is successful", async () => {
       const value = "test";
       const rule = {
@@ -260,7 +354,7 @@ describe("validators", () => {
         },
         message: "custom message"
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       mockClient.post.mockResolvedValue({
         status: 200,
@@ -291,7 +385,7 @@ describe("validators", () => {
           }
         }
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       mockClient.post.mockResolvedValue({
         status: 200,
@@ -311,8 +405,8 @@ describe("validators", () => {
         message: "custom message"
       };
       const ctx = {
-        field: { path: { entire: "testField" } },
-        form: { values: { name: "test", age: 25 } }
+        fieldName: "testField",
+        formValues: { name: "test", age: 25 }
       };
 
       mockClient.post.mockResolvedValue({
@@ -341,7 +435,7 @@ describe("validators", () => {
         },
         message: "custom message"
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       mockClient.post.mockResolvedValue({
         status: 200,
@@ -358,7 +452,7 @@ describe("validators", () => {
           restful: "api/validate"
         }
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       mockClient.post.mockResolvedValue({
         status: 200,
@@ -375,7 +469,7 @@ describe("validators", () => {
           restful: "api/validate"
         }
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       const error = new Error("Network error");
       mockClient.post.mockRejectedValue(error);
@@ -398,8 +492,8 @@ describe("validators", () => {
         }
       };
       const ctx = {
-        field: { path: { entire: "testField" } },
-        form: { values: { username: "john", email: "john@example.com" } }
+        fieldName: "testField",
+        formValues: { username: "john", email: "john@example.com" }
       };
 
       mockClient.post.mockResolvedValue({
@@ -429,8 +523,8 @@ describe("validators", () => {
         }
       };
       const ctx = {
-        field: { path: { entire: "testField" } },
-        form: { values: { username: "john", email: "john@example.com" } }
+        fieldName: "testField",
+        formValues: { username: "john", email: "john@example.com" }
       };
 
       mockClient.post.mockResolvedValue({
@@ -450,41 +544,19 @@ describe("validators", () => {
       );
     });
 
-    it("should handle missing ctx.field.path.entire", async () => {
-      const value = "test";
-      const rule = {
-        remoteValidator: {
-          restful: "api/validate"
-        }
-      };
-      const ctx = { field: {} };
-
-      mockClient.post.mockResolvedValue({
-        status: 200,
-        data: { validated: true }
-      });
-
-      await expect(remoteValidator(value, rule, ctx)).resolves.toBeUndefined();
-      expect(mockClient.post).toHaveBeenCalledWith(
-        "api/validate",
-        {
-          value: "test",
-          field: undefined,
-          extraParams: undefined
-        },
-        { disableNotiError: true }
-      );
-    });
-
-    it("should handle missing ctx.form", async () => {
+    it("should not include form data when withForm is explicitly false", async () => {
       const value = "test";
       const rule = {
         remoteValidator: {
           restful: "api/validate",
-          withForm: true
+          withForm: false,
+          extraParams: { type: "user" }
         }
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = {
+        fieldName: "testField",
+        formValues: { username: "john", email: "john@example.com" }
+      };
 
       mockClient.post.mockResolvedValue({
         status: 200,
@@ -497,14 +569,13 @@ describe("validators", () => {
         {
           value: "test",
           field: "testField",
-          extraParams: undefined,
-          form: undefined
+          extraParams: { type: "user" }
         },
         { disableNotiError: true }
       );
     });
 
-    it("should handle missing ctx.field", async () => {
+    it("should handle missing fieldName in context", async () => {
       const value = "test";
       const rule = {
         remoteValidator: {
@@ -530,6 +601,59 @@ describe("validators", () => {
       );
     });
 
+    it("should handle missing formValues in context", async () => {
+      const value = "test";
+      const rule = {
+        remoteValidator: {
+          restful: "api/validate",
+          withForm: true
+        }
+      };
+      const ctx = { fieldName: "testField" };
+
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        data: { validated: true }
+      });
+
+      await expect(remoteValidator(value, rule, ctx)).resolves.toBeUndefined();
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "api/validate",
+        {
+          value: "test",
+          field: "testField",
+          extraParams: undefined,
+          form: undefined
+        },
+        { disableNotiError: true }
+      );
+    });
+
+    it("should handle missing context entirely", async () => {
+      const value = "test";
+      const rule = {
+        remoteValidator: {
+          restful: "api/validate"
+        }
+      };
+
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        data: { validated: true }
+      });
+
+      await expect(remoteValidator(value, rule)).resolves.toBeUndefined();
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "api/validate",
+        {
+          value: "test",
+          field: undefined,
+          extraParams: undefined
+        },
+        { disableNotiError: true }
+      );
+    });
+
     it("should handle non-200 status code", async () => {
       const value = "test";
       const rule = {
@@ -537,7 +661,7 @@ describe("validators", () => {
           restful: "api/validate"
         }
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       mockClient.post.mockResolvedValue({
         status: 400,
@@ -554,7 +678,7 @@ describe("validators", () => {
           restful: "api/validate"
         }
       };
-      const ctx = { field: { path: { entire: "testField" } } };
+      const ctx = { fieldName: "testField" };
 
       mockClient.post.mockResolvedValue({
         status: 200,
@@ -562,6 +686,57 @@ describe("validators", () => {
       });
 
       await expect(remoteValidator(value, rule, ctx)).rejects.toBe("Some message");
+    });
+
+    it("should handle empty context", async () => {
+      const value = "test";
+      const rule = {
+        remoteValidator: {
+          restful: "api/validate"
+        }
+      };
+      const ctx = null;
+
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        data: { validated: true }
+      });
+
+      await expect(remoteValidator(value, rule, ctx)).resolves.toBeUndefined();
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "api/validate",
+        {
+          value: "test",
+          field: undefined,
+          extraParams: undefined
+        },
+        { disableNotiError: true }
+      );
+    });
+
+    it("should handle undefined context", async () => {
+      const value = "test";
+      const rule = {
+        remoteValidator: {
+          restful: "api/validate"
+        }
+      };
+
+      mockClient.post.mockResolvedValue({
+        status: 200,
+        data: { validated: true }
+      });
+
+      await expect(remoteValidator(value, rule, undefined)).resolves.toBeUndefined();
+      expect(mockClient.post).toHaveBeenCalledWith(
+        "api/validate",
+        {
+          value: "test",
+          field: undefined,
+          extraParams: undefined
+        },
+        { disableNotiError: true }
+      );
     });
   });
 

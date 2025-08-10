@@ -32,7 +32,11 @@ const {
 // https://core.formilyjs.org/zh-CN/api/entry/form-validator-registry
 registerValidateRules({
   expansionValidator,
-  remoteValidator,
+  remoteValidator: (value, rule, ctx) => {
+    const fieldName = ctx?.field?.path?.entire;
+    const formValues = ctx?.form?.values;
+    return remoteValidator(value, rule, { fieldName, formValues });
+  },
 });
 
 // https://react.formilyjs.org/zh-CN/api/shared/map-read-pretty

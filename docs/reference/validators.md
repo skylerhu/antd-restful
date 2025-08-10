@@ -146,7 +146,7 @@ remoteValidator(value, rule, ctx) => Promise
     - `rule.remoteValidator.makeRequestOptions.delay` - 防抖延迟时间，默认 200ms（可选）
     - `rule.remoteValidator.makeRequestOptions.key` - 防抖标识键（可选）
   - `rule.message` - 校验失败时的错误提示信息（可选）
-- `ctx` - 上下文对象，配合 formily 使用，包含表单和字段信息
+- `ctx` - 上下文对象，可配合 formily 使用，包含表单和字段信息
 
 ### 返回值
 

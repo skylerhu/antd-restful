@@ -77,22 +77,21 @@ const makeValidateRequest = makeSafeRequest();
        makeRequestOptions: { delay: 200, key: "remote-validator" },  // 防抖相关配置
      }
    }
- * @param {Object} ctx - 上下文对象，配合 formily 使用
+ * @param {Object} ctx - 上下文对象，可配合 formily 使用
  * @returns {Promise} 校验结果，成功返回 resolved promise，失败返回 rejected promise
  */
 export const remoteValidator = (value, rule, ctx) => {
-  // const { field, form } = ctx;
+  const { fieldName, formValues } = ctx || {};
   const config = rule?.remoteValidator;
   if (isEmpty(value) || isEmpty(config) || !config?.restful) {
     return Promise.resolve();
   }
   const { withForm, restful, reqConfig, extraParams, makeRequestOptions } = config;
   // value 和 表单的key
-  const fieldName = ctx?.field?.path?.entire;
   const data = { value, field: fieldName, extraParams };
   if (withForm) {
     // 带上表单值
-    data.form = ctx?.form?.values;
+    data.form = formValues;
   }
   const client = makeValidateRequest({ key: `${fieldName}-${restful}`, delay: 200, ...makeRequestOptions });
   return client.post(restful, data, { disableNotiError: true, ...reqConfig }).then(
