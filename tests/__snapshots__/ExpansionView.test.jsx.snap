@@ -92,7 +92,7 @@ exports[`ExpansionView should render with enableBraceExpansion 1`] = `
                 class="ant-alert-message"
               >
                 <div>
-                  <p
+                  <div
                     style="white-space: pre-wrap;"
                   >
                     <div
@@ -107,7 +107,7 @@ exports[`ExpansionView should render with enableBraceExpansion 1`] = `
 {3}
 {4}
                     </span>
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>

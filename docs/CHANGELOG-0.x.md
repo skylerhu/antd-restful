@@ -1,5 +1,15 @@
 # Release Notes
 
+## 0.1.10
+- fix: 修复RestTable tools配置为空时样式问题
+    - tools配置的显示依赖配置restful
+    - 筛选Tag兼容antd 4.x版本显示是设置 closable
+- feat: 增加了 validators 可应用于表单校验
+    - expansionValidator: ExpansionView 组件的校验
+    - remoteValidator: 配置远端接口校验数据
+- perf: makeSafeRequest 配置 delay 防抖的情况下，优化首次请求不执行delay
+
+
 ## 0.1.9
 - feat: 扩展 RestTable
     - 配置 extraTools 可以自定义其他操作按钮

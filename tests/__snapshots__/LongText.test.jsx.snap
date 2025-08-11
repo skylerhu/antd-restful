@@ -3,7 +3,7 @@
 exports[`LongText should render array of objects with labelTemplate and maxLength 1`] = `
 <div>
   <div>
-    <p
+    <div
       style="white-space: pre-wrap;"
     >
       <div
@@ -39,7 +39,7 @@ exports[`LongText should render array of objects with labelTemplate and maxLengt
           </svg>
         </span>
       </button>
-    </p>
+    </div>
   </div>
 </div>
 `;
@@ -47,7 +47,7 @@ exports[`LongText should render array of objects with labelTemplate and maxLengt
 exports[`LongText should render array value with maxLength 1`] = `
 <div>
   <div>
-    <p
+    <div
       style="white-space: pre-wrap;"
     >
       <div
@@ -83,7 +83,7 @@ exports[`LongText should render array value with maxLength 1`] = `
           </svg>
         </span>
       </button>
-    </p>
+    </div>
   </div>
 </div>
 `;
@@ -91,13 +91,13 @@ exports[`LongText should render array value with maxLength 1`] = `
 exports[`LongText should render basic value 1`] = `
 <div>
   <div>
-    <p
+    <div
       style="white-space: pre-wrap;"
     >
       <span>
         1
       </span>
-    </p>
+    </div>
   </div>
 </div>
 `;
@@ -105,7 +105,7 @@ exports[`LongText should render basic value 1`] = `
 exports[`LongText should render object value with labelTemplate 1`] = `
 <div>
   <div>
-    <p
+    <div
       style="white-space: pre-wrap;"
     >
       <span>
@@ -135,7 +135,7 @@ exports[`LongText should render object value with labelTemplate 1`] = `
           </svg>
         </span>
       </button>
-    </p>
+    </div>
   </div>
 </div>
 `;
@@ -143,7 +143,7 @@ exports[`LongText should render object value with labelTemplate 1`] = `
 exports[`LongText should render string value with maxLength 1`] = `
 <div>
   <div>
-    <p
+    <div
       style="white-space: pre-wrap;"
     >
       <div
@@ -179,7 +179,7 @@ exports[`LongText should render string value with maxLength 1`] = `
           </svg>
         </span>
       </button>
-    </p>
+    </div>
   </div>
 </div>
 `;

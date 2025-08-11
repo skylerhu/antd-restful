@@ -26,46 +26,16 @@ import libs from "demo/libs";
 
 const {
   formitems,
-  request,
-  apiTools: { formatRequestError },
-  typeTools: { isEmpty },
+  validators: { expansionValidator, remoteValidator },
 } = libs;
 
 // https://core.formilyjs.org/zh-CN/api/entry/form-validator-registry
 registerValidateRules({
-  // 扩展 ExpansionView 组件的校验
-  expansionValidator: (value, rule) => {
-    if (!rule["expansionValidator"] || isEmpty(value) || isEmpty(value.error)) {
-      return Promise.resolve();
-    }
-    return Promise.reject(rule.message || "请按照要求输入数据");
-  },
-  // 远程请求接口校验, 一般场景使用 ExpansionView 组件可实现类似效果
+  expansionValidator,
   remoteValidator: (value, rule, ctx) => {
-    // const { field, form } = ctx;
-    const config = rule["remoteValidator"];
-    if (isEmpty(value) || isEmpty(config) || !config.restful) {
-      return Promise.resolve();
-    }
-    // value 和 表单的key
-    const data = { value, field: ctx.field.path.entire };
-    if (config.withForm) {
-      // 带上表单值
-      data.form = ctx.form.values;
-    }
-    return request.post(config.restful, data, { disableNotiError: true }).then(
-      (res) => {
-        // 校验成功/失败都返回200，避免http接口4xx过多； validated=True表示成功
-        if (res.status === 200 && res.data.validated) {
-          return Promise.resolve();
-        }
-        return Promise.reject(res.data.message || rule.message || "请按照要求输入数据");
-      },
-      (error) => {
-        const { message, description } = formatRequestError(error);
-        return Promise.reject(`${message}: ${description}`);
-      }
-    );
+    const fieldName = ctx?.field?.path?.entire;
+    const formValues = ctx?.form?.values;
+    return remoteValidator(value, rule, { fieldName, formValues });
   },
 });
 
@@ -123,7 +93,7 @@ const testSchema = {
           properties: {
             text: {
               type: "string",
-              title: "源数据",
+              title: "远程校验",
               "x-component": "Input",
               "x-decorator": "FormItem",
               "x-validator": [
@@ -133,6 +103,9 @@ const testSchema = {
                     restful: "api/validate/remote/",
                     withForm: true,
                     // restful: "api/validate/arr/",
+                    makeRequestOptions: {
+                      delay: 1000,
+                    }
                   },
                 },
               ],

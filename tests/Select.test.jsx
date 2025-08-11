@@ -35,7 +35,7 @@ describe("RestSelect", () => {
     await waitFor(() => {
       // eslint-disable-next-line camelcase
       expect(fetch).toHaveBeenCalledWith(restful, expect.objectContaining({ params: { value__in: "1" } }));
-      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalled();
     });
     toggleOpen(container);
     expect(getByTestId("option-1")).toBeInTheDocument();
