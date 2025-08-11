@@ -22,6 +22,7 @@ import {
   SearchOutlined,
   SecurityScanOutlined,
   SettingOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
@@ -971,7 +972,8 @@ const RestTable = forwardRef(
               return (
                 <Tag
                   key={item.key}
-                  closeIcon
+                  closable={true}
+                  closeIcon={<CloseOutlined />}
                   onClose={() => {
                     setHeaderFilters((oldV) => {
                       return { ...oldV, [item.key]: null };
