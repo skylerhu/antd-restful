@@ -93,7 +93,7 @@ exports[`ExpansionView should render with enableBraceExpansion 1`] = `
               >
                 <div>
                   <div
-                    style="white-space: pre-wrap;"
+                    style="white-space: pre-wrap; word-break: break-all;"
                   >
                     <div
                       class="antd-restful-long-text-stat"

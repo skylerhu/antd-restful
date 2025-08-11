@@ -76,7 +76,7 @@ instance.interceptors.response.use(
       const { message, description } = formatRequestError(error);
       const config = {
         message,
-        description: <p style={{ whiteSpace: "pre-wrap" }}>{description}</p>,
+        description: <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{description}</p>,
       };
       // 401 和 403 避免多次提示，所以设置key
       if (["401", "403", "404"].includes(error?.response?.status)) {

@@ -1165,7 +1165,7 @@ exports[`RestTable 快照测试 should match snapshot with showHeaderTags 1`] = 
         </span>
         <span
           class="cls-resttable-header-tag-value"
-          style="white-space: pre-wrap;"
+          style="white-space: pre-wrap; word-break: break-all;"
         >
           u
         </span>

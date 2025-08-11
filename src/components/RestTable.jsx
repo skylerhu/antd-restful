@@ -983,7 +983,7 @@ const RestTable = forwardRef(
                   <span style={{ color: "#8c8c8c" }} className="cls-resttable-header-tag-label">
                     {item.label}:{" "}
                   </span>
-                  <span style={{ whiteSpace: "pre-wrap" }} className="cls-resttable-header-tag-value">
+                  <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }} className="cls-resttable-header-tag-value">
                     {item.value}
                   </span>
                 </Tag>

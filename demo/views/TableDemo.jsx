@@ -13,7 +13,7 @@ const TableDemo = () => {
 
   const Component = linkRoute ? RouteTable : RestTable;
   return (
-    <div>
+    <div style={{ width: "80%" }}>
       <Checkbox
         style={{ marginBottom: 20 }}
         checked={linkRoute}

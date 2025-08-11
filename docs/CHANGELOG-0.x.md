@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.1.11
+- style: 修复 LongText / RestTable 组件文本样式
+  - `white-space: pre-wrap; word-break: break-all` 组合用于文本显示，主要是增加了 word-break
+
 ## 0.1.10
 - fix: 修复RestTable tools配置为空时样式问题
     - tools配置的显示依赖配置restful
