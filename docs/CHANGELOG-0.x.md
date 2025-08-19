@@ -3,6 +3,7 @@
 ## 0.1.11
 - style: 修复 LongText / RestTable 组件文本样式
   - `white-space: pre-wrap; word-break: break-all` 组合用于文本显示，主要是增加了 word-break
+- - perf: makeSafeRequest 优化 delay 模式下，长时间未请求后的一次请求不会执行delay逻辑
 
 ## 0.1.10
 - fix: 修复RestTable tools配置为空时样式问题
