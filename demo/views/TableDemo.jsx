@@ -26,7 +26,7 @@ const TableDemo = () => {
       <Component
         restful="api/users/"
         baseParams={{
-          // search: "u",
+          search: "u",
           nickname: "u",
           page_size: 2, // eslint-disable-line camelcase
           // age__range: [0, 100], // eslint-disable-line camelcase
@@ -142,6 +142,9 @@ const TableDemo = () => {
         }}
         // expandFieldPath="city.name"
         filterFormProps={{
+          initialValues: {
+            search: "u3",
+          },
           advancedSearch: true,
           antdListProps: {
             grid: { gutter: 30, column: 3 },
