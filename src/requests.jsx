@@ -76,7 +76,7 @@ instance.interceptors.response.use(
       const { message, description } = formatRequestError(error);
       const config = {
         message,
-        description: <p style={{ whiteSpace: "pre-wrap" }}>{description}</p>,
+        description: <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{description}</p>,
       };
       // 401 和 403 避免多次提示，所以设置key
       if (["401", "403", "404"].includes(error?.response?.status)) {
@@ -195,13 +195,18 @@ function makeSafeRequest() {
       reqMapRef[key].promise?.abort();
       reqMapRef[key].controller?.abort();
       clearTimeout(reqMapRef[key].timer);
+      if (delay > 0 && Date.now() - reqMapRef[key].timestamp > delay * 5) {
+        // 如果超过5倍delay，则认为是第一次请求
+        isFirst = true;
+      } else {
+        isFirst = false;
+      }
       delete reqMapRef[key];
-      isFirst = false;
     }
 
     // 创建新的 AbortController
     const controller = new AbortController();
-    reqMapRef[key] = { controller };
+    reqMapRef[key] = { controller, timestamp: Date.now() };
 
     if (delay <= 0 || isFirst) {
       const promise = new AbortablePromise((resolve, reject) => doRequest(resolve, reject, { key }, reqConfig));

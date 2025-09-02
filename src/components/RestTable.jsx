@@ -444,12 +444,20 @@ const RestTable = forwardRef(
       formFilters,
     ]);
 
+    const filterFormKeys = useDeepCompareMemoize(filterFormProps?.fields?.map((field) => ({
+      key: field.key,
+      type: field.type,
+    })) || []);
+
     // 更新筛选表单的值
     useEffect(() => {
       if (filterFormRef.current) {
         const values = {};
-        filterFormProps?.fields?.forEach((field) => {
-          const v = memRouteParams ? memRouteParams[field.key] : undefined;
+        filterFormKeys.forEach((field) => {
+          let v = memRouteParams ? memRouteParams[field.key] : undefined;
+          if (v === undefined) {
+            v = memBaseParams ? memBaseParams[field.key] : undefined;
+          }
           if (v === undefined) {
             // 需要重置表单的值
             values[field.key] = null;
@@ -471,18 +479,17 @@ const RestTable = forwardRef(
             setEnableAdvancedSearch(true);
           }
         }
-
         if (isEmpty(values)) {
           filterFormRef.current.getFormInstance().resetFields();
         } else {
           filterFormRef.current.getFormInstance().setFieldsValue(values);
         }
-        setFormFilters(values);
+        setFormFilters(oldV => deepEqual(oldV, values) ? oldV : values);
       }
-    }, [memRouteParams, filterFormProps?.fields, fieldPage, fieldPageSize, innerTools.advancedSearch]);
+    }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
 
     useEffect(() => {
-      const fields = filterFormProps?.fields;
+      const fields = filterFormKeys;
       if (isEmpty(fields) || isEmpty(memBaseParams)) {
         return;
       }
@@ -495,7 +502,7 @@ const RestTable = forwardRef(
           );
         }
       });
-    }, [memBaseParams, filterFormProps?.fields]);
+    }, [memBaseParams, filterFormKeys]);
 
     // 处理筛选条件变化 onFiltersChange
     useEffect(() => {
@@ -825,6 +832,7 @@ const RestTable = forwardRef(
                   <GridForm
                     key="filterForm"
                     {...filterFormProps}
+                    initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
                     advancedSearch={enableAdvancedSearch}
                     ref={filterFormRef}
                     onSubmit={(values) => {
@@ -983,7 +991,7 @@ const RestTable = forwardRef(
                   <span style={{ color: "#8c8c8c" }} className="cls-resttable-header-tag-label">
                     {item.label}:{" "}
                   </span>
-                  <span style={{ whiteSpace: "pre-wrap" }} className="cls-resttable-header-tag-value">
+                  <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }} className="cls-resttable-header-tag-value">
                     {item.value}
                   </span>
                 </Tag>
@@ -1075,6 +1083,8 @@ RestTable.propTypes = {
   reqConfig: PropTypes.object,
   urlDetailTemplate: PropTypes.string,
   baseParams: PropTypes.object,
+  // 有了baseParams，还需要routeParams，是为了处理默认参数(baseParams)不显示在地址栏的问题
+  // routeParams与地址栏query参数对应，在使用该组件赋值时需要去掉与baseParams重复的参数
   routeParams: PropTypes.object,
   // 无论路由参数、表单参数是否变化，都会被改值覆盖
   forceParams: PropTypes.object,

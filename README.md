@@ -21,7 +21,7 @@
 
 使用示例：
 ```jsx
-import antdRestful from "antd-restufl";
+import antdRestful from "antd-restful";
 
 const {
   GridForm, RestTable,
@@ -37,7 +37,7 @@ const {
 
 若是需要调整，可以在入口中修改：
 ```jsx
-import antdRestful from "antd-restufl";
+import antdRestful from "antd-restful";
 
 const { setGlobalConfig } = antdRestful;
 // 修改成自己需要的处理方式

@@ -4,7 +4,7 @@ exports[`LongText should render array of objects with labelTemplate and maxLengt
 <div>
   <div>
     <div
-      style="white-space: pre-wrap;"
+      style="white-space: pre-wrap; word-break: break-all;"
     >
       <div
         class="antd-restful-long-text-stat"
@@ -48,7 +48,7 @@ exports[`LongText should render array value with maxLength 1`] = `
 <div>
   <div>
     <div
-      style="white-space: pre-wrap;"
+      style="white-space: pre-wrap; word-break: break-all;"
     >
       <div
         class="antd-restful-long-text-stat"
@@ -92,7 +92,7 @@ exports[`LongText should render basic value 1`] = `
 <div>
   <div>
     <div
-      style="white-space: pre-wrap;"
+      style="white-space: pre-wrap; word-break: break-all;"
     >
       <span>
         1
@@ -106,7 +106,7 @@ exports[`LongText should render object value with labelTemplate 1`] = `
 <div>
   <div>
     <div
-      style="white-space: pre-wrap;"
+      style="white-space: pre-wrap; word-break: break-all;"
     >
       <span>
         管理员(admin)
@@ -144,7 +144,7 @@ exports[`LongText should render string value with maxLength 1`] = `
 <div>
   <div>
     <div
-      style="white-space: pre-wrap;"
+      style="white-space: pre-wrap; word-break: break-all;"
     >
       <div
         class="antd-restful-long-text-stat"

@@ -76,7 +76,7 @@ const LongText = ({
 
   return (
     <div style={style} className={className}>
-      <div style={{ whiteSpace: "pre-wrap" }}>
+      <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
         {isArray(value) || isString(value) ? (
           <div style={{ color: tipColor }} className="antd-restful-long-text-stat">
             {getShowTitle(value, titleTemplate, titleAggPath)}
@@ -122,7 +122,7 @@ const LongText = ({
         {...antdModalProps}
         open={visible}
       >
-        <p style={{ whiteSpace: "pre-wrap" }}>{realText}</p>
+        <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{realText}</p>
       </Modal>
     </div>
   );

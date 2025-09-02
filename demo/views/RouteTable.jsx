@@ -32,7 +32,7 @@ const RouteTable = (restProps) => {
       }
       return newV;
     });
-  }, [location.search]);
+  }, [location.search, memBaseParams]);
 
   const onChange = useCallback(
     (values) => {
