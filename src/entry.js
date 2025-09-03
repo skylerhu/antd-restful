@@ -1,9 +1,13 @@
+import loadable from "@loadable/component";
+
 export { default as formitems } from "./components/formitems/index";
 
 export { default as RestTable } from "./components/RestTable";
 export { default as LongText } from "./components/LongText";
 export { default as CopyView } from "./components/CopyView";
 export { default as GridForm } from "./components/GridForm";
+export const RouteTable = loadable(() => import("src/components/route/RouteTable"));
+export const RouteV5Table = loadable(() => import("src/components/route/RouteV5Table"));
 
 export * as apiTools from "./requests";
 export { default as request } from "./requests";
