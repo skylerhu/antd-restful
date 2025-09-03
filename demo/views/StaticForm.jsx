@@ -206,7 +206,7 @@ export default function StaticForm() {
           defaultPageSize={5}
           titleTemplate="选中 {count} 个用户，按照性别统计[ {stat} ]"
           titleAggPath="gender"
-          // showHeaderTags={true}
+          showHeaderTags={true}
           baseParams={
             {
               page_size: 2, // eslint-disable-line camelcase
@@ -285,6 +285,9 @@ export default function StaticForm() {
               dataIndex: "created_at__range",
               filterDropdownConfig: {
                 type: FieldType.DATE_RANGE_PICKER,
+                dropdownProps: {
+                  antdRangePickerProps: { picker: "date", showTime: true },
+                },
               },
               fieldName: "created_at",
               dropdownLocalConfig: {
@@ -299,8 +302,8 @@ export default function StaticForm() {
   ];
 
   // 方便调试单个组件
-  const showFields = [];
-  // const showFields = ["table"];
+  // const showFields = [];
+  const showFields = ["table"];
 
   return (
     <div>

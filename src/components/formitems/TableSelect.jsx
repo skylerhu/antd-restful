@@ -101,8 +101,8 @@ const TableSelect = ({
     const _props = { ...antdTableProps, ...antdTableReadProps };
     return (
       <RestTable
-        tools={false}
         {...restProps}
+        tools={false}
         antdTableProps={_props}
         baseParams={{}}
         forceParams={{}}
@@ -126,7 +126,7 @@ const TableSelect = ({
     return readOnlyView;
   }
   return (
-    <Space.Compact block direction="vertical" gap={0} {...antdSpaceProps}>
+    <Space.Compact block direction="vertical" {...antdSpaceProps} style={{ rowGap: 8, ...antdSpaceProps?.style }}>
       {antdVersion && antdVersion >= "5" ? (
         <Collapse
           defaultActiveKey={expandSelected ? "title" : undefined}
