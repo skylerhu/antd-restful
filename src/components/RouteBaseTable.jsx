@@ -6,16 +6,16 @@ import { isEmpty, isFunction } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
 import { useDeepCompareMemoize } from "src/hooks";
 
-const RouteBaseTable = ({ search, onSearchChange, restProps }) => {
+const RouteBaseTable = ({ location, onSearchChange, restProps }) => {
   const { baseParams, onFiltersChange } = restProps;
-  const searchRef = useRef(search);
+  const searchRef = useRef(location.search);
 
   const memBaseParams = useDeepCompareMemoize(baseParams);
 
   const [params, setParams] = useState();
 
   useEffect(() => {
-    const query = queryString.parse(search);
+    const query = queryString.parse(location.search);
     setParams((oldV) => {
       const newV = { ...query };
       if (deepEqual(newV, oldV)) {
@@ -23,7 +23,7 @@ const RouteBaseTable = ({ search, onSearchChange, restProps }) => {
       }
       return newV;
     });
-  }, [search, memBaseParams]);
+  }, [location.search, memBaseParams]);
 
   const onChange = useCallback(
     (values) => {
@@ -53,7 +53,7 @@ const RouteBaseTable = ({ search, onSearchChange, restProps }) => {
     [memBaseParams, onFiltersChange, onSearchChange]
   );
 
-  if (!params) {
+  if (params === undefined || params === null) {
     // 等待params根据search初始化完成
     return null;
   }
@@ -62,7 +62,7 @@ const RouteBaseTable = ({ search, onSearchChange, restProps }) => {
 };
 
 RouteBaseTable.propTypes = {
-  search: PropTypes.string,
+  location: PropTypes.object,
   onSearchChange: PropTypes.func,
   restProps: PropTypes.object,
 };

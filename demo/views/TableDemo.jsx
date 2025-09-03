@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Button, Checkbox } from "antd";
 import libs from "demo/libs";
-// import RouteTable from "./RouteTable";
+import RouteTable from "./RouteTable";
 
 const {
-  RouteTable,
   RestTable,
   constants: { FieldType },
 } = libs;
