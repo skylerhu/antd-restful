@@ -325,7 +325,7 @@ const RestTable = forwardRef(
     const innerTools = useDeepCompareMemoize(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
     );
-    const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(tools?.advancedDefaultOpen || false);
+    const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(tools?.advancedDefaultOpen || filterFormProps?.advancedSearch);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
     const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     const storageKey = useMemo(() => {
@@ -817,7 +817,7 @@ const RestTable = forwardRef(
                     key="filterForm"
                     {...filterFormProps}
                     initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
-                    advancedSearch={filterFormProps?.advancedSearch !== undefined ? filterFormProps?.advancedSearch : enableAdvancedSearch}
+                    advancedSearch={enableAdvancedSearch}
                     ref={filterFormRef}
                     onSubmit={(values) => {
                       setFormFilters((oldV) => {
@@ -1142,7 +1142,7 @@ RestTable.propTypes = {
       expandable: PropTypes.bool,
       expandableItemProps: PropTypes.object,
     })
-  ),
+  ).isRequired,
   // 设置是否开启展开功能的字段
   expandFieldPath: PropTypes.string,
   expandAntdProps: PropTypes.object,

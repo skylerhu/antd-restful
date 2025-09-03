@@ -6,6 +6,7 @@ import { isEmpty, isFunction } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
 import { useDeepCompareMemoize } from "src/hooks";
 
+// 因为兼容不了react-router v5和v6 版本，所以传递 location 进来，然后父类组件实现路由的变更
 const RouteBaseTable = ({ location, onSearchChange, restProps }) => {
   const { baseParams, onFiltersChange } = restProps;
   const searchRef = useRef(location.search);

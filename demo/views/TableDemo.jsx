@@ -38,7 +38,7 @@ const TableDemo = () => {
           advancedSearch: true,
           settings: true,
           // refreshInterval: 3000,
-          advancedDefaultOpen: true,
+          // advancedDefaultOpen: true,
           expandedAllRows: false,
         }}
         // tools={false}
