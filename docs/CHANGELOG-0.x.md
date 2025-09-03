@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.1.12
+- style: 调整 TableSelect 内2个元素之间的间隔
+- fix: 修复 TableSelect也能够直接开启高级搜索
+- fix: 兼容 DataStrPicker、RangeStrPicker 组件 在v4(moment)和v5(dayjs) 上时间处理的问题
+- feat: GridForm 增加配置 submitTitle 和 resetTitle 可配置按钮显示
+
 ## 0.1.11
 - style: 修复 LongText / RestTable 组件文本样式
   - `white-space: pre-wrap; word-break: break-all` 组合用于文本显示，主要是增加了 word-break
@@ -22,7 +28,7 @@
     - 配置 tools.advancedDefaultOpen 可以定义默认打开高级搜索
     - 配置 columns.expandable 定义是否启用展开功能
     - columns.fieldValue 变更为 columns.copyField
-- fix: 修复 GridFrom 关闭高级搜索时选项初始化的问题
+- fix: 修复 GridForm 关闭高级搜索时选项初始化的问题
 
 ## 0.1.8
 - fix: 修复RestTable header筛选选择多值初始化数据的问题

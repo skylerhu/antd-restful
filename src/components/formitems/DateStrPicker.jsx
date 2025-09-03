@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { DatePicker, TimePicker } from "antd";
-import dayjs from "dayjs";
+import { createDate } from "src/common/dateUtils";
 import { READ_ONLY_CLASS } from "src/common/constants";
 import { isFunction } from "src/common/typeTools";
 
@@ -26,9 +26,9 @@ const DateStrPicker = ({
     [onChange]
   );
 
-  const getDayjsValue = useCallback(
+  const getDateValue = useCallback(
     (val) => {
-      return val ? dayjs(val, format) : undefined;
+      return val ? createDate(val, format) : undefined;
     },
     [format]
   );
@@ -49,8 +49,8 @@ const DateStrPicker = ({
       {...antdPickerProps}
       picker={picker}
       disabled={disabled}
-      value={getDayjsValue(value)}
-      defaultValue={getDayjsValue(defaultValue)}
+      value={getDateValue(value)}
+      defaultValue={getDateValue(defaultValue)}
       onChange={onValueChange}
       format={format}
     />

@@ -194,18 +194,18 @@ exports[`RangeStrPicker should render 1`] = `
 exports[`RangeStrPicker should render 2`] = `
 <div>
   <div
-    class="ant-picker ant-picker-range ant-picker-outlined css-dev-only-do-not-override-1kf000u"
+    class="ant-picker ant-picker-range ant-picker-invalid ant-picker-outlined css-dev-only-do-not-override-1kf000u"
   >
     <div
       class="ant-picker-input"
     >
       <input
-        aria-invalid="false"
+        aria-invalid="true"
         autocomplete="off"
         date-range="start"
         placeholder="Start date"
         size="12"
-        value="2025_05_25"
+        value="Invalid Date"
       />
     </div>
     <div

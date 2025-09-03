@@ -16,6 +16,8 @@ const GridForm = forwardRef(
       onSubmit,
       onValuesChange,
       onReset,
+      submitTitle = "提交",
+      resetTitle = "重置",
       initialValues,
       antdFormProps,
       antdListProps,
@@ -165,7 +167,7 @@ const GridForm = forwardRef(
               break;
             }
             default: {
-              view = <Input {...item.antdFieldProps} onPressEnter={() => form.validateFields()} />;
+              view = <Input {...fieldProps} onPressEnter={() => form.validateFields()} />;
               break;
             }
           }
@@ -238,10 +240,10 @@ const GridForm = forwardRef(
                   <Form.Item style={{ marginBottom: 0 }}>
                     <Space>
                       <Button type="primary" htmlType="submit">
-                        提交
+                        {submitTitle}
                       </Button>
                       <Button htmlType="reset" onClick={() => handleReset()}>
-                        重置
+                        {resetTitle}
                       </Button>
                     </Space>
                   </Form.Item>
@@ -276,12 +278,15 @@ GridForm.propTypes = {
       type: PropTypes.oneOf(FieldType.map((o) => o.value)),
       antdFieldProps: PropTypes.object,
       render: PropTypes.func,
+      // 单项模式下字段组件的特殊属性; 高级模式不生效
       antdSingleProps: PropTypes.object,
     })
   ),
 
   onSubmit: PropTypes.func,
   onReset: PropTypes.func,
+  submitTitle: PropTypes.node,
+  resetTitle: PropTypes.node,
 
   initialValues: PropTypes.object,
   onValuesChange: PropTypes.func,

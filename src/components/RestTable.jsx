@@ -488,22 +488,6 @@ const RestTable = forwardRef(
       }
     }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
 
-    useEffect(() => {
-      const fields = filterFormKeys;
-      if (isEmpty(fields) || isEmpty(memBaseParams)) {
-        return;
-      }
-      const keys = fields.map((item) => item.key);
-      Object.keys(memBaseParams).forEach((key) => {
-        if (keys.includes(key)) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `baseParams 与 filterFormProps.fields 两个配置的key重复了：[${key}]，配置冲突会导致筛选结果不符合预期`
-          );
-        }
-      });
-    }, [memBaseParams, filterFormKeys]);
-
     // 处理筛选条件变化 onFiltersChange
     useEffect(() => {
       if (!innerFilters[fieldPage] || !innerFilters[fieldPageSize]) {
@@ -589,7 +573,7 @@ const RestTable = forwardRef(
       return columns.map((column) => {
         const key = genColumnKey(column);
         return {
-          label: column.title || key,
+          label: <div style={{ width: 100 }}>{column.title || key}</div>,
           value: key,
         };
       });
@@ -823,7 +807,7 @@ const RestTable = forwardRef(
     }, [innerTools, extraTools, filterFormProps, restful]);
 
     return (
-      <Space direction="vertical" gap={10} {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
+      <Space direction="vertical" {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
         {
           hasHeader && (
             <div style={{ position: "relative" }} className="cls-resttable-header">
@@ -833,7 +817,7 @@ const RestTable = forwardRef(
                     key="filterForm"
                     {...filterFormProps}
                     initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
-                    advancedSearch={enableAdvancedSearch}
+                    advancedSearch={filterFormProps?.advancedSearch !== undefined ? filterFormProps?.advancedSearch : enableAdvancedSearch}
                     ref={filterFormRef}
                     onSubmit={(values) => {
                       setFormFilters((oldV) => {
@@ -938,7 +922,7 @@ const RestTable = forwardRef(
                         trigger="click"
                         color="white"
                         title={
-                          <Space direction="vertical" gap={10}>
+                          <Space direction="vertical" style={{ width: 400 }}>
                             <div style={{ color: "black" }}>设置列显示</div>
                             <Checkbox
                               indeterminate={checkColumnIndeterminate}

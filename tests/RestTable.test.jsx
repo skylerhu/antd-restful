@@ -354,22 +354,6 @@ describe("RestTable", () => {
       });
     });
 
-    it("should show warning when baseParams conflicts with filterFormProps", () => {
-      const columns = [{ title: "姓名", dataIndex: "name", key: "name" }];
-      const filterFormProps = {
-        fields: [{ key: "name", label: "姓名", type: "input" }],
-      };
-      const baseParams = { name: "test" };
-
-      render(
-        <RestTable restful="/api/users" columns={columns} filterFormProps={filterFormProps} baseParams={baseParams} />
-      );
-
-      // eslint-disable-next-line no-console
-      expect(console.warn).toHaveBeenCalledWith(
-        "baseParams 与 filterFormProps.fields 两个配置的key重复了：[name]，配置冲突会导致筛选结果不符合预期"
-      );
-    });
   });
 
   describe("列配置测试", () => {

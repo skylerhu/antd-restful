@@ -3,7 +3,6 @@
 exports[`RestTable 快照测试 should match snapshot with all tools enabled 1`] = `
 <div
   class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
-  gap="10"
   style="width: 100%;"
 >
   <div
@@ -231,7 +230,6 @@ exports[`RestTable 快照测试 should match snapshot with all tools enabled 1`]
 exports[`RestTable 快照测试 should match snapshot with basic props 1`] = `
 <div
   class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
-  gap="10"
   style="width: 100%;"
 >
   <div
@@ -562,7 +560,6 @@ exports[`RestTable 快照测试 should match snapshot with basic props 1`] = `
 exports[`RestTable 快照测试 should match snapshot with custom pagination 1`] = `
 <div
   class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
-  gap="10"
   style="width: 100%;"
 >
   <div
@@ -758,7 +755,6 @@ exports[`RestTable 快照测试 should match snapshot with custom pagination 1`]
 exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
 <div
   class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
-  gap="10"
   style="width: 100%;"
 >
   <div
@@ -1093,7 +1089,6 @@ exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
 exports[`RestTable 快照测试 should match snapshot with showHeaderTags 1`] = `
 <div
   class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
-  gap="10"
   style="width: 100%;"
 >
   <div
@@ -1464,7 +1459,6 @@ exports[`RestTable 快照测试 should match snapshot with showHeaderTags 1`] = 
 exports[`RestTable 快照测试 should match snapshot with tools disabled 1`] = `
 <div
   class="ant-space css-dev-only-do-not-override-1kf000u ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small"
-  gap="10"
   style="width: 100%;"
 >
   <div

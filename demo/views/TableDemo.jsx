@@ -132,7 +132,7 @@ const TableDemo = () => {
           },
           {
             key: "key2",
-            title: "key2",
+            title: "key2测试title长度测试title长度",
             expandable: true,
           },
         ]}

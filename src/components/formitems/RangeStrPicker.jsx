@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { DatePicker, TimePicker } from "antd";
-import dayjs from "dayjs";
+import { createDate } from "src/common/dateUtils";
 import { READ_ONLY_CLASS } from "src/common/constants";
 import { isArray, isEmpty, isFunction } from "src/common/typeTools";
 
@@ -30,14 +30,14 @@ const RangeStrPicker = ({
     [onChange]
   );
 
-  const getDayjsValue = useCallback(
+  const getDateValue = useCallback(
     (val) => {
       if (isEmpty(val)) return undefined;
       if (!isArray(val)) {
         // 不是数组
         val = val.split(",");
       }
-      return val.map((item) => (item ? dayjs(item, format) : undefined));
+      return val.map((item) => (item ? createDate(item, format) : undefined));
     },
     [format]
   );
@@ -60,8 +60,8 @@ const RangeStrPicker = ({
       allowEmpty={[true, true]}
       {...antdRangePickerProps}
       disabled={disabled}
-      value={getDayjsValue(value)}
-      defaultValue={getDayjsValue(defaultValue)}
+      value={getDateValue(value)}
+      defaultValue={getDateValue(defaultValue)}
       onChange={onValueChange}
       format={format}
     />
