@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.13
+- fix: RouteBaseTable 需要透传 ref 参数，解决调用 RestTable 中组件方法的问题
+
 ## 0.1.12
 - style: 调整 TableSelect 内2个元素之间的间隔
 - fix: 修复 TableSelect也能够直接开启高级搜索

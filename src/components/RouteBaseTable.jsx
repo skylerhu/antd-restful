@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { dequal as deepEqual } from "dequal";
 import { queryString } from "src/common/parser";
@@ -7,7 +7,7 @@ import RestTable from "src/components/RestTable";
 import { useDeepCompareMemoize } from "src/hooks";
 
 // 因为兼容不了react-router v5和v6 版本，所以传递 location 进来，然后父类组件实现路由的变更
-const RouteBaseTable = ({ location, onSearchChange, restProps }) => {
+const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref) => {
   const { baseParams, onFiltersChange } = restProps;
   const searchRef = useRef(location.search);
 
@@ -59,12 +59,15 @@ const RouteBaseTable = ({ location, onSearchChange, restProps }) => {
     return null;
   }
 
-  return <RestTable {...restProps} routeParams={params} onFiltersChange={onChange} />;
-};
+  return <RestTable ref={ref} {...restProps} routeParams={params} onFiltersChange={onChange} />;
+});
 
 RouteBaseTable.propTypes = {
   location: PropTypes.object,
   onSearchChange: PropTypes.func,
   restProps: PropTypes.object,
 };
+
+RouteBaseTable.displayName = "RouteBaseTable";
+
 export default RouteBaseTable;

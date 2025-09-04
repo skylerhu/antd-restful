@@ -26,17 +26,18 @@
 ### 使用示例
 
 ```jsx
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { RouteBaseTable } from 'antd-restful';
 
 // 封装一个通用的路由表格组件
-const RouteTable = (restProps) => {
+const RouteTable = forwardRef((restProps, ref) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
     <RouteBaseTable
+      ref={ref}
       restProps={restProps}
       location={location}
       onSearchChange={(search) => {
@@ -44,7 +45,8 @@ const RouteTable = (restProps) => {
       }}
     />
   );
-};
+});
+RouteTable.displayName = 'RouteTable';
 
 // 使用封装的组件
 const UserList = () => {
