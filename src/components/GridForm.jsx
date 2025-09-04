@@ -30,33 +30,38 @@ const GridForm = forwardRef(
     const [activeFieldKey, setActiveFieldKey] = useState();
     // 单项模式下，表单项的选项
     const options = useMemo(() => {
-      return fields?.filter(item => !item.antdFormItemProps?.hidden).map((item) => ({
-        label: item.label || item.key,
-        value: item.key,
-      }));
+      return fields
+        ?.filter((item) => !item.antdFormItemProps?.hidden)
+        .map((item) => ({
+          label: item.label || item.key,
+          value: item.key,
+        }));
     }, [fields]);
 
     const fieldKeys = useDeepCompareMemoize(options.map((item) => item.value));
 
     const initKeyRef = useRef();
     // 初始化激活的表单项的key
-    const initActiveKey = useCallback((values) => {
-      if (!fieldKeys?.length) {
-        return;
-      }
-      // console.log("fieldKeys", fieldKeys);
-      const changedKeys = Object.keys(values).filter((key) => !isEmpty(values[key]) && fieldKeys.includes(key));
-      // console.log("changedKeys", changedKeys, values);
-      if (changedKeys.length >= 1) {
-        // 单项模式下，只有一个字段被修改，则激活该字段
-        initKeyRef.current = changedKeys[0];
-        setActiveFieldKey(oldV => oldV === changedKeys[0] ? oldV : changedKeys[0]);
-      } else {
-        // 单项模式下，没有字段被修改，则激活第一个字段
-        initKeyRef.current = fieldKeys[0];
-        setActiveFieldKey(fieldKeys[0]);
-      }
-    }, [fieldKeys]);
+    const initActiveKey = useCallback(
+      (values) => {
+        if (!fieldKeys?.length) {
+          return;
+        }
+        // console.log("fieldKeys", fieldKeys);
+        const changedKeys = Object.keys(values).filter((key) => !isEmpty(values[key]) && fieldKeys.includes(key));
+        // console.log("changedKeys", changedKeys, values);
+        if (changedKeys.length >= 1) {
+          // 单项模式下，只有一个字段被修改，则激活该字段
+          initKeyRef.current = changedKeys[0];
+          setActiveFieldKey((oldV) => (oldV === changedKeys[0] ? oldV : changedKeys[0]));
+        } else {
+          // 单项模式下，没有字段被修改，则激活第一个字段
+          initKeyRef.current = fieldKeys[0];
+          setActiveFieldKey(fieldKeys[0]);
+        }
+      },
+      [fieldKeys]
+    );
 
     const activeItem = useMemo(() => {
       return fields?.find((item) => item.key === activeFieldKey);
@@ -177,6 +182,11 @@ const GridForm = forwardRef(
       [form]
     );
 
+    const labelFlex = useMemo(() => {
+      return antdFormProps?.labelCol?.flex || "80px";
+    }, [antdFormProps?.labelCol]);
+
+
     if (!fields || fields.length === 0) {
       // 没有配置字段，不显示
       return null;
@@ -186,6 +196,7 @@ const GridForm = forwardRef(
       <Form
         style={style}
         className={className}
+        labelCol={{ flex: labelFlex, ...antdFormProps?.labelCol }}
         {...antdFormProps}
         form={form}
         initialValues={initialValues}
@@ -195,7 +206,6 @@ const GridForm = forwardRef(
           if (isFunction(onValuesChange)) {
             onValuesChange(changedValues, allValues);
           }
-
         }}
       >
         {!advancedSearch ? (
@@ -238,7 +248,7 @@ const GridForm = forwardRef(
               <List.Item key={item.key}>
                 {item.key === "__submit" ? (
                   <Form.Item style={{ marginBottom: 0 }}>
-                    <Space>
+                    <Space style={{ marginLeft: labelFlex }}>
                       <Button type="primary" htmlType="submit">
                         {submitTitle}
                       </Button>

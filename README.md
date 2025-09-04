@@ -52,6 +52,7 @@ setGlobalConfig({
   - [GridForm](./docs/reference/GridForm.md)
   - [LongText](./docs/reference/LongText.md)
   - [CopyView](./docs/reference/CopyView.md)
+  - [RouteBaseTable](./docs/reference/RouteBaseTable.md)
 - [表单项(formitems)](#22-表单项formitems)
   - [RestSelect](./docs/reference/formitems/RestSelect.md)
   - [DateStrPicker](./docs/reference/formitems/DateStrPicker.md)

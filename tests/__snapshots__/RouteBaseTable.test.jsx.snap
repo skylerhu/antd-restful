@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RouteBaseTable 快照测试 should match snapshot with basic props 1`] = `
+<div
+  data-testid="rest-table"
+>
+  <div
+    data-testid="route-params"
+  >
+    {"name":"test","age":25}
+  </div>
+  <button
+    data-testid="trigger-filters"
+  >
+    Trigger Filters
+  </button>
+  <div
+    data-testid="rest-table-props"
+  >
+    {"baseParams":{"status":"active"},"columns":[{"title":"Name","dataIndex":"name"}],"restful":"/api/users"}
+  </div>
+</div>
+`;
+
+exports[`RouteBaseTable 快照测试 should match snapshot with complex baseParams 1`] = `
+<div
+  data-testid="rest-table"
+>
+  <div
+    data-testid="route-params"
+  >
+    {"name":"test","age":25}
+  </div>
+  <button
+    data-testid="trigger-filters"
+  >
+    Trigger Filters
+  </button>
+  <div
+    data-testid="rest-table-props"
+  >
+    {"baseParams":{"user":{"id":1,"role":"admin"},"filters":{"status":"active","type":"premium"}},"columns":[{"title":"Name","dataIndex":"name"}],"restful":"/api/users"}
+  </div>
+</div>
+`;
+
+exports[`RouteBaseTable 快照测试 should match snapshot with empty search 1`] = `
+<div
+  data-testid="rest-table"
+>
+  <div
+    data-testid="route-params"
+  >
+    {}
+  </div>
+  <button
+    data-testid="trigger-filters"
+  >
+    Trigger Filters
+  </button>
+  <div
+    data-testid="rest-table-props"
+  >
+    {"baseParams":{"status":"active"},"columns":[{"title":"Name","dataIndex":"name"}],"restful":"/api/users"}
+  </div>
+</div>
+`;

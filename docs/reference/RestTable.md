@@ -53,7 +53,6 @@
 | 参数 | 说明 | 类型 | 默认值 | 版本 |
 | - | - | - | - | - |
 | advancedSearch | 是否显示高级搜索切换按钮 | `boolean` | `true` | - |
-| advancedDefaultOpen | 是否默认打开高级搜索 | `boolean` | `false` | - |
 | refreshInterval | 刷新间隔（毫秒），0为手动刷新，>0为自动刷新，<0为隐藏刷新按钮 | `number` | `0` | - |
 | downloadKey | 下载功能的参数名，true时使用'_download'，字符串时使用自定义参数名，false时禁用下载 | `boolean \| string` | `false` | - |
 | settings | 列显示设置，true时使用restful作为存储key，字符串时使用自定义key，false时禁用 | `boolean \| string` | `true` | - |

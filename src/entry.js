@@ -4,6 +4,7 @@ export { default as RestTable } from "./components/RestTable";
 export { default as LongText } from "./components/LongText";
 export { default as CopyView } from "./components/CopyView";
 export { default as GridForm } from "./components/GridForm";
+export { default as RouteBaseTable } from "./components/RouteBaseTable";
 
 export * as apiTools from "./requests";
 export { default as request } from "./requests";
