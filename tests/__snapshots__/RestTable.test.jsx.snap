@@ -774,131 +774,98 @@ exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
             class="ant-form ant-form-horizontal css-dev-only-do-not-override-1kf000u"
           >
             <div
-              class="ant-list ant-list-split ant-list-grid css-dev-only-do-not-override-1kf000u"
+              class="ant-space css-dev-only-do-not-override-1kf000u ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small"
             >
               <div
-                class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+                class="ant-space-item"
               >
                 <div
-                  class="ant-spin-container"
+                  class="ant-select ant-select-outlined css-dev-only-do-not-override-1kf000u ant-select-single ant-select-show-arrow"
+                  style="min-width: 100px;"
                 >
                   <div
-                    class="ant-row css-dev-only-do-not-override-1kf000u"
-                    style="margin-left: -5px; margin-right: -5px;"
+                    class="ant-select-selector"
                   >
-                    <div>
-                      <div
-                        class="ant-col css-dev-only-do-not-override-1kf000u"
-                        style="padding-left: 5px; padding-right: 5px; flex: 1 1 auto;"
+                    <span
+                      class="ant-select-selection-wrap"
+                    >
+                      <span
+                        class="ant-select-selection-search"
                       >
-                        <div
-                          class="ant-list-item"
-                        >
-                          <div
-                            class="ant-form-item css-dev-only-do-not-override-1kf000u ant-form-item-has-success"
-                            style="margin-bottom: 0px;"
-                          >
-                            <div
-                              class="ant-row ant-form-item-row css-dev-only-do-not-override-1kf000u"
-                            >
-                              <div
-                                class="ant-col ant-form-item-label css-dev-only-do-not-override-1kf000u"
-                                style="flex: 0 0 80px;"
-                              >
-                                <label
-                                  class=""
-                                  for="name"
-                                  title="姓名"
-                                >
-                                  姓名
-                                </label>
-                              </div>
-                              <div
-                                class="ant-col ant-form-item-control css-dev-only-do-not-override-1kf000u"
-                              >
-                                <div
-                                  class="ant-form-item-control-input"
-                                >
-                                  <div
-                                    class="ant-form-item-control-input-content"
-                                  >
-                                    <input
-                                      class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined ant-input-status-success"
-                                      id="name"
-                                      type="text"
-                                      value=""
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <div
-                        class="ant-col css-dev-only-do-not-override-1kf000u"
-                        style="padding-left: 5px; padding-right: 5px; flex: 1 1 auto;"
+                        <input
+                          aria-autocomplete="list"
+                          aria-controls="rc_select_TEST_OR_SSR_list"
+                          aria-expanded="false"
+                          aria-haspopup="listbox"
+                          aria-owns="rc_select_TEST_OR_SSR_list"
+                          autocomplete="off"
+                          class="ant-select-selection-search-input"
+                          id="rc_select_TEST_OR_SSR"
+                          readonly=""
+                          role="combobox"
+                          style="opacity: 0;"
+                          type="search"
+                          unselectable="on"
+                          value=""
+                        />
+                      </span>
+                      <span
+                        class="ant-select-selection-item"
+                        title="姓名"
                       >
-                        <div
-                          class="ant-list-item"
-                        >
-                          <div
-                            class="ant-form-item css-dev-only-do-not-override-1kf000u"
-                            style="margin-bottom: 0px;"
-                          >
-                            <div
-                              class="ant-row ant-form-item-row css-dev-only-do-not-override-1kf000u"
-                            >
-                              <div
-                                class="ant-col ant-form-item-control css-dev-only-do-not-override-1kf000u"
-                              >
-                                <div
-                                  class="ant-form-item-control-input"
-                                >
-                                  <div
-                                    class="ant-form-item-control-input-content"
-                                  >
-                                    <div
-                                      class="ant-space css-dev-only-do-not-override-1kf000u ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small"
-                                      style="margin-left: 80px;"
-                                    >
-                                      <div
-                                        class="ant-space-item"
-                                      >
-                                        <button
-                                          class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-primary ant-btn-color-primary ant-btn-variant-solid"
-                                          type="submit"
-                                        >
-                                          <span>
-                                            提 交
-                                          </span>
-                                        </button>
-                                      </div>
-                                      <div
-                                        class="ant-space-item"
-                                      >
-                                        <button
-                                          class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-default ant-btn-color-default ant-btn-variant-outlined"
-                                          type="reset"
-                                        >
-                                          <span>
-                                            重 置
-                                          </span>
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                        姓名
+                      </span>
+                    </span>
                   </div>
+                  <span
+                    aria-hidden="true"
+                    class="ant-select-arrow"
+                    style="user-select: none;"
+                    unselectable="on"
+                  >
+                    <span
+                      aria-label="down"
+                      class="anticon anticon-down ant-select-suffix"
+                      role="img"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        data-icon="down"
+                        fill="currentColor"
+                        focusable="false"
+                        height="1em"
+                        viewBox="64 64 896 896"
+                        width="1em"
+                      >
+                        <path
+                          d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+                        />
+                      </svg>
+                    </span>
+                  </span>
                 </div>
+              </div>
+              <div
+                class="ant-space-item"
+              >
+                <input
+                  class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined"
+                  id="name"
+                  type="text"
+                  value=""
+                />
+              </div>
+              <div
+                class="ant-space-item"
+              >
+                <button
+                  class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-primary ant-btn-color-primary ant-btn-variant-solid"
+                  type="submit"
+                >
+                  <span>
+                    搜 索
+                  </span>
+                </button>
               </div>
             </div>
           </form>

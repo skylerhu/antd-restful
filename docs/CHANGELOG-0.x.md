@@ -5,6 +5,7 @@
 - fix: 修复 TableSelect也能够直接开启高级搜索
 - fix: 兼容 DataStrPicker、RangeStrPicker 组件 在v4(moment)和v5(dayjs) 上时间处理的问题
 - feat: GridForm 增加配置 submitTitle 和 resetTitle 可配置按钮显示
+- fix: 移除 RestTable 的 tools.advancedDefaultOpen 配置项，设置默认是否开启高级筛选配置 filterFormProps?.advancedSearch
 - feat: 新增 RouteBaseTable 为表单与路由联动提供支持
 
 ## 0.1.11
