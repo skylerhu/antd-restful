@@ -327,7 +327,6 @@ const RestTable = forwardRef(
     );
     const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(filterFormProps?.advancedSearch || false);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
-    const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     const storageKey = useMemo(() => {
       if (isString(innerTools.settings)) {
         return innerTools.settings;
@@ -336,16 +335,6 @@ const RestTable = forwardRef(
     }, [innerTools.settings, restful]);
     // {allKeys: [], keys: []}, keys 是实际显示的列； allKeys 是所有列, 用标记cloumns是否发生过变动，如果发生过变动，则keys失效
     const [showColumns, setShowColumns] = useLocalStorage(storageKey, {});
-
-    // 暴露给ref调用的方法
-    useImperativeHandle(
-      ref,
-      () => ({
-        refreshList: fetchData,
-        deleteRow,
-      }),
-      [fetchData, deleteRow]
-    );
 
     useEffect(() => {
       if (isArray(dataSource)) {
@@ -515,14 +504,6 @@ const RestTable = forwardRef(
       }
     }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, innerFilters, onFiltersChange]);
 
-    useEffect(() => {
-      if (!innerFilters[fieldPage]) {
-        // 因为page_size一定会赋予默认值，避免首次会多请求一次
-        return;
-      }
-      fetchData();
-    }, [innerFilters, fetchData, fieldPage]);
-
     // 请求远端数据
     const fetchData = useCallback(() => {
       if (!isActive || !restful) {
@@ -541,6 +522,15 @@ const RestTable = forwardRef(
         });
     }, [isActive, makeRequest, restful, parseRowsPath, parseTotalPath, innerFilters]);
 
+    useEffect(() => {
+      if (!innerFilters[fieldPage]) {
+        // 因为page_size一定会赋予默认值，避免首次会多请求一次
+        return;
+      }
+      fetchData();
+    }, [innerFilters, fetchData, fieldPage]);
+
+    const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     // 删除行
     const deleteRow = useCallback(
       (row) => {
@@ -566,6 +556,16 @@ const RestTable = forwardRef(
           });
       },
       [rowKey, restful, urlDetailTemplate, fetchData, makeRequest]
+    );
+
+    // 暴露给ref调用的方法
+    useImperativeHandle(
+      ref,
+      () => ({
+        refreshList: fetchData,
+        deleteRow,
+      }),
+      [fetchData, deleteRow]
     );
 
     // 所有列的选项, 用于列显示设置
