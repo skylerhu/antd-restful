@@ -2,6 +2,7 @@
 
 ## 0.1.13
 - fix: RouteBaseTable 需要透传 ref 参数，解决调用 RestTable 中组件方法的问题
+- fix: 修复 RestTable 通过 ref 调用 refreshList 丢失参数的问题 (变个了函数顺序，依赖的函数放使用地方的上面)
 
 ## 0.1.12
 - style: 调整 TableSelect 内2个元素之间的间隔

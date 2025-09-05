@@ -815,6 +815,7 @@ const RestTable = forwardRef(
                 <Spin spinning={loading}>
                   <GridForm
                     key="filterForm"
+                    submitTitle="搜索"
                     {...filterFormProps}
                     initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
                     advancedSearch={enableAdvancedSearch}
