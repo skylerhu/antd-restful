@@ -3,8 +3,10 @@
 ## 0.1.13
 - fix: RouteBaseTable 需要透传 ref 参数，解决调用 RestTable 中组件方法的问题
 - fix: 修复 RestTable 通过 ref 调用 refreshList 丢失参数的问题 (变个了函数顺序，依赖的函数放使用地方的上面)
-- fix: RouteBaseTable 和 RestTable 增加 `parseOptions` 可以配置处理 query 参数
-    - query-string 在 本项目中默认设置了 `parseNumbers: true`，但在处理query中有超大数值会有溢出精度问题，可以设置为False当做字符串处理
+- fix: RestTable 增加 `parseOptions` 可以配置处理 query 参数
+    - query-string 在 本项目中默认设置了 `parseNumbers: true`
+    - 虽然是 RestTable 增加的配置，但主要是在 RouteBaseTable 中用到将query参数转换成object
+    - 在处理query中有超大数值会有溢出精度问题，可以设置为 False 当做字符串处理
 
 ## 0.1.12
 - style: 调整 TableSelect 内2个元素之间的间隔

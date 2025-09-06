@@ -7,8 +7,8 @@ import RestTable from "src/components/RestTable";
 import { useDeepCompareMemoize } from "src/hooks";
 
 // 因为兼容不了react-router v5和v6 版本，所以传递 location 进来，然后父类组件实现路由的变更
-const RouteBaseTable = forwardRef(({ location, onSearchChange, parseOptions, restProps }, ref) => {
-  const { baseParams, onFiltersChange } = restProps;
+const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref) => {
+  const { baseParams, parseOptions, onFiltersChange } = restProps;
   const searchRef = useRef(location.search);
 
   const memParseOptions = useDeepCompareMemoize(parseOptions);
@@ -66,8 +66,6 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, parseOptions, res
 RouteBaseTable.propTypes = {
   location: PropTypes.object,
   onSearchChange: PropTypes.func,
-  // 解析路由参数的选项, query-string 的配置项
-  parseOptions: PropTypes.object,
   restProps: PropTypes.object,
 };
 

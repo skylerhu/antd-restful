@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { useLocation, useNavigate } from "react-router";
 import libs from "demo/libs";
 
@@ -8,7 +7,7 @@ const {
 } = libs;
 
 
-const RouteTable = ({ parseOptions, ...restProps }) => {
+const RouteTable = (restProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,16 +15,11 @@ const RouteTable = ({ parseOptions, ...restProps }) => {
     <RouteBaseTable
       restProps={restProps}
       location={location}
-      parseOptions={parseOptions}
       onSearchChange={(search) => {
         navigate(`${location.pathname}${search}`);
       }}
     />
   );
-};
-
-RouteTable.propTypes = {
-  parseOptions: PropTypes.object,
 };
 
 export default RouteTable;
