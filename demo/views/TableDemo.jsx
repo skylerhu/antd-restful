@@ -24,6 +24,9 @@ const TableDemo = () => {
         联动路由
       </Checkbox>
       <Component
+        parseOptions={{
+          parseNumbers: false,
+        }}
         restful="api/users/"
         baseParams={{
           search: "u",

@@ -14,6 +14,7 @@
 | - | - | - | - | - |
 | location | 路由 location 对象，包含当前 URL 信息 | `object` | - | - |
 | onSearchChange | 搜索参数变化回调，用于更新路由 | `function(search)` | - | - |
+| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | - |
 | restProps | 传递给 RestTable 的所有属性 | `object` | - | - |
 
 **restProps 中的关键参数：**
@@ -27,25 +28,29 @@
 
 ```jsx
 import React, { forwardRef } from 'react';
+import PropTypes from "prop-types";
 import { useLocation, useNavigate } from 'react-router';
 import { RouteBaseTable } from 'antd-restful';
 
 // 封装一个通用的路由表格组件
-const RouteTable = forwardRef((restProps, ref) => {
+const RouteTable = ({ parseOptions, ...restProps }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
     <RouteBaseTable
-      ref={ref}
       restProps={restProps}
       location={location}
+      parseOptions={parseOptions}
       onSearchChange={(search) => {
         navigate(`${location.pathname}${search}`);
       }}
     />
   );
-});
+};
+RouteTable.propTypes = {
+  parseOptions: PropTypes.object,
+};
 RouteTable.displayName = 'RouteTable';
 
 // 使用封装的组件

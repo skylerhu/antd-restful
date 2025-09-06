@@ -16,13 +16,13 @@ import {
   Tooltip,
 } from "antd";
 import {
+  CloseOutlined,
   DownloadOutlined,
   NodeExpandOutlined,
   ReloadOutlined,
   SearchOutlined,
   SecurityScanOutlined,
   SettingOutlined,
-  CloseOutlined,
 } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
@@ -263,6 +263,7 @@ const RestTable = forwardRef(
 
       restful,
       reqConfig,
+      parseOptions,
       urlDetailTemplate,
       baseParams,
       routeParams,
@@ -294,6 +295,7 @@ const RestTable = forwardRef(
   ) => {
     const [makeRequest] = useSafeRequest();
     const reqConfigRef = useRef(reqConfig);
+    const memParseOptions = useDeepCompareMemoize(parseOptions);
 
     const [loading, setLoading] = useState(false);
     // table数据源
@@ -433,10 +435,12 @@ const RestTable = forwardRef(
       formFilters,
     ]);
 
-    const filterFormKeys = useDeepCompareMemoize(filterFormProps?.fields?.map((field) => ({
-      key: field.key,
-      type: field.type,
-    })) || []);
+    const filterFormKeys = useDeepCompareMemoize(
+      filterFormProps?.fields?.map((field) => ({
+        key: field.key,
+        type: field.type,
+      })) || []
+    );
 
     // 更新筛选表单的值
     useEffect(() => {
@@ -473,7 +477,7 @@ const RestTable = forwardRef(
         } else {
           filterFormRef.current.getFormInstance().setFieldsValue(values);
         }
-        setFormFilters(oldV => deepEqual(oldV, values) ? oldV : values);
+        setFormFilters((oldV) => (deepEqual(oldV, values) ? oldV : values));
       }
     }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
 
@@ -510,8 +514,15 @@ const RestTable = forwardRef(
         return;
       }
       setLoading(true);
+      const _config = {
+        params: innerFilters,
+        ...reqConfigRef.current,
+      };
+      if (memParseOptions) {
+        _config.paramsSerializer = (p) => globalConfig.queryStringify(p, memParseOptions);
+      }
       makeRequest({ delay: 200, key: `resttable` })
-        .get(restful, { params: innerFilters, ...reqConfigRef.current })
+        .get(restful, _config)
         .then((response) => {
           const data = findDataByPath(response.data, parseRowsPath);
           const _total = findDataByPath(response.data, parseTotalPath);
@@ -520,7 +531,7 @@ const RestTable = forwardRef(
         .finally(() => {
           setLoading(false);
         });
-    }, [isActive, makeRequest, restful, parseRowsPath, parseTotalPath, innerFilters]);
+    }, [isActive, makeRequest, restful, parseRowsPath, parseTotalPath, innerFilters, memParseOptions]);
 
     useEffect(() => {
       if (!innerFilters[fieldPage]) {
@@ -808,157 +819,155 @@ const RestTable = forwardRef(
 
     return (
       <Space direction="vertical" {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
-        {
-          hasHeader && (
-            <div style={{ position: "relative" }} className="cls-resttable-header">
-              {restful && filterFormProps && (
-                <Spin spinning={loading}>
-                  <GridForm
-                    key="filterForm"
-                    submitTitle="搜索"
-                    {...filterFormProps}
-                    initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
-                    advancedSearch={enableAdvancedSearch}
-                    ref={filterFormRef}
-                    onSubmit={(values) => {
-                      setFormFilters((oldV) => {
-                        if (deepEqual(oldV, values)) {
-                          // 数据没有变更刷新列表
-                          fetchData();
-                          return oldV;
-                        }
-                        return values;
-                      });
-                    }}
-                    onReset={(values) => {
-                      setFormFilters((oldV) => {
-                        if (deepEqual(oldV, values)) {
-                          // 数据没有变更刷新列表
-                          fetchData();
-                          return oldV;
-                        }
-                        return values;
-                      });
-                    }}
-                  />
-                </Spin>
-              )}
-              {(!isEmpty(innerTools) || extraTools) && (
-                <div
-                  style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
-                  className="cls-resttable-tools"
-                >
-                  <Space key="tools">
-                    {extraTools}
-                    {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
-                      <Tooltip title={isExpandedAll ? "收起所有行" : "展开所有行"}>
-                        <Button
-                          icon={<NodeExpandOutlined />}
-                          type={isExpandedAll ? "primary" : undefined}
-                          onClick={() => {
-                            setIsExpandedAll((oldV) => !oldV);
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                    {restful && filterFormProps && innerTools.advancedSearch && (
-                      <Tooltip title="高级搜索">
-                        <Button
-                          icon={<SecurityScanOutlined />}
-                          type={enableAdvancedSearch ? "primary" : undefined}
-                          onClick={() => setEnableAdvancedSearch((oldV) => !oldV)}
-                        />
-                      </Tooltip>
-                    )}
-                    {restful && innerTools.refreshInterval >= 0 && (
-                      <Tooltip
-                        title={
-                          innerTools.refreshInterval > 0
-                            ? enableRefresh
-                              ? `点击关闭 ${innerTools.refreshInterval}ms 刷新`
-                              : `开启间隔 ${innerTools.refreshInterval}ms 刷新`
-                            : "点击刷新"
-                        }
-                      >
-                        <Button
-                          icon={<ReloadOutlined />}
-                          type={enableRefresh && innerTools.refreshInterval > 0 ? "primary" : undefined}
-                          onClick={() => {
-                            const v = !enableRefresh;
-                            setEnableRefresh(v);
-                            runInterval(v && innerTools.refreshInterval > 0);
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                    {restful && innerTools.downloadKey && (
-                      <Dropdown
-                        menu={{
-                          items: [
-                            {
-                              key: "download_current",
-                              label: (
-                                <Button href={genDownloadUrl(false)} type="link" target="blank" size="small">
-                                  导出当前页
-                                </Button>
-                              ),
-                            },
-                            {
-                              key: "download_all",
-                              label: (
-                                <Button href={genDownloadUrl(true)} type="link" target="blank" size="small">
-                                  导出全部数据
-                                </Button>
-                              ),
-                            },
-                          ],
+        {hasHeader && (
+          <div style={{ position: "relative" }} className="cls-resttable-header">
+            {restful && filterFormProps && (
+              <Spin spinning={loading}>
+                <GridForm
+                  key="filterForm"
+                  submitTitle="搜索"
+                  {...filterFormProps}
+                  initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
+                  advancedSearch={enableAdvancedSearch}
+                  ref={filterFormRef}
+                  onSubmit={(values) => {
+                    setFormFilters((oldV) => {
+                      if (deepEqual(oldV, values)) {
+                        // 数据没有变更刷新列表
+                        fetchData();
+                        return oldV;
+                      }
+                      return values;
+                    });
+                  }}
+                  onReset={(values) => {
+                    setFormFilters((oldV) => {
+                      if (deepEqual(oldV, values)) {
+                        // 数据没有变更刷新列表
+                        fetchData();
+                        return oldV;
+                      }
+                      return values;
+                    });
+                  }}
+                />
+              </Spin>
+            )}
+            {(!isEmpty(innerTools) || extraTools) && (
+              <div
+                style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
+                className="cls-resttable-tools"
+              >
+                <Space key="tools">
+                  {extraTools}
+                  {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
+                    <Tooltip title={isExpandedAll ? "收起所有行" : "展开所有行"}>
+                      <Button
+                        icon={<NodeExpandOutlined />}
+                        type={isExpandedAll ? "primary" : undefined}
+                        onClick={() => {
+                          setIsExpandedAll((oldV) => !oldV);
                         }}
-                        placement="bottom"
-                      >
-                        <Button icon={<DownloadOutlined />} />
-                      </Dropdown>
-                    )}
-                    {innerTools.settings && (
-                      <Tooltip
-                        trigger="click"
-                        color="white"
-                        title={
-                          <Space direction="vertical" style={{ width: 400 }}>
-                            <div style={{ color: "black" }}>设置列显示</div>
-                            <Checkbox
-                              indeterminate={checkColumnIndeterminate}
-                              checked={checkColumnAll}
-                              onChange={(e) => {
-                                setShowColumns({
-                                  allKeys: allColumnKeys,
-                                  keys: e.target.checked ? allColumnKeys : [],
-                                });
-                              }}
-                            >
-                              全选
-                            </Checkbox>
-                            <Checkbox.Group
-                              value={realCheckKeys}
-                              options={allColumnOptions}
-                              onChange={(value) => {
-                                setShowColumns({
-                                  allKeys: allColumnKeys,
-                                  keys: value,
-                                });
-                              }}
-                            />
-                          </Space>
-                        }
-                      >
-                        <Button icon={<SettingOutlined />} />
-                      </Tooltip>
-                    )}
-                  </Space>
-                </div>
-              )}
-            </div>
-          )
-        }
+                      />
+                    </Tooltip>
+                  )}
+                  {restful && filterFormProps && innerTools.advancedSearch && (
+                    <Tooltip title="高级搜索">
+                      <Button
+                        icon={<SecurityScanOutlined />}
+                        type={enableAdvancedSearch ? "primary" : undefined}
+                        onClick={() => setEnableAdvancedSearch((oldV) => !oldV)}
+                      />
+                    </Tooltip>
+                  )}
+                  {restful && innerTools.refreshInterval >= 0 && (
+                    <Tooltip
+                      title={
+                        innerTools.refreshInterval > 0
+                          ? enableRefresh
+                            ? `点击关闭 ${innerTools.refreshInterval}ms 刷新`
+                            : `开启间隔 ${innerTools.refreshInterval}ms 刷新`
+                          : "点击刷新"
+                      }
+                    >
+                      <Button
+                        icon={<ReloadOutlined />}
+                        type={enableRefresh && innerTools.refreshInterval > 0 ? "primary" : undefined}
+                        onClick={() => {
+                          const v = !enableRefresh;
+                          setEnableRefresh(v);
+                          runInterval(v && innerTools.refreshInterval > 0);
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                  {restful && innerTools.downloadKey && (
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "download_current",
+                            label: (
+                              <Button href={genDownloadUrl(false)} type="link" target="blank" size="small">
+                                导出当前页
+                              </Button>
+                            ),
+                          },
+                          {
+                            key: "download_all",
+                            label: (
+                              <Button href={genDownloadUrl(true)} type="link" target="blank" size="small">
+                                导出全部数据
+                              </Button>
+                            ),
+                          },
+                        ],
+                      }}
+                      placement="bottom"
+                    >
+                      <Button icon={<DownloadOutlined />} />
+                    </Dropdown>
+                  )}
+                  {innerTools.settings && (
+                    <Tooltip
+                      trigger="click"
+                      color="white"
+                      title={
+                        <Space direction="vertical" style={{ width: 400 }}>
+                          <div style={{ color: "black" }}>设置列显示</div>
+                          <Checkbox
+                            indeterminate={checkColumnIndeterminate}
+                            checked={checkColumnAll}
+                            onChange={(e) => {
+                              setShowColumns({
+                                allKeys: allColumnKeys,
+                                keys: e.target.checked ? allColumnKeys : [],
+                              });
+                            }}
+                          >
+                            全选
+                          </Checkbox>
+                          <Checkbox.Group
+                            value={realCheckKeys}
+                            options={allColumnOptions}
+                            onChange={(value) => {
+                              setShowColumns({
+                                allKeys: allColumnKeys,
+                                keys: value,
+                              });
+                            }}
+                          />
+                        </Space>
+                      }
+                    >
+                      <Button icon={<SettingOutlined />} />
+                    </Tooltip>
+                  )}
+                </Space>
+              </div>
+            )}
+          </div>
+        )}
         {headerTags.length > 0 && (
           <div className="cls-resttable-header-tags">
             {headerTags.map((item) => {
@@ -976,7 +985,10 @@ const RestTable = forwardRef(
                   <span style={{ color: "#8c8c8c" }} className="cls-resttable-header-tag-label">
                     {item.label}:{" "}
                   </span>
-                  <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }} className="cls-resttable-header-tag-value">
+                  <span
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                    className="cls-resttable-header-tag-value"
+                  >
                     {item.value}
                   </span>
                 </Tag>
@@ -1066,6 +1078,8 @@ RestTable.propTypes = {
 
   restful: PropTypes.string,
   reqConfig: PropTypes.object,
+  // 处理query参数的选项, query-string 的配置项
+  parseOptions: PropTypes.object,
   urlDetailTemplate: PropTypes.string,
   baseParams: PropTypes.object,
   // 有了baseParams，还需要routeParams，是为了处理默认参数(baseParams)不显示在地址栏的问题

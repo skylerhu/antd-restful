@@ -169,7 +169,7 @@ describe("RouteBaseTable", () => {
       render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
 
       await waitFor(() => {
-        expect(queryString.parse).toHaveBeenCalledWith("?name=test&age=25&status=active");
+        expect(queryString.parse).toHaveBeenCalledWith("?name=test&age=25&status=active", undefined);
         const routeParamsElement = screen.getByTestId("route-params");
         expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25, status: "active" }));
       });

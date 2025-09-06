@@ -7,16 +7,17 @@ import RestTable from "src/components/RestTable";
 import { useDeepCompareMemoize } from "src/hooks";
 
 // 因为兼容不了react-router v5和v6 版本，所以传递 location 进来，然后父类组件实现路由的变更
-const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref) => {
+const RouteBaseTable = forwardRef(({ location, onSearchChange, parseOptions, restProps }, ref) => {
   const { baseParams, onFiltersChange } = restProps;
   const searchRef = useRef(location.search);
 
+  const memParseOptions = useDeepCompareMemoize(parseOptions);
   const memBaseParams = useDeepCompareMemoize(baseParams);
 
   const [params, setParams] = useState();
 
   useEffect(() => {
-    const query = queryString.parse(location.search);
+    const query = queryString.parse(location.search, memParseOptions);
     setParams((oldV) => {
       const newV = { ...query };
       if (deepEqual(newV, oldV)) {
@@ -24,7 +25,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
       }
       return newV;
     });
-  }, [location.search, memBaseParams]);
+  }, [location.search, memBaseParams, memParseOptions]);
 
   const onChange = useCallback(
     (values) => {
@@ -37,7 +38,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
         }
       });
       setParams(filters);
-      let changedSearch = queryString.stringify(filters);
+      let changedSearch = queryString.stringify(filters, memParseOptions);
       if (isEmpty(changedSearch)) {
         changedSearch = "";
       } else {
@@ -51,7 +52,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
         onFiltersChange(values);
       }
     },
-    [memBaseParams, onFiltersChange, onSearchChange]
+    [memBaseParams, onFiltersChange, onSearchChange, memParseOptions]
   );
 
   if (params === undefined || params === null) {
@@ -65,6 +66,8 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
 RouteBaseTable.propTypes = {
   location: PropTypes.object,
   onSearchChange: PropTypes.func,
+  // 解析路由参数的选项, query-string 的配置项
+  parseOptions: PropTypes.object,
   restProps: PropTypes.object,
 };
 

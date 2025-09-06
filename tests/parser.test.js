@@ -292,6 +292,8 @@ describe("Parser", () => {
       expect(parser.queryString.parse("?name=John&age=30")).toEqual({ name: "John", age: 30 });
       expect(parser.queryString.parse("?active=true")).toEqual({ active: true });
       expect(parser.queryString.parse("?tags=a,b,c")).toEqual({ tags: ["a", "b", "c"] });
+      expect(parser.queryString.parse("?active=true", { parseBooleans: false })).toEqual({ active: "true" });
+      expect(parser.queryString.parse("?name=John&age=30", { parseNumbers: false })).toEqual({ name: "John", age: "30" });
     });
 
     test("should stringify object", () => {
