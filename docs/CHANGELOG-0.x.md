@@ -7,6 +7,7 @@
     - query-string 在 本项目中默认设置了 `parseNumbers: true`
     - 虽然是 RestTable 增加的配置，但主要是在 RouteBaseTable 中用到将query参数转换成object
     - 在处理query中有超大数值会有溢出精度问题，可以设置为 False 当做字符串处理
+    - 升级 `query-string": "^9.1.0"` 支持可指定特定参数的类型
 
 ## 0.1.12
 - style: 调整 TableSelect 内2个元素之间的间隔

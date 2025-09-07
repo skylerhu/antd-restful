@@ -26,6 +26,9 @@ const TableDemo = () => {
       <Component
         parseOptions={{
           parseNumbers: false,
+          types: {
+            user: "number",
+          },
         }}
         restful="api/users/"
         baseParams={{
@@ -139,9 +142,11 @@ const TableDemo = () => {
           },
         ]}
         // expandedAllRows={true}
-        expandAntdProps={{
-          // bordered: true,
-        }}
+        expandAntdProps={
+          {
+            // bordered: true,
+          }
+        }
         // expandFieldPath="city.name"
         filterFormProps={{
           initialValues: {
@@ -162,11 +167,12 @@ const TableDemo = () => {
               type: FieldType.INPUT,
             },
             {
-              key: "search_",
-              label: "占位",
-              antdFormItemProps: {
-                // 隐藏占位使用
-                hidden: true,
+              key: "user",
+              label: "用户",
+              type: FieldType.SELECT,
+              antdFieldProps: {
+                restful: "api/users/",
+                fieldNames: { label: "nickname", value: "id" },
               },
             },
             {
