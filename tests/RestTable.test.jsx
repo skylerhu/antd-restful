@@ -2,7 +2,7 @@ import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DEFAULT_PAGE_SIZE, FieldType } from "src/common/constants";
-import RestTable, { getColumnSearchProps, genColumnKey, renderRowLabel } from "src/components/RestTable";
+import RestTable, { getColumnSearchProps, renderRowLabel } from "src/components/RestTable";
 
 // Mock useSafeRequest hook
 const mockMakeRequest = jest.fn();
@@ -1194,50 +1194,6 @@ describe("RestTable", () => {
       expect(filterDropdown).toBeDefined();
       // 验证返回的是一个有效的 React 元素
       expect(filterDropdown).toBeTruthy();
-    });
-  });
-
-  describe("genColumnKey 测试", () => {
-    it("should return key when column has key", () => {
-      const column = { key: "custom_key", dataIndex: "name" };
-      const result = genColumnKey(column);
-      expect(result).toBe("custom_key");
-    });
-
-    it("should return dataIndex when column has no key", () => {
-      const column = { dataIndex: "name" };
-      const result = genColumnKey(column);
-      expect(result).toBe("name");
-    });
-
-    it("should join array key with double underscore", () => {
-      const column = { key: ["user", "name"], dataIndex: "name" };
-      const result = genColumnKey(column);
-      expect(result).toBe("user__name");
-    });
-
-    it("should join array dataIndex with double underscore", () => {
-      const column = { dataIndex: ["user", "info", "name"] };
-      const result = genColumnKey(column);
-      expect(result).toBe("user__info__name");
-    });
-
-    it("should handle empty array", () => {
-      const column = { key: [], dataIndex: "name" };
-      const result = genColumnKey(column);
-      expect(result).toBe("");
-    });
-
-    it("should handle undefined values", () => {
-      const column = {};
-      const result = genColumnKey(column);
-      expect(result).toBeUndefined();
-    });
-
-    it("should prioritize key over dataIndex", () => {
-      const column = { key: "priority_key", dataIndex: "fallback_name" };
-      const result = genColumnKey(column);
-      expect(result).toBe("priority_key");
     });
   });
 

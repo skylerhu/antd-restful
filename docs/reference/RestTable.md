@@ -671,3 +671,31 @@ const AdvancedTable = () => {
    - 配置合适的请求超时时间
    - 使用reqConfig添加必要的请求头
    - 实现数据变化的回调处理
+
+
+### 常见问题
+
+1. **工具栏遮挡了筛选表单中的字段**
+
+有2种解决方式
+
+1）不根据屏幕宽高动态设置列数，组件会根据 column 设置的列数兼容遮挡的场景：
+```js
+filterFormProps: {
+  antdListProps: grid: { gutter: 30, column: 3 },
+}
+```
+
+2）可以在 `filterFormProps.fields` 筛选配置最后增加一个占位的字段，例如
+```js
+{
+  key: "__placeholder",
+  label: "占位",
+  tip: "搜索按钮被遮挡，可以勾选控制换行展示",
+  hidden: true,
+  antdFormItemProps: {
+    hidden: true,
+  },
+}
+```
+

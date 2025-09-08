@@ -2,7 +2,6 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo
 import PropTypes from "prop-types";
 import {
   Button,
-  Checkbox,
   Col,
   Descriptions,
   Dropdown,
@@ -30,6 +29,7 @@ import {
   apiSorterToTableSorterDict,
   commonFormat,
   findDataByPath,
+  genColumnKey,
   tableSorterToApiSorter,
   toBeString,
   transformFilters,
@@ -37,12 +37,13 @@ import {
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
 import CopyView from "src/components/CopyView";
+import FieldsSetting from "src/components/FieldsSetting";
 import NumberRange from "src/components/formitems/NumberRange";
 import RangeStrPicker from "src/components/formitems/RangeStrPicker";
 import RestSelect from "src/components/formitems/RestSelect";
 import GridForm from "src/components/GridForm";
 import globalConfig from "src/config";
-import { useDeepCompareMemoize, useInterval, useLocalStorage } from "src/hooks/index";
+import { useDeepCompareMemoize, useInterval } from "src/hooks/index";
 import { useSafeRequest } from "src/requests";
 
 // 处理table表头中列的筛选
@@ -195,14 +196,6 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
   return _props;
 };
 
-export const genColumnKey = (column) => {
-  let key = column.key || column.dataIndex;
-  if (isArray(key)) {
-    key = key.join("__");
-  }
-  return key;
-};
-
 export const renderRowLabel = (record, column) => {
   let label;
   if (column.fieldName) {
@@ -328,15 +321,10 @@ const RestTable = forwardRef(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
     );
     const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(filterFormProps?.advancedSearch || false);
+    const [filterFields, setFilterFields] = useState(filterFormProps?.fields || []);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
-    const storageKey = useMemo(() => {
-      if (isString(innerTools.settings)) {
-        return innerTools.settings;
-      }
-      return restful;
-    }, [innerTools.settings, restful]);
-    // {allKeys: [], keys: []}, keys 是实际显示的列； allKeys 是所有列, 用标记cloumns是否发生过变动，如果发生过变动，则keys失效
-    const [showColumns, setShowColumns] = useLocalStorage(storageKey, {});
+    // 控制显示的列
+    const [showColumns, setShowColumns] = useState(columns);
 
     useEffect(() => {
       if (isArray(dataSource)) {
@@ -579,63 +567,17 @@ const RestTable = forwardRef(
       [fetchData, deleteRow]
     );
 
-    // 所有列的选项, 用于列显示设置
-    const allColumnOptions = useMemo(() => {
-      return columns.map((column) => {
-        const key = genColumnKey(column);
-        return {
-          label: <div style={{ width: 100 }}>{column.title || key}</div>,
-          value: key,
-        };
-      });
-    }, [columns]);
-
-    const allColumnKeys = useMemo(() => {
-      return allColumnOptions.map((item) => item.value);
-    }, [allColumnOptions]);
-
-    const defaultShowColumnKeys = useMemo(() => {
-      if (!innerTools.settings) {
-        return [];
-      }
-      return columns.filter((column) => !column.hidden).map((column) => genColumnKey(column));
-    }, [columns, innerTools.settings]);
-
-    // 实际显示的列，处理没有本地设置时需要有默认值
-    const realCheckKeys = useMemo(() => {
-      if (!innerTools.settings) {
-        return [];
-      }
-      if (showColumns.keys) {
-        if (deepEqual(showColumns.allKeys, allColumnKeys)) {
-          // 仅当当时设置时的 allKeys 与 当前配置一直，设置的值才有效
-          return showColumns.keys;
-        }
-      }
-      return defaultShowColumnKeys;
-    }, [showColumns, defaultShowColumnKeys, innerTools.settings, allColumnKeys]);
-
-    const checkColumnAll = useMemo(() => columns.length === realCheckKeys.length, [columns, realCheckKeys]);
-    const checkColumnIndeterminate = useMemo(
-      () => realCheckKeys.length > 0 && realCheckKeys.length < columns.length,
-      [columns, realCheckKeys]
-    );
-
     const columnSearchViewRef = useRef(null);
 
     // 处理table的cloumns
     const memColumns = useMemo(() => {
       const sorterDict = apiSorterToTableSorterDict(innerFilters[fieldOrdering]);
-      const arr = columns
-        .filter((item) => !item.expandable)
+      const arr = showColumns
+        .filter((item) => !item.expandable && !item.hidden)
         .map((column) => {
           // 获取唯一字段; antd默认dataIndex优先，但其取值可能是数组，不能作为key使用
           const field = genColumnKey(column);
           let newCloumn = { ...column };
-          if (innerTools.settings && realCheckKeys?.length > 0) {
-            // 设置了显示，则不隐藏
-            newCloumn.hidden = !realCheckKeys.includes(field);
-          }
           if (newCloumn.hidden) {
             // 隐藏的字段后续无需处理
             return newCloumn;
@@ -719,15 +661,17 @@ const RestTable = forwardRef(
           return newCloumn;
         });
       return arr.filter((item) => !item.hidden);
-    }, [columns, innerFilters, fieldOrdering, restful, realCheckKeys, innerTools.settings]);
+    }, [innerFilters, fieldOrdering, showColumns, restful]);
 
     // 表头上的筛选条件，按照Tags的形式都展示出来
     const headerTags = useMemo(() => {
       if (!showHeaderTags) {
         return [];
       }
-      const arr = columns
-        .filter((column) => column.filterDropdownConfig || column.dropdownLocalConfig || column.filters)
+      const arr = showColumns
+        .filter(
+          (column) => !column.hidden && (column.filterDropdownConfig || column.dropdownLocalConfig || column.filters)
+        )
         .map((column) => {
           let field = genColumnKey(column);
           const v = innerFilters[field];
@@ -735,24 +679,12 @@ const RestTable = forwardRef(
         })
         .filter((item) => !isEmpty(item.value));
       return arr;
-    }, [innerFilters, columns, showHeaderTags]);
+    }, [innerFilters, showColumns, showHeaderTags]);
 
     // 展开的列
     const memExpandableColumns = useMemo(() => {
-      return columns
-        .filter((item) => item.expandable && !item.hidden)
-        .map((column) => {
-          const newCloumn = { ...column };
-          const field = genColumnKey(newCloumn);
-          if (innerTools.settings && realCheckKeys?.length > 0) {
-            // 设置了显示，则不隐藏
-            newCloumn.hidden = !realCheckKeys.includes(field);
-          }
-          return newCloumn;
-        })
-        .filter((item) => !item.hidden);
-    }, [columns, innerTools.settings, realCheckKeys]);
-
+      return showColumns.filter((item) => item.expandable && !item.hidden);
+    }, [showColumns]);
     const [isExpandedAll, setIsExpandedAll] = useState(expandedAllRows || innerTools.expandedAllRows);
     const [expandedRows, setExpandedRows] = useState();
     useEffect(() => {
@@ -762,6 +694,34 @@ const RestTable = forwardRef(
         setExpandedRows([]);
       }
     }, [innerData.dataSource, rowKey, isExpandedAll]);
+
+    const expandableProps = useMemo(() => {
+      if (memExpandableColumns.length === 0) {
+        return antdTableProps?.expandable;
+      }
+      return {
+        expandedRowRender: (record) => {
+          return (
+            <Descriptions {...expandAntdProps}>
+              {memExpandableColumns.map((column) => {
+                const _key = genColumnKey(column);
+                return (
+                  <Descriptions.Item key={_key} {...column.expandItemProps} label={column.title}>
+                    {renderRowLabel(record, column)}
+                  </Descriptions.Item>
+                );
+              })}
+            </Descriptions>
+          );
+        },
+        rowExpandable: (record) => !expandFieldPath || findDataByPath(record, expandFieldPath),
+        expandedRowKeys: expandedRows,
+        onExpandedRowsChange: (rowKeys) => {
+          setExpandedRows(rowKeys);
+        },
+        ...antdTableProps?.expandable,
+      };
+    }, [memExpandableColumns, antdTableProps?.expandable, expandAntdProps, expandFieldPath, expandedRows]);
 
     // 处理table的onChange事件
     const onTableChange = useCallback(
@@ -826,7 +786,9 @@ const RestTable = forwardRef(
                 <GridForm
                   key="filterForm"
                   submitTitle="搜索"
+                  enablePlaceholder={!isEmpty(innerTools) || extraTools}
                   {...filterFormProps}
+                  fields={filterFields}
                   initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
                   advancedSearch={enableAdvancedSearch}
                   ref={filterFormRef}
@@ -855,7 +817,7 @@ const RestTable = forwardRef(
             )}
             {(!isEmpty(innerTools) || extraTools) && (
               <div
-                style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
+                style={{ position: "absolute", right: 10, bottom: 15 }}
                 className="cls-resttable-tools"
               >
                 <Space key="tools">
@@ -868,15 +830,6 @@ const RestTable = forwardRef(
                         onClick={() => {
                           setIsExpandedAll((oldV) => !oldV);
                         }}
-                      />
-                    </Tooltip>
-                  )}
-                  {restful && filterFormProps && innerTools.advancedSearch && (
-                    <Tooltip title="高级搜索">
-                      <Button
-                        icon={<SecurityScanOutlined />}
-                        type={enableAdvancedSearch ? "primary" : undefined}
-                        onClick={() => setEnableAdvancedSearch((oldV) => !oldV)}
                       />
                     </Tooltip>
                   )}
@@ -928,40 +881,29 @@ const RestTable = forwardRef(
                       <Button icon={<DownloadOutlined />} />
                     </Dropdown>
                   )}
+                  {restful && filterFormProps && innerTools.advancedSearch && (
+                    <FieldsSetting
+                      value={filterFormProps.fields}
+                      title="设置搜索选项"
+                      storageKey={isString(innerTools.advancedSearch) ? innerTools.advancedSearch : `${restful}-filter`}
+                      onChange={(value) => {
+                        setFilterFields(value);
+                      }}
+                    >
+                      <Button icon={<SecurityScanOutlined />} />
+                    </FieldsSetting>
+                  )}
                   {innerTools.settings && (
-                    <Tooltip
-                      trigger="click"
-                      color="white"
-                      title={
-                        <Space direction="vertical" style={{ width: 400 }}>
-                          <div style={{ color: "black" }}>设置列显示</div>
-                          <Checkbox
-                            indeterminate={checkColumnIndeterminate}
-                            checked={checkColumnAll}
-                            onChange={(e) => {
-                              setShowColumns({
-                                allKeys: allColumnKeys,
-                                keys: e.target.checked ? allColumnKeys : [],
-                              });
-                            }}
-                          >
-                            全选
-                          </Checkbox>
-                          <Checkbox.Group
-                            value={realCheckKeys}
-                            options={allColumnOptions}
-                            onChange={(value) => {
-                              setShowColumns({
-                                allKeys: allColumnKeys,
-                                keys: value,
-                              });
-                            }}
-                          />
-                        </Space>
-                      }
+                    <FieldsSetting
+                      value={columns}
+                      title="设置列显示"
+                      storageKey={isString(innerTools.settings) ? innerTools.settings : `${restful}-settings`}
+                      onChange={(value) => {
+                        setShowColumns(value);
+                      }}
                     >
                       <Button icon={<SettingOutlined />} />
-                    </Tooltip>
+                    </FieldsSetting>
                   )}
                 </Space>
               </div>
@@ -1040,32 +982,7 @@ const RestTable = forwardRef(
               antdTableProps.onChange(pagination, filters, sorter, extra);
             }
           }}
-          expandable={
-            memExpandableColumns.length > 0
-              ? {
-                expandedRowRender: (record) => {
-                  return (
-                    <Descriptions {...expandAntdProps}>
-                      {memExpandableColumns.map((column) => {
-                        const _key = genColumnKey(column);
-                        return (
-                          <Descriptions.Item key={_key} {...column.expandItemProps} label={column.title}>
-                            {renderRowLabel(record, column)}
-                          </Descriptions.Item>
-                        );
-                      })}
-                    </Descriptions>
-                  );
-                },
-                rowExpandable: (record) => !expandFieldPath || findDataByPath(record, expandFieldPath),
-                expandedRowKeys: expandedRows,
-                onExpandedRowsChange: (rowKeys) => {
-                  setExpandedRows(rowKeys);
-                },
-                ...antdTableProps?.expandable,
-              }
-              : antdTableProps?.expandable
-          }
+          expandable={expandableProps}
         />
       </Space>
     );

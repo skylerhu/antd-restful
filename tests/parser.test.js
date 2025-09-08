@@ -501,4 +501,49 @@ describe("Parser", () => {
       expect(parser.getShowTitle(rowsWithNoStatus, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 3 条数据 (-: 3)");
     });
   });
+
+  describe("genColumnKey 测试", () => {
+    it("should return key when column has key", () => {
+      const column = { key: "custom_key", dataIndex: "name" };
+      const result = parser.genColumnKey(column);
+      expect(result).toBe("custom_key");
+    });
+
+    it("should return dataIndex when column has no key", () => {
+      const column = { dataIndex: "name" };
+      const result = parser.genColumnKey(column);
+      expect(result).toBe("name");
+    });
+
+    it("should join array key with double underscore", () => {
+      const column = { key: ["user", "name"], dataIndex: "name" };
+      const result = parser.genColumnKey(column);
+      expect(result).toBe("user__name");
+    });
+
+    it("should join array dataIndex with double underscore", () => {
+      const column = { dataIndex: ["user", "info", "name"] };
+      const result = parser.genColumnKey(column);
+      expect(result).toBe("user__info__name");
+    });
+
+    it("should handle empty array", () => {
+      const column = { key: [], dataIndex: "name" };
+      const result = parser.genColumnKey(column);
+      expect(result).toBe("");
+    });
+
+    it("should handle undefined values", () => {
+      const column = {};
+      const result = parser.genColumnKey(column);
+      expect(result).toBeUndefined();
+    });
+
+    it("should prioritize key over dataIndex", () => {
+      const column = { key: "priority_key", dataIndex: "fallback_name" };
+      const result = parser.genColumnKey(column);
+      expect(result).toBe("priority_key");
+    });
+  });
+
 });

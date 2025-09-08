@@ -187,6 +187,15 @@ const TableDemo = () => {
                 ],
               },
             },
+            // {
+            //   key: "__placeholder",
+            //   label: "占位",
+            //   tip: "搜索按钮被遮挡，可以勾选控制换行展示",
+            //   hidden: true,
+            //   antdFormItemProps: {
+            //     hidden: true,
+            //   },
+            // },
           ],
         }}
       />

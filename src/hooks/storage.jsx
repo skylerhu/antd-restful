@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { dequal as deepEqual } from "dequal";
+import { genColumnKey } from "src/common/parser";
+import { isString } from "src/common/typeTools";
+import { useDeepCompareMemoize } from "./protect";
 
 const _getStorageValue = (storage, key, defaultValue) => {
   let value;
@@ -93,3 +96,63 @@ function genStorage(storage) {
 
 export const useLocalStorage = genStorage(window.localStorage);
 export const useSessionStorage = genStorage(window.sessionStorage);
+
+export const useSettingsStorage = (key, columns) => {
+  // {allKeys: [], keys: []}, keys 是实际显示的列； allKeys 是所有列, 用标记cloumns是否发生过变动，如果发生过变动，则keys失效
+  const [config, setConfig] = useLocalStorage(key, {});
+
+  const memoColumns = useDeepCompareMemoize(
+    columns.map((column) => ({ key: genColumnKey(column), hidden: column.hidden, label: column.label || column.title }))
+  );
+  // 所有的keys
+  const allKeys = useMemo(() => memoColumns.map((column) => column.key), [memoColumns]);
+  // 默认显示的keys
+  const defaultShowKeys = useMemo(
+    () => memoColumns.filter((column) => !column.hidden).map((column) => column.key),
+    [memoColumns]
+  );
+
+  const [showKeys, setShowKeys] = useState(config?.keys || defaultShowKeys);
+
+  useEffect(() => {
+    setShowKeys((oldV) => {
+      let keys = [];
+      if (!isString(key) || !config) {
+        // 非字符串，则直接返回
+        keys = defaultShowKeys;
+      } else if (!config.keys || !deepEqual(config.allKeys, allKeys)) {
+        // 未配置；或者 配置的keys 和 当前的keys 不一致，则之前的配置不生效
+        keys = defaultShowKeys;
+      } else {
+        keys = config.keys;
+      }
+      const _keys = deepEqual(keys, oldV) ? oldV : keys;
+      return _keys;
+    });
+  }, [allKeys, config, defaultShowKeys, key]);
+
+  const showColumns = useMemo(() => {
+    const _columns = columns.filter((column) => showKeys.includes(genColumnKey(column)));
+    // 将隐藏的列设置为不隐藏
+    _columns.forEach((column) => {
+      column.hidden = false;
+    });
+    return _columns;
+  }, [columns, showKeys]);
+
+  const setKeys = useCallback(
+    (keys) => {
+      // setShowKeys(keys);
+      setConfig({ allKeys, keys });
+    },
+    [allKeys, setConfig]
+  );
+
+  return {
+    showColumns,
+    allKeys,
+    keys: showKeys,
+    setKeys,
+    options: memoColumns,
+  };
+};
