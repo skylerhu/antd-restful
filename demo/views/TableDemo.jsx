@@ -26,9 +26,12 @@ const TableDemo = () => {
       <Component
         parseOptions={{
           parseNumbers: false,
-          types: {
-            user: "number",
-          },
+          // types: {
+          //   user: "number",
+          // },
+        }}
+        parseTypes={{
+          user: "number",
         }}
         restful="api/users/"
         baseParams={{

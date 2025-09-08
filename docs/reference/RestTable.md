@@ -699,3 +699,23 @@ filterFormProps: {
 }
 ```
 
+2. **处理query参数在超大数值下丢失精度问题**
+1）升级 `query-string > 9.1`，支持配置 `parseOptions.types` 指定字段类型
+2）低版本 可以通过 `parseTypes` 配置解决
+```js
+<RestTable
+  parseOptions={{
+    parseNumbers: false,
+    // types: {  // required query-string > 9.1
+    //   user: "number",
+    // },
+  }}
+  parseTypes={{
+    // 注意配置 string 无效，因为会先由 query-string 处理完 再使用 parseTypes 处理
+    // 注意解决 parseOptions.parseNumbers = false 一起使用
+    user: "number",
+  }}
+  ...
+/>
+```
+

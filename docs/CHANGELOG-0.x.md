@@ -3,11 +3,11 @@
 ## 0.1.13
 - fix: RouteBaseTable 需要透传 ref 参数，解决调用 RestTable 中组件方法的问题
 - fix: 修复 RestTable 通过 ref 调用 refreshList 丢失参数的问题 (变个了函数顺序，依赖的函数放使用地方的上面)
-- fix: RestTable 增加 `parseOptions` 可以配置处理 query 参数
+- fix: RestTable 增加 `parseOptions` 和 `parseTypes` 可以配置处理 query 参数
     - query-string 在 本项目中默认设置了 `parseNumbers: true`
     - 虽然是 RestTable 增加的配置，但主要是在 RouteBaseTable 中用到将query参数转换成object
     - 在处理query中有超大数值会有溢出精度问题，可以设置为 False 当做字符串处理
-    - 升级 `query-string": "^9.1.0"` 支持可指定特定参数的类型
+    - 升级 `query-string": "^9.1.0"` 支持可指定特定参数的类型，低版本node不支持可使用 parseTypes 配置字段类型；
 - feat: 调整 RestTable 组件中 advancedSearch 参数控制搜索字段的展示
 
 ## 0.1.12
