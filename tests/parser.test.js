@@ -502,6 +502,199 @@ describe("Parser", () => {
     });
   });
 
+  describe("parseQueryTypes", () => {
+    test("should convert string types", () => {
+      const query = { name: "John", age: 30, active: true };
+      const types = { name: "string", age: "string", active: "string" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ name: "John", age: "30", active: "true" });
+    });
+
+    test("should convert number types", () => {
+      const query = { name: "John", age: "30", count: "5" };
+      const types = { name: "number", age: "number", count: "number" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ name: NaN, age: 30, count: 5 });
+    });
+
+    test("should convert boolean types", () => {
+      const query = { name: "John", active: "true", disabled: "false" };
+      const types = { name: "boolean", active: "boolean", disabled: "boolean" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ name: true, active: true, disabled: true });
+    });
+
+    test("should handle array values", () => {
+      const query = { tags: ["a", "b", "c"], ids: [1, 2, 3] };
+      const types = { tags: "string", ids: "number" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ tags: ["a", "b", "c"], ids: [1, 2, 3] });
+    });
+
+    test("should handle mixed types", () => {
+      const query = { name: "John", age: "30", active: "true", tags: ["a", "b"] };
+      const types = { name: "string", age: "number", active: "boolean", tags: "string" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ name: "John", age: 30, active: true, tags: ["a", "b"] });
+    });
+
+    test("should return original query when types is empty", () => {
+      const query = { name: "John", age: 30 };
+      const result = parser.parseQueryTypes(query, {});
+      expect(result).toEqual(query);
+    });
+
+    test("should return original query when query is empty", () => {
+      const result = parser.parseQueryTypes({}, { name: "string" });
+      expect(result).toEqual({});
+    });
+
+    test("should return original query when both are empty", () => {
+      const result = parser.parseQueryTypes({}, {});
+      expect(result).toEqual({});
+    });
+
+    test("should return original query when types is null/undefined", () => {
+      const query = { name: "John", age: 30 };
+      expect(parser.parseQueryTypes(query, null)).toEqual(query);
+      expect(parser.parseQueryTypes(query, undefined)).toEqual(query);
+    });
+
+    test("should return original query when query is null/undefined", () => {
+      const types = { name: "string" };
+      expect(parser.parseQueryTypes(null, types)).toBeNull();
+      expect(parser.parseQueryTypes(undefined, types)).toBeUndefined();
+    });
+
+    test("should skip non-basic types", () => {
+      const query = {
+        name: "John",
+        user: { id: 1, name: "John" },
+        items: [{ id: 1 }, { id: 2 }]
+      };
+      const types = { name: "string", user: "string", items: "string" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        name: "John",
+        user: { id: 1, name: "John" },
+        items: [{ id: 1 }, { id: 2 }]
+      });
+    });
+
+    test("should handle empty string values", () => {
+      const query = { name: "", age: "", active: "" };
+      const types = { name: "string", age: "number", active: "boolean" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ name: "", age: "", active: "" });
+    });
+
+    test("should handle null/undefined values", () => {
+      const query = { name: null, age: undefined, active: null };
+      const types = { name: "string", age: "number", active: "boolean" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({ name: null, age: undefined, active: null });
+    });
+  });
+
+  describe("genFields", () => {
+    const testFields = [
+      { key: "name", title: "Name", dataIndex: "name" },
+      { key: "age", title: "Age", dataIndex: "age" },
+      { key: "email", title: "Email", dataIndex: "email", hidden: true },
+      { dataIndex: "address", title: "Address" },
+      { key: "phone", title: "Phone", dataIndex: "phone", hidden: true },
+    ];
+
+    test("should filter fields by keys", () => {
+      const keys = ["name", "email"];
+      const result = parser.genFields(testFields, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0].key).toBe("name");
+      expect(result[1].key).toBe("email");
+    });
+
+    test("should remove hidden property from filtered fields", () => {
+      const keys = ["email", "phone"];
+      const result = parser.genFields(testFields, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0].hidden).toBe(false);
+      expect(result[1].hidden).toBe(false);
+    });
+
+    test("should handle fields without key (using dataIndex)", () => {
+      const keys = ["address"];
+      const result = parser.genFields(testFields, keys);
+      expect(result).toHaveLength(1);
+      expect(result[0].dataIndex).toBe("address");
+    });
+
+    test("should handle array keys in fields", () => {
+      const fieldsWithArrayKey = [
+        { key: ["user", "name"], title: "User Name" },
+        { key: ["user", "age"], title: "User Age" },
+        { key: "email", title: "Email" },
+      ];
+      const keys = ["user__name", "email"];
+      const result = parser.genFields(fieldsWithArrayKey, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0].key).toEqual(["user", "name"]);
+      expect(result[1].key).toBe("email");
+    });
+
+    test("should return all fields when keys is empty", () => {
+      const result = parser.genFields(testFields, []);
+      expect(result).toEqual(testFields);
+    });
+
+    test("should return all fields when keys is null/undefined", () => {
+      expect(parser.genFields(testFields, null)).toEqual(testFields);
+      expect(parser.genFields(testFields, undefined)).toEqual(testFields);
+    });
+
+    test("should return empty array when no matching fields", () => {
+      const keys = ["nonExistent"];
+      const result = parser.genFields(testFields, keys);
+      expect(result).toEqual([]);
+    });
+
+    test("should handle empty fields array", () => {
+      const result = parser.genFields([], ["name"]);
+      expect(result).toEqual([]);
+    });
+
+    test("should handle fields with both key and dataIndex", () => {
+      const fieldsWithBoth = [
+        { key: "custom_key", dataIndex: "name", title: "Name" },
+        { key: "age", title: "Age" },
+      ];
+      const keys = ["custom_key", "age"];
+      const result = parser.genFields(fieldsWithBoth, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0].key).toBe("custom_key");
+      expect(result[1].key).toBe("age");
+    });
+
+    test("should not modify original fields array", () => {
+      const originalFields = [...testFields];
+      const keys = ["name", "email"];
+      parser.genFields(testFields, keys);
+      expect(testFields).toEqual(originalFields);
+    });
+
+    test("should handle duplicate keys", () => {
+      const fieldsWithDuplicates = [
+        { key: "name", title: "Name 1" },
+        { key: "name", title: "Name 2" },
+        { key: "age", title: "Age" },
+      ];
+      const keys = ["name"];
+      const result = parser.genFields(fieldsWithDuplicates, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0].title).toBe("Name 1");
+      expect(result[1].title).toBe("Name 2");
+    });
+  });
+
   describe("genColumnKey 测试", () => {
     it("should return key when column has key", () => {
       const column = { key: "custom_key", dataIndex: "name" };

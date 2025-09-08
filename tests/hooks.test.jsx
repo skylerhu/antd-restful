@@ -670,4 +670,250 @@ describe("Hooks Tests", () => {
       });
     });
   });
+
+  describe("useSettingsStorage", () => {
+    const mockColumns = [
+      { key: "name", title: "Name", dataIndex: "name" },
+      { key: "age", title: "Age", dataIndex: "age" },
+      { key: "email", title: "Email", dataIndex: "email", hidden: true },
+      { dataIndex: "address", title: "Address" },
+    ];
+
+    beforeEach(() => {
+      localStorage.clear();
+    });
+
+    it("should initialize with default visible columns when no config exists", () => {
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      expect(result.current.allKeys).toEqual(["name", "age", "email", "address"]);
+      expect(result.current.keys).toEqual(["name", "age", "address"]); // email is hidden
+      expect(result.current.options).toEqual([
+        { key: "name", hidden: undefined, label: "Name" },
+        { key: "age", hidden: undefined, label: "Age" },
+        { key: "email", hidden: true, label: "Email" },
+        { key: "address", hidden: undefined, label: "Address" },
+      ]);
+    });
+
+    it("should use stored config when available and valid", () => {
+      const storedConfig = {
+        allKeys: ["name", "age", "email", "address"],
+        keys: ["name", "email"],
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      expect(result.current.keys).toEqual(["name", "email"]);
+    });
+
+    it("should ignore stored config when allKeys don't match", () => {
+      const storedConfig = {
+        allKeys: ["name", "age"], // Different from current columns
+        keys: ["name"],
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      // Should fall back to default visible columns
+      expect(result.current.keys).toEqual(["name", "age", "address"]);
+    });
+
+    it("should ignore stored config when keys are missing", () => {
+      const storedConfig = {
+        allKeys: ["name", "age", "email", "address"],
+        // keys is missing
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      // Should fall back to default visible columns
+      expect(result.current.keys).toEqual(["name", "age", "address"]);
+    });
+
+    it("should update config when setKeys is called", () => {
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      act(() => {
+        result.current.setKeys(["name", "email"]);
+      });
+
+      const storedConfig = JSON.parse(localStorage.getItem("test-key"));
+      expect(storedConfig).toEqual({
+        allKeys: ["name", "age", "email", "address"],
+        keys: ["name", "email"],
+      });
+    });
+
+    it("should handle columns with array keys", () => {
+      const columnsWithArrayKeys = [
+        { key: ["user", "name"], title: "User Name" },
+        { key: "age", title: "Age" },
+        { key: ["user", "email"], title: "User Email", hidden: true },
+      ];
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithArrayKeys));
+
+      expect(result.current.allKeys).toEqual(["user__name", "age", "user__email"]);
+      expect(result.current.keys).toEqual(["user__name", "age"]); // user__email is hidden
+    });
+
+    it("should handle empty columns array", () => {
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", []));
+
+      expect(result.current.allKeys).toEqual([]);
+      expect(result.current.keys).toEqual([]);
+      expect(result.current.options).toEqual([]);
+    });
+
+    it("should handle columns without title or label", () => {
+      const columnsWithoutTitle = [
+        { key: "name", dataIndex: "name" },
+        { key: "age", dataIndex: "age", title: "Age" },
+      ];
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithoutTitle));
+
+      expect(result.current.options).toEqual([
+        { key: "name", hidden: undefined, label: undefined },
+        { key: "age", hidden: undefined, label: "Age" },
+      ]);
+    });
+
+    it("should handle non-string key parameter", () => {
+      const { result } = renderHook(() => hooks.useSettingsStorage(null, mockColumns));
+
+      // Should fall back to default visible columns
+      expect(result.current.keys).toEqual(["name", "age", "address"]);
+    });
+
+    it("should handle undefined config", () => {
+      localStorage.setItem("test-key", JSON.stringify(null));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      // Should fall back to default visible columns
+      expect(result.current.keys).toEqual(["name", "age", "address"]);
+    });
+
+    it("should update when columns change", () => {
+      const { result, rerender } = renderHook(
+        ({ columns }) => hooks.useSettingsStorage("test-key", columns),
+        { initialProps: { columns: mockColumns } }
+      );
+
+      expect(result.current.allKeys).toEqual(["name", "age", "email", "address"]);
+
+      const newColumns = [
+        { key: "name", title: "Name" },
+        { key: "phone", title: "Phone" },
+      ];
+
+      rerender({ columns: newColumns });
+
+      expect(result.current.allKeys).toEqual(["name", "phone"]);
+      expect(result.current.keys).toEqual(["name", "phone"]);
+    });
+
+    it("should maintain config when columns change but allKeys match", () => {
+      const storedConfig = {
+        allKeys: ["name", "age", "email", "address"],
+        keys: ["name", "email"],
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result, rerender } = renderHook(
+        ({ columns }) => hooks.useSettingsStorage("test-key", columns),
+        { initialProps: { columns: mockColumns } }
+      );
+
+      expect(result.current.keys).toEqual(["name", "email"]);
+
+      // Change columns but keep same allKeys
+      const newColumns = [
+        { key: "name", title: "Name" },
+        { key: "age", title: "Age" },
+        { key: "email", title: "Email", hidden: true },
+        { dataIndex: "address", title: "Address" },
+      ];
+
+      rerender({ columns: newColumns });
+
+      // Should still use stored config
+      expect(result.current.keys).toEqual(["name", "email"]);
+    });
+
+    it("should handle columns with same key but different properties", () => {
+      const columnsWithSameKey = [
+        { key: "name", title: "Name 1" },
+        { key: "name", title: "Name 2" },
+        { key: "age", title: "Age" },
+      ];
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithSameKey));
+
+      expect(result.current.allKeys).toEqual(["name", "name", "age"]);
+      expect(result.current.keys).toEqual(["name", "name", "age"]);
+    });
+
+    it("should handle setKeys with empty array", () => {
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      act(() => {
+        result.current.setKeys([]);
+      });
+
+      const storedConfig = JSON.parse(localStorage.getItem("test-key"));
+      expect(storedConfig).toEqual({
+        allKeys: ["name", "age", "email", "address"],
+        keys: [],
+      });
+    });
+
+    it("should handle setKeys with invalid keys", () => {
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      act(() => {
+        result.current.setKeys(["invalid-key", "another-invalid"]);
+      });
+
+      const storedConfig = JSON.parse(localStorage.getItem("test-key"));
+      expect(storedConfig).toEqual({
+        allKeys: ["name", "age", "email", "address"],
+        keys: ["invalid-key", "another-invalid"],
+      });
+    });
+
+    it("should handle columns with mixed key and dataIndex", () => {
+      const mixedColumns = [
+        { key: "custom_key", dataIndex: "name", title: "Name" },
+        { dataIndex: "age", title: "Age" },
+        { key: "email", title: "Email" },
+      ];
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mixedColumns));
+
+      expect(result.current.allKeys).toEqual(["custom_key", "age", "email"]);
+      expect(result.current.keys).toEqual(["custom_key", "age", "email"]);
+    });
+
+    it("should handle deep equality comparison correctly", () => {
+      const { result, rerender } = renderHook(
+        ({ columns }) => hooks.useSettingsStorage("test-key", columns),
+        { initialProps: { columns: mockColumns } }
+      );
+
+      const firstResult = result.current;
+
+      // Rerender with same columns (different reference but same content)
+      rerender({ columns: [...mockColumns] });
+
+      // Should maintain the same state
+      expect(result.current.allKeys).toEqual(firstResult.allKeys);
+      expect(result.current.keys).toEqual(firstResult.keys);
+    });
+  });
 });

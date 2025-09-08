@@ -705,13 +705,13 @@ filterFormProps: {
 ```js
 <RestTable
   parseOptions={{
-    parseNumbers: false,
+    parseNumbers: false,  // 关闭转换成数字
     // types: {  // required query-string > 9.1
     //   user: "number",
     // },
   }}
   parseTypes={{
-    // 注意配置 string 无效，因为会先由 query-string 处理完 再使用 parseTypes 处理
+    // 注意配置 string 无效，因为会先由 query-string 处理完 再使用 parseTypes 处理转成数字
     // 注意解决 parseOptions.parseNumbers = false 一起使用
     user: "number",
   }}
