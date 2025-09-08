@@ -47,20 +47,15 @@ const TableSelect = ({
   }, [value, rowKey]);
 
   const updateSelectedRows = useCallback(
-    (keys, rows, deleteKey = null) => {
-      const _keys = deleteKey ? keys.filter((k) => k !== deleteKey) : keys;
-      if (deleteKey) {
-        setSelectedKeys(oldV => oldV.filter((k) => k !== deleteKey));
-      } else {
-        setSelectedKeys(keys);
-      }
+    (keys, rows) => {
+      setSelectedKeys(keys);
       // 保留已选中的行
-      let newRows = selectedRows.filter((item) => isDict(item) && _keys.includes(item[rowKey]));
+      let newRows = selectedRows.filter((item) => isDict(item) && keys.includes(item[rowKey]));
       if (isArray(rows)) {
         const partKeys = newRows.map((item) => item[rowKey]);
         // 添加新选中的行
         const partRows = rows.filter(
-          (item) => isDict(item) && !partKeys.includes(item[rowKey]) && _keys.includes(item[rowKey])
+          (item) => isDict(item) && !partKeys.includes(item[rowKey]) && keys.includes(item[rowKey])
         );
         newRows = [...newRows, ...partRows];
       }
@@ -73,13 +68,6 @@ const TableSelect = ({
       }
     },
     [rowKey, onChange, selectedRows]
-  );
-
-  const onCancelSelected = useCallback(
-    (record) => {
-      updateSelectedRows(selectedKeys.filter((k) => k !== record[rowKey]));
-    },
-    [selectedKeys, rowKey, updateSelectedRows]
   );
 
   // 添加取消选择按钮
@@ -95,14 +83,14 @@ const TableSelect = ({
             <Button
               icon={<CloseOutlined style={{ color: "red" }} />}
               type="text"
-              onClick={() => onCancelSelected(record)}
+              onClick={() => updateSelectedRows(selectedKeys.filter((k) => k !== record[rowKey]))}
             />
           );
         },
       });
     }
     return _columns;
-  }, [columns, disabled, readOnly, onCancelSelected]);
+  }, [columns, disabled, readOnly, rowKey, selectedKeys, updateSelectedRows]);
 
   const rowSelection = useMemo(() => {
     if (disabled) {
