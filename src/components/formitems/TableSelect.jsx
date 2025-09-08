@@ -47,15 +47,20 @@ const TableSelect = ({
   }, [value, rowKey]);
 
   const updateSelectedRows = useCallback(
-    (keys, rows) => {
-      setSelectedKeys(keys);
+    (keys, rows, deleteKey = null) => {
+      const _keys = deleteKey ? keys.filter((k) => k !== deleteKey) : keys;
+      if (deleteKey) {
+        setSelectedKeys(oldV => oldV.filter((k) => k !== deleteKey));
+      } else {
+        setSelectedKeys(keys);
+      }
       // 保留已选中的行
-      let newRows = selectedRows.filter((item) => isDict(item) && keys.includes(item[rowKey]));
+      let newRows = selectedRows.filter((item) => isDict(item) && _keys.includes(item[rowKey]));
       if (isArray(rows)) {
         const partKeys = newRows.map((item) => item[rowKey]);
         // 添加新选中的行
         const partRows = rows.filter(
-          (item) => isDict(item) && !partKeys.includes(item[rowKey]) && keys.includes(item[rowKey])
+          (item) => isDict(item) && !partKeys.includes(item[rowKey]) && _keys.includes(item[rowKey])
         );
         newRows = [...newRows, ...partRows];
       }
@@ -70,27 +75,52 @@ const TableSelect = ({
     [rowKey, onChange, selectedRows]
   );
 
+  const onCancelSelected = useCallback(
+    (record) => {
+      updateSelectedRows(selectedKeys.filter((k) => k !== record[rowKey]));
+    },
+    [selectedKeys, rowKey, updateSelectedRows]
+  );
+
   // 添加取消选择按钮
   const columensWithActions = useMemo(() => {
     let _columns = [...columns];
     if (!disabled && !readOnly) {
       _columns.push({
         title: "取消",
-        key: "actions",
+        key: "__actions",
         width: 80,
         render: (text, record) => {
           return (
             <Button
               icon={<CloseOutlined style={{ color: "red" }} />}
               type="text"
-              onClick={() => updateSelectedRows(selectedKeys.filter((k) => k !== record[rowKey]))}
+              onClick={() => onCancelSelected(record)}
             />
           );
         },
       });
     }
     return _columns;
-  }, [rowKey, selectedKeys, columns, updateSelectedRows, disabled, readOnly]);
+  }, [columns, disabled, readOnly, onCancelSelected]);
+
+  const rowSelection = useMemo(() => {
+    if (disabled) {
+      return undefined;
+    }
+    return {
+      ...antdTableProps?.rowSelection,
+      hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
+      preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
+      selectedRowKeys: selectedKeys,
+      onChange: (_selectedRowKeys, _selectedRows) => {
+        updateSelectedRows(_selectedRowKeys, _selectedRows);
+      },
+      getCheckboxProps: (record) => ({
+        disabled: disabled || record.disabled,
+      }),
+    };
+  }, [disabled, antdTableProps?.rowSelection, selectedKeys, updateSelectedRows]);
 
   const title = useMemo(
     () => getShowTitle(selectedRows, titleTemplate, titleAggPath),
@@ -153,20 +183,7 @@ const TableSelect = ({
         columns={columns}
         antdTableProps={{
           ...antdTableProps,
-          rowSelection: disabled
-            ? undefined
-            : {
-              ...antdTableProps?.rowSelection,
-              hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
-              preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
-              selectedRowKeys: selectedKeys,
-              onChange: (_selectedRowKeys, _selectedRows) => {
-                updateSelectedRows(_selectedRowKeys, _selectedRows);
-              },
-              getCheckboxProps: (record) => ({
-                disabled: disabled || record.disabled,
-              }),
-            },
+          rowSelection,
         }}
       />
     </Space.Compact>

@@ -48,9 +48,7 @@ const GridForm = forwardRef(
         if (!fieldKeys?.length) {
           return;
         }
-        // console.log("fieldKeys", fieldKeys);
         const changedKeys = Object.keys(values).filter((key) => !isEmpty(values[key]) && fieldKeys.includes(key));
-        // console.log("changedKeys", changedKeys, values);
         if (changedKeys.length >= 1) {
           // 单项模式下，只有一个字段被修改，则激活该字段
           initKeyRef.current = changedKeys[0];

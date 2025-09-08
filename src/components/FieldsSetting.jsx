@@ -3,12 +3,12 @@ import PropTypes from "prop-types";
 import { Button, Checkbox, Space, Tooltip } from "antd";
 import { QuestionCircleOutlined, SettingOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { genColumnKey } from "src/common/parser";
+import { genColumnKey, genFields } from "src/common/parser";
 import { isFunction } from "src/common/typeTools";
 import { useSettingsStorage } from "src/hooks/index";
 
 const FieldsSetting = ({ style, className, title, storageKey, value, onChange, children }) => {
-  const { showColumns, keys, setKeys, allKeys } = useSettingsStorage(storageKey, value);
+  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, value);
 
   // 全选
   const checkAll = useMemo(() => deepEqual(keys, allKeys), [keys, allKeys]);
@@ -36,10 +36,11 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   }, [value]);
 
   useEffect(() => {
+    const _columns = genFields(value, keys);
     if (isFunction(onChange)) {
-      onChange(showColumns, keys);
+      onChange(_columns, keys);
     }
-  }, [showColumns, keys, onChange]);
+  }, [value, keys, onChange]);
 
   return (
     <Tooltip

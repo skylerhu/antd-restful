@@ -33,6 +33,7 @@ import {
   tableSorterToApiSorter,
   toBeString,
   transformFilters,
+  genFields,
 } from "src/common/parser";
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
@@ -321,10 +322,22 @@ const RestTable = forwardRef(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
     );
     const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(filterFormProps?.advancedSearch || false);
-    const [filterFields, setFilterFields] = useState(filterFormProps?.fields || []);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
+    // 控制显示的表单字段
+    const [filterFieldKeys, setFilterFieldKeys] = useState([]);
     // 控制显示的列
-    const [showColumns, setShowColumns] = useState(columns);
+    const [showColumnsKeys, setShowColumnsKeys] = useState([]);
+
+    // 因为有未使用 FieldsSettings的场景，所以不能直接使用 value 作为设置的值设置, 无法监听columns的变化
+    const onToolsFilterChange = useCallback((_, keys) => {
+      setFilterFieldKeys(keys);
+    }, []);
+    const onToolsSettingsChange = useCallback((_, keys) => {
+      setShowColumnsKeys(keys);
+    }, []);
+
+    const filterFields = useMemo(() => genFields(filterFormProps?.fields, filterFieldKeys), [filterFormProps?.fields, filterFieldKeys]);
+    const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
 
     useEffect(() => {
       if (isArray(dataSource)) {
@@ -886,9 +899,7 @@ const RestTable = forwardRef(
                       value={filterFormProps.fields}
                       title="设置搜索选项"
                       storageKey={isString(innerTools.advancedSearch) ? innerTools.advancedSearch : `${restful}-filter`}
-                      onChange={(value) => {
-                        setFilterFields(value);
-                      }}
+                      onChange={onToolsFilterChange}
                     >
                       <Button icon={<SecurityScanOutlined />} />
                     </FieldsSetting>
@@ -898,9 +909,7 @@ const RestTable = forwardRef(
                       value={columns}
                       title="设置列显示"
                       storageKey={isString(innerTools.settings) ? innerTools.settings : `${restful}-settings`}
-                      onChange={(value) => {
-                        setShowColumns(value);
-                      }}
+                      onChange={onToolsSettingsChange}
                     >
                       <Button icon={<SettingOutlined />} />
                     </FieldsSetting>

@@ -131,15 +131,6 @@ export const useSettingsStorage = (key, columns) => {
     });
   }, [allKeys, config, defaultShowKeys, key]);
 
-  const showColumns = useMemo(() => {
-    const _columns = columns.filter((column) => showKeys.includes(genColumnKey(column)));
-    // 将隐藏的列设置为不隐藏
-    _columns.forEach((column) => {
-      column.hidden = false;
-    });
-    return _columns;
-  }, [columns, showKeys]);
-
   const setKeys = useCallback(
     (keys) => {
       // setShowKeys(keys);
@@ -149,7 +140,6 @@ export const useSettingsStorage = (key, columns) => {
   );
 
   return {
-    showColumns,
     allKeys,
     keys: showKeys,
     setKeys,

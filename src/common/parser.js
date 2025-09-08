@@ -338,11 +338,24 @@ export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
   return commonFormat(titleTemplate, { count: rows?.length || 0, stat: statStr });
 };
 
-
 export const genColumnKey = (column) => {
   let key = column.key || column.dataIndex;
   if (isArray(key)) {
     key = key.join("__");
   }
   return key;
+};
+
+export const genFields = (fields, keys) => {
+  if (!keys?.length) {
+    return fields;
+  }
+  const _fields = fields.filter((field) => keys.includes(genColumnKey(field)));
+  _fields.forEach((field) => {
+    if (field.hidden) {
+      // 设置显示了不隐藏
+      field.hidden = false;
+    }
+  });
+  return _fields;
 };
