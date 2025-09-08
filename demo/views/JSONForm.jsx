@@ -158,8 +158,7 @@ const testSchema = {
               enum: ["male", "female"],
               "x-component-props": {
                 onChange: (value, option) => {
-                  // eslint-disable-next-line no-console
-                  console.log("Select onChange", value, option);
+                  console.log("Select onChange", value, option); // eslint-disable-line no-console
                 },
               },
             },
@@ -208,8 +207,7 @@ const FactoryView = () => {
     // readPretty: true,
     effects: () => {
       onFieldValueChange("text", (field, form) => {
-        // eslint-disable-next-line no-console
-        console.log("onFieldValueChange", field.value, form.values);
+        console.log("onFieldValueChange", field.value, form.values); // eslint-disable-line no-console
       });
     },
   });

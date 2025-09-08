@@ -41,8 +41,7 @@ export default function StaticForm() {
         fieldParent: "belong",
         enableCopy: true,
         onChange: (value, selectedOptions, treeOpts) => {
-          // eslint-disable-next-line no-console
-          console.log("Cascader onChange", value, treeOpts);
+          console.log("Cascader onChange", value, treeOpts); // eslint-disable-line no-console
         },
         options: [{ key: "anhui", name: "安徽", children: [{ key: "anqing", name: "安庆" }] }],
         antdCascaderProps: {
@@ -171,8 +170,7 @@ export default function StaticForm() {
           enableCopy
           // antdTreeSelectProps={{ treeCheckable: true }}
           onChange={(value, nodes) => {
-            // eslint-disable-next-line no-console
-            console.log("TreeSelect onChange", value, nodes);
+            console.log("TreeSelect onChange", value, nodes); // eslint-disable-line no-console
           }}
           {...editProps}
         />

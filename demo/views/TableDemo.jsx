@@ -201,6 +201,9 @@ const TableDemo = () => {
             // },
           ],
         }}
+        onDataSourceChange={(dataSource) => {
+          console.log("dataSource", dataSource); // eslint-disable-line no-console
+        }}
       />
     </div>
   );
