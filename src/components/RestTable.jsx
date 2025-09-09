@@ -561,6 +561,9 @@ const RestTable = forwardRef(
     // 删除行
     const deleteRow = useCallback(
       (row) => {
+        if (!restful || !row[rowKey]) {
+          return;
+        }
         setLoading(true);
         let url;
         if (urlDetailTemplate) {

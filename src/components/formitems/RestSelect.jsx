@@ -198,7 +198,7 @@ const RestSelect = ({
 
   // 当值发生改变时
   useEffect(() => {
-    if (isEmpty(selectedValues)) {
+    if (!restful || isEmpty(selectedValues)) {
       return;
     }
     // 没有options的选中项

@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.14
+fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用
+
 ## 0.1.13
 - feat: 调整 RestTable 组件中 advancedSearch 参数控制搜索字段的展示
 - fix: RouteBaseTable 需要透传 ref 参数，解决调用 RestTable 中组件方法的问题
