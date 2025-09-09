@@ -1,7 +1,7 @@
 # Release Notes
 
 ## 0.1.14
-fix: 修复 RestSelect 不配置 restful 的情况下不触发远程调用
+fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用
 
 ## 0.1.13
 - feat: 调整 RestTable 组件中 advancedSearch 参数控制搜索字段的展示
