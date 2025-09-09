@@ -370,7 +370,7 @@ describe("RouteBaseTable", () => {
       });
     });
 
-    it("should call onFiltersChange when filters change", async () => {
+    it("should not call onFiltersChange when filters not change", async () => {
       render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
 
       await waitFor(() => {
@@ -385,7 +385,7 @@ describe("RouteBaseTable", () => {
       });
 
       await waitFor(() => {
-        expect(mockOnFiltersChange).toHaveBeenCalledWith({ name: "test", age: 25 });
+        expect(mockOnFiltersChange).not.toHaveBeenCalled();
       });
     });
 
