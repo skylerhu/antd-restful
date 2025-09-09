@@ -689,10 +689,10 @@ describe("Hooks Tests", () => {
       expect(result.current.allKeys).toEqual(["name", "age", "email", "address"]);
       expect(result.current.keys).toEqual(["name", "age", "address"]); // email is hidden
       expect(result.current.options).toEqual([
-        { key: "name", hidden: undefined, label: "Name" },
-        { key: "age", hidden: undefined, label: "Age" },
-        { key: "email", hidden: true, label: "Email" },
-        { key: "address", hidden: undefined, label: "Address" },
+        { key: "name", hidden: undefined, label: "Name", disabled: false },
+        { key: "age", hidden: undefined, label: "Age", disabled: false },
+        { key: "email", hidden: true, label: "Email", disabled: false },
+        { key: "address", hidden: undefined, label: "Address", disabled: false },
       ]);
     });
 
@@ -778,8 +778,8 @@ describe("Hooks Tests", () => {
       const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithoutTitle));
 
       expect(result.current.options).toEqual([
-        { key: "name", hidden: undefined, label: undefined },
-        { key: "age", hidden: undefined, label: "Age" },
+        { key: "name", hidden: undefined, label: undefined, disabled: false },
+        { key: "age", hidden: undefined, label: "Age", disabled: false },
       ]);
     });
 
