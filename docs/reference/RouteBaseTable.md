@@ -26,7 +26,8 @@
 ### 使用示例
 
 ```jsx
-import React from 'react';
+import React, { forwardRef } from 'react';
+import PropTypes from "prop-types";
 import { useLocation, useNavigate } from 'react-router';
 import { RouteBaseTable } from 'antd-restful';
 
@@ -45,6 +46,7 @@ const RouteTable = (restProps) => {
     />
   );
 };
+RouteTable.displayName = 'RouteTable';
 
 // 使用封装的组件
 const UserList = () => {

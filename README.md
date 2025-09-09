@@ -17,7 +17,7 @@
 
 还需要安装库自身的依赖：
 
-    npm install react react-dom antd @ant-design/icons axios
+    npm install react react-dom antd @ant-design/icons axios query-string
 
 使用示例：
 ```jsx

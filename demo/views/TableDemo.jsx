@@ -24,6 +24,15 @@ const TableDemo = () => {
         联动路由
       </Checkbox>
       <Component
+        parseOptions={{
+          parseNumbers: false,
+          // types: {
+          //   user: "number",
+          // },
+        }}
+        parseTypes={{
+          user: "number",
+        }}
         restful="api/users/"
         baseParams={{
           search: "u",
@@ -136,9 +145,11 @@ const TableDemo = () => {
           },
         ]}
         // expandedAllRows={true}
-        expandAntdProps={{
-          // bordered: true,
-        }}
+        expandAntdProps={
+          {
+            // bordered: true,
+          }
+        }
         // expandFieldPath="city.name"
         filterFormProps={{
           initialValues: {
@@ -152,6 +163,7 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
+              hidden: false,
             },
             {
               key: "search",
@@ -159,11 +171,12 @@ const TableDemo = () => {
               type: FieldType.INPUT,
             },
             {
-              key: "search_",
-              label: "占位",
-              antdFormItemProps: {
-                // 隐藏占位使用
-                hidden: true,
+              key: "user",
+              label: "用户",
+              type: FieldType.SELECT,
+              antdFieldProps: {
+                restful: "api/users/",
+                fieldNames: { label: "nickname", value: "id" },
               },
             },
             {
@@ -178,7 +191,19 @@ const TableDemo = () => {
                 ],
               },
             },
+            // {
+            //   key: "__placeholder",
+            //   label: "占位",
+            //   tip: "搜索按钮被遮挡，可以勾选控制换行展示",
+            //   hidden: true,
+            //   antdFormItemProps: {
+            //     hidden: true,
+            //   },
+            // },
           ],
+        }}
+        onDataSourceChange={(dataSource) => {
+          console.log("dataSource", dataSource); // eslint-disable-line no-console
         }}
       />
     </div>

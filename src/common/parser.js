@@ -2,7 +2,7 @@ import format from "string-format";
 import objectPath from "object-path";
 import libQuery from "query-string";
 import { DEFAULT_SEPARATOR, SorterEnum } from "src/common/constants";
-import { isArray, isBlank, isBoolean, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
+import { isArray, isBasicType, isBlank, isBoolean, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
 
 export const commonFormat = (template, ...values) => {
   if (isBlank(template)) {
@@ -210,6 +210,28 @@ export const queryString = {
   },
 };
 
+export const parseQueryTypes = (query, types) => {
+  if (isEmpty(types) || isEmpty(query)) {
+    return query;
+  }
+  let _query = {};
+  Object.keys(query).forEach((key) => {
+    let v = query[key];
+    if (!isEmpty(v) && isBasicType(v)) {
+      // 只处理基础类型
+      if (types[key] === "string") {
+        v = isArray(v) ? v.map((v) => toBeString(v)) : toBeString(v);
+      } else if (types[key] === "number") {
+        v = isArray(v) ? v.map((v) => Number(v)) : Number(v);
+      } else if (types[key] === "boolean") {
+        v = isArray(v) ? v.map((v) => Boolean(v)) : Boolean(v);
+      }
+    }
+    _query[key] = v;
+  });
+  return _query;
+};
+
 export const clearEmptyValue = (data) => {
   let newV = {};
   Object.keys(data).forEach((key) => {
@@ -336,4 +358,26 @@ export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
     }
   }
   return commonFormat(titleTemplate, { count: rows?.length || 0, stat: statStr });
+};
+
+export const genColumnKey = (column) => {
+  let key = column.key || column.dataIndex;
+  if (isArray(key)) {
+    key = key.join("__");
+  }
+  return key;
+};
+
+export const genFields = (fields, keys) => {
+  if (!keys?.length) {
+    return fields;
+  }
+  const _fields = fields.filter((field) => keys.includes(genColumnKey(field)));
+  _fields.forEach((field) => {
+    if (field.hidden) {
+      // 设置显示了不隐藏
+      field.hidden = false;
+    }
+  });
+  return _fields;
 };

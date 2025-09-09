@@ -76,7 +76,7 @@ const TableSelect = ({
     if (!disabled && !readOnly) {
       _columns.push({
         title: "取消",
-        key: "actions",
+        key: "__actions",
         width: 80,
         render: (text, record) => {
           return (
@@ -90,7 +90,25 @@ const TableSelect = ({
       });
     }
     return _columns;
-  }, [rowKey, selectedKeys, columns, updateSelectedRows, disabled, readOnly]);
+  }, [columns, disabled, readOnly, rowKey, selectedKeys, updateSelectedRows]);
+
+  const rowSelection = useMemo(() => {
+    if (disabled) {
+      return undefined;
+    }
+    return {
+      ...antdTableProps?.rowSelection,
+      hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
+      preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
+      selectedRowKeys: selectedKeys,
+      onChange: (_selectedRowKeys, _selectedRows) => {
+        updateSelectedRows(_selectedRowKeys, _selectedRows);
+      },
+      getCheckboxProps: (record) => ({
+        disabled: disabled || record.disabled,
+      }),
+    };
+  }, [disabled, antdTableProps?.rowSelection, selectedKeys, updateSelectedRows]);
 
   const title = useMemo(
     () => getShowTitle(selectedRows, titleTemplate, titleAggPath),
@@ -153,20 +171,7 @@ const TableSelect = ({
         columns={columns}
         antdTableProps={{
           ...antdTableProps,
-          rowSelection: disabled
-            ? undefined
-            : {
-              ...antdTableProps?.rowSelection,
-              hideSelectAll: disabled || antdTableProps?.rowSelection?.hideSelectAll,
-              preserveSelectedRowKeys: true, // 当数据被删除时仍然保留选项的 key
-              selectedRowKeys: selectedKeys,
-              onChange: (_selectedRowKeys, _selectedRows) => {
-                updateSelectedRows(_selectedRowKeys, _selectedRows);
-              },
-              getCheckboxProps: (record) => ({
-                disabled: disabled || record.disabled,
-              }),
-            },
+          rowSelection,
         }}
       />
     </Space.Compact>

@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.1.13
+- feat: 调整 RestTable 组件中 advancedSearch 参数控制搜索字段的展示
+- fix: RouteBaseTable 需要透传 ref 参数，解决调用 RestTable 中组件方法的问题
+- fix: 修复 RestTable 通过 ref 调用 refreshList 丢失参数的问题 (变个了函数顺序，依赖的函数放使用地方的上面)
+- fix: RestTable 增加 `parseOptions` 和 `parseTypes` 可以配置处理 query 参数
+    - query-string 在 本项目中默认设置了 `parseNumbers: true`
+    - 虽然是 RestTable 增加的配置，但主要是在 RouteBaseTable 中用到将query参数转换成object
+    - 在处理query中有超大数值会有溢出精度问题，可以设置为 False 当做字符串处理
+- fix: RestTable 的 onFiltersChange 在处理回调值时`移除`跟 baseParams 和 forceParams 相同的值
+    - 避免还原为原来值的情况下显示在路由上
+
 ## 0.1.12
 - style: 调整 TableSelect 内2个元素之间的间隔
 - fix: 修复 TableSelect也能够直接开启高级搜索

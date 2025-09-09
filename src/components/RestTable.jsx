@@ -2,7 +2,6 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo
 import PropTypes from "prop-types";
 import {
   Button,
-  Checkbox,
   Col,
   Descriptions,
   Dropdown,
@@ -16,13 +15,13 @@ import {
   Tooltip,
 } from "antd";
 import {
+  CloseOutlined,
   DownloadOutlined,
   NodeExpandOutlined,
   ReloadOutlined,
   SearchOutlined,
   SecurityScanOutlined,
   SettingOutlined,
-  CloseOutlined,
 } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
@@ -30,19 +29,22 @@ import {
   apiSorterToTableSorterDict,
   commonFormat,
   findDataByPath,
+  genColumnKey,
   tableSorterToApiSorter,
   toBeString,
   transformFilters,
+  genFields,
 } from "src/common/parser";
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
 import CopyView from "src/components/CopyView";
+import FieldsSetting from "src/components/FieldsSetting";
 import NumberRange from "src/components/formitems/NumberRange";
 import RangeStrPicker from "src/components/formitems/RangeStrPicker";
 import RestSelect from "src/components/formitems/RestSelect";
 import GridForm from "src/components/GridForm";
 import globalConfig from "src/config";
-import { useDeepCompareMemoize, useInterval, useLocalStorage } from "src/hooks/index";
+import { useDeepCompareMemoize, useInterval } from "src/hooks/index";
 import { useSafeRequest } from "src/requests";
 
 // 处理table表头中列的筛选
@@ -195,14 +197,6 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
   return _props;
 };
 
-export const genColumnKey = (column) => {
-  let key = column.key || column.dataIndex;
-  if (isArray(key)) {
-    key = key.join("__");
-  }
-  return key;
-};
-
 export const renderRowLabel = (record, column) => {
   let label;
   if (column.fieldName) {
@@ -263,6 +257,7 @@ const RestTable = forwardRef(
 
       restful,
       reqConfig,
+      parseOptions,
       urlDetailTemplate,
       baseParams,
       routeParams,
@@ -294,6 +289,7 @@ const RestTable = forwardRef(
   ) => {
     const [makeRequest] = useSafeRequest();
     const reqConfigRef = useRef(reqConfig);
+    const memParseOptions = useDeepCompareMemoize(parseOptions);
 
     const [loading, setLoading] = useState(false);
     // table数据源
@@ -327,25 +323,21 @@ const RestTable = forwardRef(
     );
     const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(filterFormProps?.advancedSearch || false);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
-    const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
-    const storageKey = useMemo(() => {
-      if (isString(innerTools.settings)) {
-        return innerTools.settings;
-      }
-      return restful;
-    }, [innerTools.settings, restful]);
-    // {allKeys: [], keys: []}, keys 是实际显示的列； allKeys 是所有列, 用标记cloumns是否发生过变动，如果发生过变动，则keys失效
-    const [showColumns, setShowColumns] = useLocalStorage(storageKey, {});
+    // 控制显示的表单字段
+    const [filterFieldKeys, setFilterFieldKeys] = useState([]);
+    // 控制显示的列
+    const [showColumnsKeys, setShowColumnsKeys] = useState([]);
 
-    // 暴露给ref调用的方法
-    useImperativeHandle(
-      ref,
-      () => ({
-        refreshList: fetchData,
-        deleteRow,
-      }),
-      [fetchData, deleteRow]
-    );
+    // 因为有未使用 FieldsSettings的场景，所以不能直接使用 value 作为设置的值设置, 无法监听columns的变化
+    const onToolsFilterChange = useCallback((_, keys) => {
+      setFilterFieldKeys(keys);
+    }, []);
+    const onToolsSettingsChange = useCallback((_, keys) => {
+      setShowColumnsKeys(keys);
+    }, []);
+
+    const filterFields = useMemo(() => genFields(filterFormProps?.fields, filterFieldKeys), [filterFormProps?.fields, filterFieldKeys]);
+    const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
 
     useEffect(() => {
       if (isArray(dataSource)) {
@@ -444,10 +436,12 @@ const RestTable = forwardRef(
       formFilters,
     ]);
 
-    const filterFormKeys = useDeepCompareMemoize(filterFormProps?.fields?.map((field) => ({
-      key: field.key,
-      type: field.type,
-    })) || []);
+    const filterFormKeys = useDeepCompareMemoize(
+      filterFormProps?.fields?.map((field) => ({
+        key: field.key,
+        type: field.type,
+      })) || []
+    );
 
     // 更新筛选表单的值
     useEffect(() => {
@@ -484,7 +478,7 @@ const RestTable = forwardRef(
         } else {
           filterFormRef.current.getFormInstance().setFieldsValue(values);
         }
-        setFormFilters(oldV => deepEqual(oldV, values) ? oldV : values);
+        setFormFilters((oldV) => (deepEqual(oldV, values) ? oldV : values));
       }
     }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
 
@@ -511,9 +505,49 @@ const RestTable = forwardRef(
             delete filters[fieldPageSize];
           }
         }
+        // forceParams 会覆盖其他参数，去掉相同key的
+        if (memForceParams) {
+          Object.keys(memForceParams).forEach((key) => {
+            // 直接删除，肯定相等
+            delete filters[key];
+          });
+        }
+        // baseParams 相同值的可以去掉
+        if (memBaseParams) {
+          Object.keys(memBaseParams).forEach((key) => {
+            if (deepEqual(filters[key], memBaseParams[key])) {
+              delete filters[key];
+            }
+          });
+        }
         onFiltersChange(filters);
       }
-    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, innerFilters, onFiltersChange]);
+    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, memForceParams, innerFilters, onFiltersChange]);
+
+    // 请求远端数据
+    const fetchData = useCallback(() => {
+      if (!isActive || !restful) {
+        return;
+      }
+      setLoading(true);
+      const _config = {
+        params: innerFilters,
+        ...reqConfigRef.current,
+      };
+      if (memParseOptions) {
+        _config.paramsSerializer = (p) => globalConfig.queryStringify(p, memParseOptions);
+      }
+      makeRequest({ delay: 200, key: `resttable` })
+        .get(restful, _config)
+        .then((response) => {
+          const data = findDataByPath(response.data, parseRowsPath);
+          const _total = findDataByPath(response.data, parseTotalPath);
+          setInnerData({ dataSource: data, total: _total || 0 });
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, [isActive, makeRequest, restful, parseRowsPath, parseTotalPath, innerFilters, memParseOptions]);
 
     useEffect(() => {
       if (!innerFilters[fieldPage]) {
@@ -523,24 +557,7 @@ const RestTable = forwardRef(
       fetchData();
     }, [innerFilters, fetchData, fieldPage]);
 
-    // 请求远端数据
-    const fetchData = useCallback(() => {
-      if (!isActive || !restful) {
-        return;
-      }
-      setLoading(true);
-      makeRequest({ delay: 200, key: `resttable` })
-        .get(restful, { params: innerFilters, ...reqConfigRef.current })
-        .then((response) => {
-          const data = findDataByPath(response.data, parseRowsPath);
-          const _total = findDataByPath(response.data, parseTotalPath);
-          setInnerData({ dataSource: data, total: _total || 0 });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }, [isActive, makeRequest, restful, parseRowsPath, parseTotalPath, innerFilters]);
-
+    const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     // 删除行
     const deleteRow = useCallback(
       (row) => {
@@ -568,46 +585,14 @@ const RestTable = forwardRef(
       [rowKey, restful, urlDetailTemplate, fetchData, makeRequest]
     );
 
-    // 所有列的选项, 用于列显示设置
-    const allColumnOptions = useMemo(() => {
-      return columns.map((column) => {
-        const key = genColumnKey(column);
-        return {
-          label: <div style={{ width: 100 }}>{column.title || key}</div>,
-          value: key,
-        };
-      });
-    }, [columns]);
-
-    const allColumnKeys = useMemo(() => {
-      return allColumnOptions.map((item) => item.value);
-    }, [allColumnOptions]);
-
-    const defaultShowColumnKeys = useMemo(() => {
-      if (!innerTools.settings) {
-        return [];
-      }
-      return columns.filter((column) => !column.hidden).map((column) => genColumnKey(column));
-    }, [columns, innerTools.settings]);
-
-    // 实际显示的列，处理没有本地设置时需要有默认值
-    const realCheckKeys = useMemo(() => {
-      if (!innerTools.settings) {
-        return [];
-      }
-      if (showColumns.keys) {
-        if (deepEqual(showColumns.allKeys, allColumnKeys)) {
-          // 仅当当时设置时的 allKeys 与 当前配置一直，设置的值才有效
-          return showColumns.keys;
-        }
-      }
-      return defaultShowColumnKeys;
-    }, [showColumns, defaultShowColumnKeys, innerTools.settings, allColumnKeys]);
-
-    const checkColumnAll = useMemo(() => columns.length === realCheckKeys.length, [columns, realCheckKeys]);
-    const checkColumnIndeterminate = useMemo(
-      () => realCheckKeys.length > 0 && realCheckKeys.length < columns.length,
-      [columns, realCheckKeys]
+    // 暴露给ref调用的方法
+    useImperativeHandle(
+      ref,
+      () => ({
+        refreshList: fetchData,
+        deleteRow,
+      }),
+      [fetchData, deleteRow]
     );
 
     const columnSearchViewRef = useRef(null);
@@ -615,16 +600,12 @@ const RestTable = forwardRef(
     // 处理table的cloumns
     const memColumns = useMemo(() => {
       const sorterDict = apiSorterToTableSorterDict(innerFilters[fieldOrdering]);
-      const arr = columns
-        .filter((item) => !item.expandable)
+      const arr = showColumns
+        .filter((item) => !item.expandable && !item.hidden)
         .map((column) => {
           // 获取唯一字段; antd默认dataIndex优先，但其取值可能是数组，不能作为key使用
           const field = genColumnKey(column);
           let newCloumn = { ...column };
-          if (innerTools.settings && realCheckKeys?.length > 0) {
-            // 设置了显示，则不隐藏
-            newCloumn.hidden = !realCheckKeys.includes(field);
-          }
           if (newCloumn.hidden) {
             // 隐藏的字段后续无需处理
             return newCloumn;
@@ -708,15 +689,17 @@ const RestTable = forwardRef(
           return newCloumn;
         });
       return arr.filter((item) => !item.hidden);
-    }, [columns, innerFilters, fieldOrdering, restful, realCheckKeys, innerTools.settings]);
+    }, [innerFilters, fieldOrdering, showColumns, restful]);
 
     // 表头上的筛选条件，按照Tags的形式都展示出来
     const headerTags = useMemo(() => {
       if (!showHeaderTags) {
         return [];
       }
-      const arr = columns
-        .filter((column) => column.filterDropdownConfig || column.dropdownLocalConfig || column.filters)
+      const arr = showColumns
+        .filter(
+          (column) => !column.hidden && (column.filterDropdownConfig || column.dropdownLocalConfig || column.filters)
+        )
         .map((column) => {
           let field = genColumnKey(column);
           const v = innerFilters[field];
@@ -724,24 +707,12 @@ const RestTable = forwardRef(
         })
         .filter((item) => !isEmpty(item.value));
       return arr;
-    }, [innerFilters, columns, showHeaderTags]);
+    }, [innerFilters, showColumns, showHeaderTags]);
 
     // 展开的列
     const memExpandableColumns = useMemo(() => {
-      return columns
-        .filter((item) => item.expandable && !item.hidden)
-        .map((column) => {
-          const newCloumn = { ...column };
-          const field = genColumnKey(newCloumn);
-          if (innerTools.settings && realCheckKeys?.length > 0) {
-            // 设置了显示，则不隐藏
-            newCloumn.hidden = !realCheckKeys.includes(field);
-          }
-          return newCloumn;
-        })
-        .filter((item) => !item.hidden);
-    }, [columns, innerTools.settings, realCheckKeys]);
-
+      return showColumns.filter((item) => item.expandable && !item.hidden);
+    }, [showColumns]);
     const [isExpandedAll, setIsExpandedAll] = useState(expandedAllRows || innerTools.expandedAllRows);
     const [expandedRows, setExpandedRows] = useState();
     useEffect(() => {
@@ -751,6 +722,34 @@ const RestTable = forwardRef(
         setExpandedRows([]);
       }
     }, [innerData.dataSource, rowKey, isExpandedAll]);
+
+    const expandableProps = useMemo(() => {
+      if (memExpandableColumns.length === 0) {
+        return antdTableProps?.expandable;
+      }
+      return {
+        expandedRowRender: (record) => {
+          return (
+            <Descriptions {...expandAntdProps}>
+              {memExpandableColumns.map((column) => {
+                const _key = genColumnKey(column);
+                return (
+                  <Descriptions.Item key={_key} {...column.expandItemProps} label={column.title}>
+                    {renderRowLabel(record, column)}
+                  </Descriptions.Item>
+                );
+              })}
+            </Descriptions>
+          );
+        },
+        rowExpandable: (record) => !expandFieldPath || findDataByPath(record, expandFieldPath),
+        expandedRowKeys: expandedRows,
+        onExpandedRowsChange: (rowKeys) => {
+          setExpandedRows(rowKeys);
+        },
+        ...antdTableProps?.expandable,
+      };
+    }, [memExpandableColumns, antdTableProps?.expandable, expandAntdProps, expandFieldPath, expandedRows]);
 
     // 处理table的onChange事件
     const onTableChange = useCallback(
@@ -808,156 +807,133 @@ const RestTable = forwardRef(
 
     return (
       <Space direction="vertical" {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
-        {
-          hasHeader && (
-            <div style={{ position: "relative" }} className="cls-resttable-header">
-              {restful && filterFormProps && (
-                <Spin spinning={loading}>
-                  <GridForm
-                    key="filterForm"
-                    {...filterFormProps}
-                    initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
-                    advancedSearch={enableAdvancedSearch}
-                    ref={filterFormRef}
-                    onSubmit={(values) => {
-                      setFormFilters((oldV) => {
-                        if (deepEqual(oldV, values)) {
-                          // 数据没有变更刷新列表
-                          fetchData();
-                          return oldV;
-                        }
-                        return values;
-                      });
-                    }}
-                    onReset={(values) => {
-                      setFormFilters((oldV) => {
-                        if (deepEqual(oldV, values)) {
-                          // 数据没有变更刷新列表
-                          fetchData();
-                          return oldV;
-                        }
-                        return values;
-                      });
-                    }}
-                  />
-                </Spin>
-              )}
-              {(!isEmpty(innerTools) || extraTools) && (
-                <div
-                  style={{ position: "absolute", right: 10, bottom: enableAdvancedSearch ? 10 : 0 }}
-                  className="cls-resttable-tools"
-                >
-                  <Space key="tools">
-                    {extraTools}
-                    {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
-                      <Tooltip title={isExpandedAll ? "收起所有行" : "展开所有行"}>
-                        <Button
-                          icon={<NodeExpandOutlined />}
-                          type={isExpandedAll ? "primary" : undefined}
-                          onClick={() => {
-                            setIsExpandedAll((oldV) => !oldV);
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                    {restful && filterFormProps && innerTools.advancedSearch && (
-                      <Tooltip title="高级搜索">
-                        <Button
-                          icon={<SecurityScanOutlined />}
-                          type={enableAdvancedSearch ? "primary" : undefined}
-                          onClick={() => setEnableAdvancedSearch((oldV) => !oldV)}
-                        />
-                      </Tooltip>
-                    )}
-                    {restful && innerTools.refreshInterval >= 0 && (
-                      <Tooltip
-                        title={
-                          innerTools.refreshInterval > 0
-                            ? enableRefresh
-                              ? `点击关闭 ${innerTools.refreshInterval}ms 刷新`
-                              : `开启间隔 ${innerTools.refreshInterval}ms 刷新`
-                            : "点击刷新"
-                        }
-                      >
-                        <Button
-                          icon={<ReloadOutlined />}
-                          type={enableRefresh && innerTools.refreshInterval > 0 ? "primary" : undefined}
-                          onClick={() => {
-                            const v = !enableRefresh;
-                            setEnableRefresh(v);
-                            runInterval(v && innerTools.refreshInterval > 0);
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                    {restful && innerTools.downloadKey && (
-                      <Dropdown
-                        menu={{
-                          items: [
-                            {
-                              key: "download_current",
-                              label: (
-                                <Button href={genDownloadUrl(false)} type="link" target="blank" size="small">
-                                  导出当前页
-                                </Button>
-                              ),
-                            },
-                            {
-                              key: "download_all",
-                              label: (
-                                <Button href={genDownloadUrl(true)} type="link" target="blank" size="small">
-                                  导出全部数据
-                                </Button>
-                              ),
-                            },
-                          ],
+        {hasHeader && (
+          <div style={{ position: "relative" }} className="cls-resttable-header">
+            {restful && filterFormProps && (
+              <Spin spinning={loading}>
+                <GridForm
+                  key="filterForm"
+                  submitTitle="搜索"
+                  enablePlaceholder={!isEmpty(innerTools) || extraTools}
+                  {...filterFormProps}
+                  fields={filterFields}
+                  initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
+                  advancedSearch={enableAdvancedSearch}
+                  ref={filterFormRef}
+                  onSubmit={(values) => {
+                    setFormFilters((oldV) => {
+                      if (deepEqual(oldV, values)) {
+                        // 数据没有变更刷新列表
+                        fetchData();
+                        return oldV;
+                      }
+                      return values;
+                    });
+                  }}
+                  onReset={(values) => {
+                    setFormFilters((oldV) => {
+                      if (deepEqual(oldV, values)) {
+                        // 数据没有变更刷新列表
+                        fetchData();
+                        return oldV;
+                      }
+                      return values;
+                    });
+                  }}
+                />
+              </Spin>
+            )}
+            {(!isEmpty(innerTools) || extraTools) && (
+              <div
+                style={{ position: "absolute", right: 10, bottom: 15 }}
+                className="cls-resttable-tools"
+              >
+                <Space key="tools">
+                  {extraTools}
+                  {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
+                    <Tooltip title={isExpandedAll ? "收起所有行" : "展开所有行"}>
+                      <Button
+                        icon={<NodeExpandOutlined />}
+                        type={isExpandedAll ? "primary" : undefined}
+                        onClick={() => {
+                          setIsExpandedAll((oldV) => !oldV);
                         }}
-                        placement="bottom"
-                      >
-                        <Button icon={<DownloadOutlined />} />
-                      </Dropdown>
-                    )}
-                    {innerTools.settings && (
-                      <Tooltip
-                        trigger="click"
-                        color="white"
-                        title={
-                          <Space direction="vertical" style={{ width: 400 }}>
-                            <div style={{ color: "black" }}>设置列显示</div>
-                            <Checkbox
-                              indeterminate={checkColumnIndeterminate}
-                              checked={checkColumnAll}
-                              onChange={(e) => {
-                                setShowColumns({
-                                  allKeys: allColumnKeys,
-                                  keys: e.target.checked ? allColumnKeys : [],
-                                });
-                              }}
-                            >
-                              全选
-                            </Checkbox>
-                            <Checkbox.Group
-                              value={realCheckKeys}
-                              options={allColumnOptions}
-                              onChange={(value) => {
-                                setShowColumns({
-                                  allKeys: allColumnKeys,
-                                  keys: value,
-                                });
-                              }}
-                            />
-                          </Space>
-                        }
-                      >
-                        <Button icon={<SettingOutlined />} />
-                      </Tooltip>
-                    )}
-                  </Space>
-                </div>
-              )}
-            </div>
-          )
-        }
+                      />
+                    </Tooltip>
+                  )}
+                  {restful && innerTools.refreshInterval >= 0 && (
+                    <Tooltip
+                      title={
+                        innerTools.refreshInterval > 0
+                          ? enableRefresh
+                            ? `点击关闭 ${innerTools.refreshInterval}ms 刷新`
+                            : `开启间隔 ${innerTools.refreshInterval}ms 刷新`
+                          : "点击刷新"
+                      }
+                    >
+                      <Button
+                        icon={<ReloadOutlined />}
+                        type={enableRefresh && innerTools.refreshInterval > 0 ? "primary" : undefined}
+                        onClick={() => {
+                          const v = !enableRefresh;
+                          setEnableRefresh(v);
+                          runInterval(v && innerTools.refreshInterval > 0);
+                        }}
+                      />
+                    </Tooltip>
+                  )}
+                  {restful && innerTools.downloadKey && (
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "download_current",
+                            label: (
+                              <Button href={genDownloadUrl(false)} type="link" target="blank" size="small">
+                                导出当前页
+                              </Button>
+                            ),
+                          },
+                          {
+                            key: "download_all",
+                            label: (
+                              <Button href={genDownloadUrl(true)} type="link" target="blank" size="small">
+                                导出全部数据
+                              </Button>
+                            ),
+                          },
+                        ],
+                      }}
+                      placement="bottom"
+                    >
+                      <Button icon={<DownloadOutlined />} />
+                    </Dropdown>
+                  )}
+                  {restful && filterFormProps && innerTools.advancedSearch && (
+                    <FieldsSetting
+                      value={filterFormProps.fields}
+                      title="设置搜索选项"
+                      storageKey={isString(innerTools.advancedSearch) ? innerTools.advancedSearch : `${restful}-filter`}
+                      onChange={onToolsFilterChange}
+                    >
+                      <Button icon={<SecurityScanOutlined />} />
+                    </FieldsSetting>
+                  )}
+                  {innerTools.settings && (
+                    <FieldsSetting
+                      value={columns}
+                      title="设置列显示"
+                      storageKey={isString(innerTools.settings) ? innerTools.settings : `${restful}-settings`}
+                      onChange={onToolsSettingsChange}
+                    >
+                      <Button icon={<SettingOutlined />} />
+                    </FieldsSetting>
+                  )}
+                </Space>
+              </div>
+            )}
+          </div>
+        )}
         {headerTags.length > 0 && (
           <div className="cls-resttable-header-tags">
             {headerTags.map((item) => {
@@ -975,7 +951,10 @@ const RestTable = forwardRef(
                   <span style={{ color: "#8c8c8c" }} className="cls-resttable-header-tag-label">
                     {item.label}:{" "}
                   </span>
-                  <span style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }} className="cls-resttable-header-tag-value">
+                  <span
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}
+                    className="cls-resttable-header-tag-value"
+                  >
                     {item.value}
                   </span>
                 </Tag>
@@ -1027,32 +1006,7 @@ const RestTable = forwardRef(
               antdTableProps.onChange(pagination, filters, sorter, extra);
             }
           }}
-          expandable={
-            memExpandableColumns.length > 0
-              ? {
-                expandedRowRender: (record) => {
-                  return (
-                    <Descriptions {...expandAntdProps}>
-                      {memExpandableColumns.map((column) => {
-                        const _key = genColumnKey(column);
-                        return (
-                          <Descriptions.Item key={_key} {...column.expandItemProps} label={column.title}>
-                            {renderRowLabel(record, column)}
-                          </Descriptions.Item>
-                        );
-                      })}
-                    </Descriptions>
-                  );
-                },
-                rowExpandable: (record) => !expandFieldPath || findDataByPath(record, expandFieldPath),
-                expandedRowKeys: expandedRows,
-                onExpandedRowsChange: (rowKeys) => {
-                  setExpandedRows(rowKeys);
-                },
-                ...antdTableProps?.expandable,
-              }
-              : antdTableProps?.expandable
-          }
+          expandable={expandableProps}
         />
       </Space>
     );
@@ -1065,6 +1019,8 @@ RestTable.propTypes = {
 
   restful: PropTypes.string,
   reqConfig: PropTypes.object,
+  // 处理query参数的选项, query-string 的配置项
+  parseOptions: PropTypes.object,
   urlDetailTemplate: PropTypes.string,
   baseParams: PropTypes.object,
   // 有了baseParams，还需要routeParams，是为了处理默认参数(baseParams)不显示在地址栏的问题

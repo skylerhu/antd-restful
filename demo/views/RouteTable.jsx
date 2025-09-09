@@ -21,4 +21,5 @@ const RouteTable = (restProps) => {
     />
   );
 };
+
 export default RouteTable;

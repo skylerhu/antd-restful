@@ -20,6 +20,7 @@
 | **远程数据相关** | | | | |
 | restful | RESTful API 接口地址 | `string` | - | - |
 | reqConfig | 请求配置，axios请求的额外配置 | `object` | - | - |
+| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` |
 | urlDetailTemplate | 删除操作的自定义 URL 模板 | `string` | - | - |
 | baseParams | 基础请求参数 | `object` | - | - |
 | routeParams | 路由参数 | `object` | - | - |
@@ -670,3 +671,51 @@ const AdvancedTable = () => {
    - 配置合适的请求超时时间
    - 使用reqConfig添加必要的请求头
    - 实现数据变化的回调处理
+
+
+### 常见问题
+
+1. **工具栏遮挡了筛选表单中的字段**
+
+有2种解决方式
+
+1）不根据屏幕宽高动态设置列数，组件会根据 column 设置的列数兼容遮挡的场景：
+```js
+filterFormProps: {
+  antdListProps: grid: { gutter: 30, column: 3 },
+}
+```
+
+2）可以在 `filterFormProps.fields` 筛选配置最后增加一个占位的字段，例如
+```js
+{
+  key: "__placeholder",
+  label: "占位",
+  tip: "搜索按钮被遮挡，可以勾选控制换行展示",
+  hidden: true,
+  antdFormItemProps: {
+    hidden: true,
+  },
+}
+```
+
+2. **处理query参数在超大数值下丢失精度问题**
+1）升级 `query-string > 9.1`，支持配置 `parseOptions.types` 指定字段类型
+2）低版本 可以通过 `parseTypes` 配置解决
+```js
+<RestTable
+  parseOptions={{
+    parseNumbers: false,  // 关闭转换成数字
+    // types: {  // required query-string > 9.1
+    //   user: "number",
+    // },
+  }}
+  parseTypes={{
+    // 注意配置 string 无效，因为会先由 query-string 处理完 再使用 parseTypes 处理转成数字
+    // 注意解决 parseOptions.parseNumbers = false 一起使用
+    user: "number",
+  }}
+  ...
+/>
+```
+

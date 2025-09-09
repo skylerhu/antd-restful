@@ -18,6 +18,7 @@ const GridForm = forwardRef(
       onReset,
       submitTitle = "提交",
       resetTitle = "重置",
+      enablePlaceholder = false,
       initialValues,
       antdFormProps,
       antdListProps,
@@ -47,9 +48,7 @@ const GridForm = forwardRef(
         if (!fieldKeys?.length) {
           return;
         }
-        // console.log("fieldKeys", fieldKeys);
         const changedKeys = Object.keys(values).filter((key) => !isEmpty(values[key]) && fieldKeys.includes(key));
-        // console.log("changedKeys", changedKeys, values);
         if (changedKeys.length >= 1) {
           // 单项模式下，只有一个字段被修改，则激活该字段
           initKeyRef.current = changedKeys[0];
@@ -182,10 +181,26 @@ const GridForm = forwardRef(
       [form]
     );
 
+    const dataSource = useMemo(() => {
+      const column = antdListProps?.grid?.column || 3;
+      const _fields = [...fields];
+      if (enablePlaceholder && column > 0 && (_fields.length + 1) % column === 0) {
+        // 会被工具按钮遮挡，添加占位字段
+        _fields.push({
+          key: "__placeholder",
+          hidden: true,
+          antdFormItemProps: {
+            hidden: true,
+          },
+        });
+      }
+      _fields.push({ key: "__submit" });
+      return _fields;
+    }, [antdListProps?.grid?.column, fields, enablePlaceholder]);
+
     const labelFlex = useMemo(() => {
       return antdFormProps?.labelCol?.flex || "80px";
     }, [antdFormProps?.labelCol]);
-
 
     if (!fields || fields.length === 0) {
       // 没有配置字段，不显示
@@ -234,16 +249,10 @@ const GridForm = forwardRef(
           <List
             grid={{
               gutter: 10,
-              xs: 1,
-              sm: 2,
-              md: 4,
+              column: 3,
             }}
             {...antdListProps}
-            dataSource={fields.concat([
-              {
-                key: "__submit",
-              },
-            ])}
+            dataSource={dataSource}
             renderItem={(item) => (
               <List.Item key={item.key}>
                 {item.key === "__submit" ? (
@@ -301,6 +310,8 @@ GridForm.propTypes = {
   initialValues: PropTypes.object,
   onValuesChange: PropTypes.func,
 
+  // 是否开启占位字段
+  enablePlaceholder: PropTypes.bool,
   // 开启高级搜索
   advancedSearch: PropTypes.bool,
 

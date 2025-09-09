@@ -74,7 +74,8 @@ const config = {
     react: "react",
     "react-dom": "react-dom",
     antd: "antd",
-    "@ant-design/icons": "@ant-design/icons"
+    "@ant-design/icons": "@ant-design/icons",
+    "query-string": "query-string",
   },
 };
 
