@@ -505,9 +505,24 @@ const RestTable = forwardRef(
             delete filters[fieldPageSize];
           }
         }
+        // forceParams 会覆盖其他参数，去掉相同key的
+        if (memForceParams) {
+          Object.keys(memForceParams).forEach((key) => {
+            // 直接删除，肯定相等
+            delete filters[key];
+          });
+        }
+        // baseParams 相同值的可以去掉
+        if (memBaseParams) {
+          Object.keys(memBaseParams).forEach((key) => {
+            if (deepEqual(filters[key], memBaseParams[key])) {
+              delete filters[key];
+            }
+          });
+        }
         onFiltersChange(filters);
       }
-    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, innerFilters, onFiltersChange]);
+    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, memForceParams, innerFilters, onFiltersChange]);
 
     // 请求远端数据
     const fetchData = useCallback(() => {

@@ -9,6 +9,8 @@
     - 在处理query中有超大数值会有溢出精度问题，可以设置为 False 当做字符串处理
     - 升级 `query-string": "^9.1.0"` 支持可指定特定参数的类型，低版本node不支持可使用 parseTypes 配置字段类型；
 - feat: 调整 RestTable 组件中 advancedSearch 参数控制搜索字段的展示
+- fix: RestTable 的 onFiltersChange 在处理回调值时`移除`跟 baseParams 和 forceParams 相同的值
+    - 避免还原为原来值的情况下显示在路由上
 
 ## 0.1.12
 - style: 调整 TableSelect 内2个元素之间的间隔

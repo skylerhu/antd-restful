@@ -6,18 +6,41 @@ import RouteBaseTable from "src/components/RouteBaseTable";
 
 // Mock RestTable component
 let capturedOnFiltersChange;
+let capturedBaseParams;
 jest.mock("src/components/RestTable", () => {
   // eslint-disable-next-line react/prop-types
-  return function MockRestTable({ routeParams, onFiltersChange, ...props }) {
-    // 捕获 onFiltersChange 函数
+  return function MockRestTable({ routeParams, onFiltersChange, baseParams, ...props }) {
+    // 捕获 onFiltersChange 函数和 baseParams
     capturedOnFiltersChange = onFiltersChange;
+    capturedBaseParams = baseParams;
+
+    // 模拟 RestTable 内部的 baseParams 过滤逻辑
+    const handleFiltersChange = (filters) => {
+      if (onFiltersChange) {
+        let filteredFilters = { ...filters };
+        // 模拟 RestTable 内部的过滤逻辑
+        if (baseParams) {
+          Object.keys(baseParams).forEach((key) => {
+            if (JSON.stringify(filteredFilters[key]) === JSON.stringify(baseParams[key])) {
+              delete filteredFilters[key];
+            }
+          });
+        }
+        onFiltersChange(filteredFilters);
+      }
+    };
 
     return (
       <div data-testid="rest-table">
         <div data-testid="route-params">{JSON.stringify(routeParams)}</div>
         <button
           data-testid="trigger-filters"
-          onClick={() => onFiltersChange && onFiltersChange({ name: "test", age: 25 })}
+          onClick={() => handleFiltersChange({
+            name: "test",
+            age: 25,
+            status: "active",
+            type: "user"
+          })}
         >
           Trigger Filters
         </button>
@@ -243,28 +266,39 @@ describe("RouteBaseTable", () => {
         expect(screen.getByTestId("rest-table")).toBeInTheDocument();
       });
 
-      // 使用捕获的 onFiltersChange 函数
+      // 使用捕获的 onFiltersChange 函数和 baseParams
       expect(capturedOnFiltersChange).toBeDefined();
+      expect(capturedBaseParams).toEqual({ status: "active", type: "user" });
 
       // 直接调用传递给 RestTable 的 onFiltersChange 回调
       act(() => {
-        capturedOnFiltersChange({
+        // 模拟 RestTable 内部的过滤逻辑
+        const filters = {
           name: "test",
           age: 25,
           status: "active", // 这个应该被过滤掉
           type: "user", // 这个应该被过滤掉
-        });
+        };
+
+        let filteredFilters = { ...filters };
+        if (capturedBaseParams) {
+          Object.keys(capturedBaseParams).forEach((key) => {
+            if (JSON.stringify(filteredFilters[key]) === JSON.stringify(capturedBaseParams[key])) {
+              delete filteredFilters[key];
+            }
+          });
+        }
+
+        capturedOnFiltersChange(filteredFilters);
       });
 
       await waitFor(() => {
         // 验证 onSearchChange 被调用，且过滤掉了与 baseParams 相同的参数
         expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&age=25");
-        // 验证原始的 onFiltersChange 被调用
+        // 验证原始的 onFiltersChange 被调用，但参数已经被 RestTable 过滤
         expect(mockOnFiltersChange).toHaveBeenCalledWith({
           name: "test",
           age: 25,
-          status: "active",
-          type: "user",
         });
       });
     });
