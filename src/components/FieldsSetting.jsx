@@ -15,8 +15,8 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   // 部分选中
   const checkIndeterminate = useMemo(() => keys.length > 0 && !checkAll, [keys, checkAll]);
 
-  const allColumnOptions = useMemo(() => {
-    return value.map((column) => {
+  const data = useMemo(() => {
+    const options = value.map((column) => {
       const key = genColumnKey(column);
       return {
         label: (
@@ -31,8 +31,15 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
           </div>
         ),
         value: key,
+        // 如果强制设置的 false，则禁止配置
+        disabled: column.hidden === false,
       };
     });
+    const forceChecks = options.filter((option) => option.disabled).map((option) => option.value);
+    return {
+      options,
+      forceChecks,
+    };
   }, [value]);
 
   useEffect(() => {
@@ -55,14 +62,14 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
             indeterminate={checkIndeterminate}
             checked={checkAll}
             onChange={(e) => {
-              setKeys(e.target.checked ? allKeys : []);
+              setKeys(e.target.checked ? allKeys : data.forceChecks);
             }}
           >
             全选
           </Checkbox>
           <Checkbox.Group
             value={keys}
-            options={allColumnOptions}
+            options={data.options}
             onChange={(value) => {
               setKeys(value);
             }}

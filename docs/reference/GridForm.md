@@ -34,6 +34,8 @@
 | key | 字段唯一标识，同时作为表单字段的 name | `string` | - | - |
 | label | 字段标签，未设置时使用 key 值 | `string` | `key` | - |
 | type | 字段类型，详见下方支持的字段类型 | `string` | `'input'` | - |
+| tips | 在配置展示列时的提示信息 | `string` | - | - |
+| hidden | 设置true隐藏字段，若显示设置false则不可配置隐藏 | `bool` | undefined | - |
 | antdFormItemProps | Ant Design Form.Item 组件的属性，如验证规则等 | `object` | - | - |
 | antdFieldProps | 对应字段组件的属性 | `object` | - | - |
 | antdSingleProps | 单项模式下字段组件的特殊属性 | `object` | - | - |

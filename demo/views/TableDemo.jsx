@@ -163,6 +163,7 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
+              hidden: false,
             },
             {
               key: "search",

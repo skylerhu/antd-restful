@@ -102,7 +102,13 @@ export const useSettingsStorage = (key, columns) => {
   const [config, setConfig] = useLocalStorage(key, {});
 
   const memoColumns = useDeepCompareMemoize(
-    columns.map((column) => ({ key: genColumnKey(column), hidden: column.hidden, label: column.label || column.title }))
+    columns.map((column) => ({
+      key: genColumnKey(column),
+      hidden: column.hidden,
+      label: column.label || column.title,
+      // 如果强制设置的 false，则禁止配置
+      disabled: column.hidden === false,
+    }))
   );
   // 所有的keys
   const allKeys = useMemo(() => memoColumns.map((column) => column.key), [memoColumns]);
