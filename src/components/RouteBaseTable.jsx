@@ -35,19 +35,21 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
   const onChange = useCallback(
     (values) => {
       const filters = { ...values };
-      setParams(filters);
       let changedSearch = queryString.stringify(filters, memParseOptions);
       if (isEmpty(changedSearch)) {
         changedSearch = "";
       } else {
         changedSearch = `?${changedSearch}`;
       }
-      if (searchRef.current !== changedSearch && isFunction(onSearchChange)) {
+      if (searchRef.current !== changedSearch) {
         searchRef.current = changedSearch;
-        onSearchChange(changedSearch);
-      }
-      if (isFunction(onFiltersChange)) {
-        onFiltersChange(values);
+        setParams(filters);
+        if (isFunction(onSearchChange)) {
+          onSearchChange(changedSearch);
+        }
+        if (isFunction(onFiltersChange)) {
+          onFiltersChange(values);
+        }
       }
     },
     [onFiltersChange, onSearchChange, memParseOptions]
