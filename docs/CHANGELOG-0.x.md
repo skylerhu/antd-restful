@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.1.15
+- fix: RestTable 点击搜索，修复 未重置 page=1 的问题
+- fix: requests 请求被 取消时不提示
+
 ## 0.1.14
 fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用
 
@@ -36,7 +40,6 @@ fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用
     - expansionValidator: ExpansionView 组件的校验
     - remoteValidator: 配置远端接口校验数据
 - perf: makeSafeRequest 配置 delay 防抖的情况下，优化首次请求不执行delay
-
 
 ## 0.1.9
 - feat: 扩展 RestTable

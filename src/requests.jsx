@@ -72,17 +72,20 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (!error.config?.disableNotiError) {
-      // 显示通知
-      const { message, description } = formatRequestError(error);
-      const config = {
-        message,
-        description: <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{description}</p>,
-      };
-      // 401 和 403 避免多次提示，所以设置key
-      if (["401", "403", "404"].includes(error?.response?.status)) {
-        config.key = error.response.status;
+      // 被取消的请求不提示错误
+      if (error.name !== "CanceledError") {
+        // 显示通知
+        const { message, description } = formatRequestError(error);
+        const config = {
+          message,
+          description: <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{description}</p>,
+        };
+        // 401 和 403 避免多次提示，所以设置key
+        if (["401", "403", "404"].includes(error?.response?.status)) {
+          config.key = error.response.status;
+        }
+        notification.error(config);
       }
-      notification.error(config);
     }
     return Promise.reject(error);
   }

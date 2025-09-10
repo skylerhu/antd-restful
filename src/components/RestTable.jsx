@@ -824,6 +824,9 @@ const RestTable = forwardRef(
                   advancedSearch={enableAdvancedSearch}
                   ref={filterFormRef}
                   onSubmit={(values) => {
+                    setHeaderFilters((oldV) => {
+                      return { ...oldV, [fieldPage]: 1 };
+                    });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, values)) {
                         // 数据没有变更刷新列表
@@ -834,6 +837,9 @@ const RestTable = forwardRef(
                     });
                   }}
                   onReset={(values) => {
+                    setHeaderFilters((oldV) => {
+                      return { ...oldV, [fieldPage]: 1 };
+                    });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, values)) {
                         // 数据没有变更刷新列表

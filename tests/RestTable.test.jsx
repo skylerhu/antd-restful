@@ -1570,6 +1570,210 @@ describe("RestTable", () => {
     });
   });
 
+  describe("路由参数和刷新/搜索功能测试", () => {
+    it("should use routeParams for initial request", async () => {
+      const mockResponse = {
+        data: {
+          results: [{ id: 1, name: "张三" }],
+          count: 1,
+        },
+      };
+
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      mockMakeRequest.mockReturnValue({
+        get: mockGet,
+      });
+
+      const columns = [{ title: "姓名", dataIndex: "name", key: "name" }];
+      const routeParams = { page: 2, page_size: 2 }; // eslint-disable-line camelcase
+
+      render(
+        <RestTable
+          restful="/api/users"
+          columns={columns}
+          routeParams={routeParams}
+        />
+      );
+
+      // 验证初始请求包含正确的路由参数
+      await waitFor(() => {
+        expect(mockGet).toHaveBeenCalledWith("/api/users", {
+          params: expect.objectContaining({
+            page: 2,
+            page_size: 2, // eslint-disable-line camelcase
+          }),
+        });
+      });
+    });
+
+    it("should maintain params when refreshList is called", async () => {
+      const mockResponse = {
+        data: {
+          results: [{ id: 1, name: "张三" }],
+          count: 1,
+        },
+      };
+
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      mockMakeRequest.mockReturnValue({
+        get: mockGet,
+      });
+
+      const columns = [{ title: "姓名", dataIndex: "name", key: "name" }];
+      const routeParams = { page: 2, page_size: 2 }; // eslint-disable-line camelcase
+      const tableRef = React.createRef();
+
+      render(
+        <RestTable
+          ref={tableRef}
+          restful="/api/users"
+          columns={columns}
+          routeParams={routeParams}
+        />
+      );
+
+      // 等待初始请求完成
+      await waitFor(() => {
+        expect(mockGet).toHaveBeenCalledWith("/api/users", {
+          params: expect.objectContaining({
+            page: 2,
+            page_size: 2, // eslint-disable-line camelcase
+          }),
+        });
+      });
+
+      // 清除之前的调用记录
+      mockGet.mockClear();
+
+      // 直接调用refreshList方法
+      await act(async () => {
+        tableRef.current.refreshList();
+      });
+
+      // 验证刷新请求仍然包含相同的参数
+      await waitFor(() => {
+        expect(mockGet).toHaveBeenCalledTimes(1); // 刷新请求
+        expect(mockGet).toHaveBeenCalledWith("/api/users", {
+          params: expect.objectContaining({
+            page: 2,
+            page_size: 2, // eslint-disable-line camelcase
+          }),
+        });
+      });
+    });
+
+    it("should reset page to 1 but keep page_size when search button is clicked", async () => {
+      const mockResponse = {
+        data: {
+          results: [{ id: 1, name: "张三" }],
+          count: 1,
+        },
+      };
+
+      mockMakeRequest.mockReturnValue({
+        get: jest.fn().mockResolvedValue(mockResponse),
+      });
+
+      const columns = [{ title: "姓名", dataIndex: "name", key: "name" }];
+      const routeParams = { page: 2, page_size: 2 }; // eslint-disable-line camelcase
+      const filterFormProps = {
+        fields: [{ key: "name", label: "姓名", type: "input" }],
+      };
+
+      const { container } = render(
+        <RestTable
+          restful="/api/users"
+          columns={columns}
+          routeParams={routeParams}
+          filterFormProps={filterFormProps}
+        />
+      );
+
+      // 等待初始请求完成
+      await waitFor(() => {
+        expect(screen.getByText("张三")).toBeInTheDocument();
+      });
+
+      // 清除之前的调用记录
+      mockMakeRequest().get.mockClear();
+
+      // 点击搜索按钮
+      const searchButton = container.querySelector('button[type="submit"]');
+      await act(async () => {
+        await user.click(searchButton);
+      });
+
+      // 验证搜索请求page重置为1，但page_size保持不变
+      await waitFor(() => {
+        const mockGet = mockMakeRequest().get;
+        expect(mockGet).toHaveBeenCalledWith("/api/users", {
+          params: expect.objectContaining({
+            page: 1, // page重置为1
+            page_size: 2, // eslint-disable-line camelcase
+          }),
+        });
+      });
+    });
+
+    it("should reset page to 1 but keep page_size when form is reset", async () => {
+      const mockResponse = {
+        data: {
+          results: [{ id: 1, name: "张三" }],
+          count: 1,
+        },
+      };
+
+      const mockGet = jest.fn().mockResolvedValue(mockResponse);
+      mockMakeRequest.mockReturnValue({
+        get: mockGet,
+      });
+
+      const columns = [{ title: "姓名", dataIndex: "name", key: "name" }];
+      const routeParams = { page: 2, page_size: 2 }; // eslint-disable-line camelcase
+      const filterFormProps = {
+        fields: [
+          { key: "name", label: "姓名", type: "input" },
+          { key: "age", label: "年龄", type: "number" }
+        ],
+        advancedSearch: true
+      };
+
+      const { container } = render(
+        <RestTable
+          restful="/api/users"
+          columns={columns}
+          routeParams={routeParams}
+          filterFormProps={filterFormProps}
+        />
+      );
+
+      // 等待初始请求完成
+      await waitFor(() => {
+        expect(screen.getByText("张三")).toBeInTheDocument();
+      });
+
+      // 清除之前的调用记录
+      mockGet.mockClear();
+
+      // 查找重置按钮并点击
+      const resetButton = container.querySelector('button[type="reset"]');
+      await act(async () => {
+        await user.click(resetButton);
+      });
+
+      // 验证重置请求page重置为1，但page_size保持不变
+      await waitFor(() => {
+        expect(mockGet).toHaveBeenCalledTimes(1); // 重置请求
+        expect(mockGet).toHaveBeenCalledWith("/api/users", {
+          params: expect.objectContaining({
+            page: 1, // page重置为1
+            page_size: 2, // eslint-disable-line camelcase
+          }),
+        });
+      });
+    });
+  });
+
   describe("renderRowLabel 测试", () => {
     it("should render simple value without template", () => {
       const record = { id: 1, name: "张三" };
