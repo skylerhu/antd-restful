@@ -276,7 +276,7 @@ const RestTable = forwardRef(
       onFiltersChange,
 
       rowKey = "id",
-      columns,
+      columns = [],
       expandFieldPath,
       expandAntdProps,
       expandedAllRows = false,
