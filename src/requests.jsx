@@ -50,7 +50,7 @@ const instance = axios.create({
   paramsSerializer: (params) => globalConfig.queryStringify(params),
 });
 
-instance.interceptors.request.use((config) => {
+export const reqInterceptor = instance.interceptors.request.use((config) => {
   const headers = { ...config.headers };
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(config.method.toUpperCase())) {
@@ -66,7 +66,7 @@ instance.interceptors.request.use((config) => {
 
   return config;
 });
-instance.interceptors.response.use(
+export const resInterceptor = instance.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -90,6 +90,10 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 在适当的时候移除拦截器
+// axios.interceptors.request.eject(reqInterceptor);
+// axios.interceptors.response.eject(resInterceptor);
 
 const emptyFn = () => {};
 

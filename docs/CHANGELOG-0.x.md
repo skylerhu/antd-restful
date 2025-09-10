@@ -3,6 +3,7 @@
 ## 0.1.15
 - fix: 修复 RestTable 点击搜索时 未重置 页码`page=1` 的问题
 - fix: requests 请求 被取消时 不提示弹窗
+- feat: requests 增加export `reqInterceptor` 和 `resInterceptor`，可在合适的时候移除拦截器
 
 ## 0.1.14
 fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用

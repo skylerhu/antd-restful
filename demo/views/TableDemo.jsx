@@ -35,7 +35,7 @@ const TableDemo = () => {
         }}
         restful="api/users/"
         baseParams={{
-          // search: "u",
+          search: "u",
           // nickname: "u",
           page_size: 2, // eslint-disable-line camelcase
           // age__range: [0, 100], // eslint-disable-line camelcase

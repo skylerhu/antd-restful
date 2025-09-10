@@ -120,7 +120,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           let _value = isMultiple ? handleValue(selectedKeys) : selectedKeys;
           searchItem = (
             <RestSelect
-              style={{ width: "100%" }}
+              style={{ width: "100%", minWidth: 100 }}
               {...config.dropdownProps}
               value={_value}
               onChange={(value) => {
