@@ -120,7 +120,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           let _value = isMultiple ? handleValue(selectedKeys) : selectedKeys;
           searchItem = (
             <RestSelect
-              style={{ width: "100%" }}
+              style={{ width: "100%", minWidth: 100 }}
               {...config.dropdownProps}
               value={_value}
               onChange={(value) => {
@@ -276,7 +276,7 @@ const RestTable = forwardRef(
       onFiltersChange,
 
       rowKey = "id",
-      columns,
+      columns = [],
       expandFieldPath,
       expandAntdProps,
       expandedAllRows = false,
@@ -824,6 +824,9 @@ const RestTable = forwardRef(
                   advancedSearch={enableAdvancedSearch}
                   ref={filterFormRef}
                   onSubmit={(values) => {
+                    setHeaderFilters((oldV) => {
+                      return { ...oldV, [fieldPage]: 1 };
+                    });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, values)) {
                         // 数据没有变更刷新列表
@@ -834,6 +837,9 @@ const RestTable = forwardRef(
                     });
                   }}
                   onReset={(values) => {
+                    setHeaderFilters((oldV) => {
+                      return { ...oldV, [fieldPage]: 1 };
+                    });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, values)) {
                         // 数据没有变更刷新列表

@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.1.15
+- fix: 修复 RestTable 点击搜索时 未重置 页码`page=1` 的问题
+- fix: requests 请求 被取消时 不提示弹窗
+- feat: requests 增加export `reqInterceptor` 和 `resInterceptor`，可在合适的时候移除拦截器
+
 ## 0.1.14
 fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用
 
@@ -36,7 +41,6 @@ fix: 修复 RestSelect 不配置 restful 的情况下不应触发远程调用
     - expansionValidator: ExpansionView 组件的校验
     - remoteValidator: 配置远端接口校验数据
 - perf: makeSafeRequest 配置 delay 防抖的情况下，优化首次请求不执行delay
-
 
 ## 0.1.9
 - feat: 扩展 RestTable

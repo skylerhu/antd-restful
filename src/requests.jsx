@@ -50,7 +50,7 @@ const instance = axios.create({
   paramsSerializer: (params) => globalConfig.queryStringify(params),
 });
 
-instance.interceptors.request.use((config) => {
+export const reqInterceptor = instance.interceptors.request.use((config) => {
   const headers = { ...config.headers };
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(config.method.toUpperCase())) {
@@ -66,27 +66,34 @@ instance.interceptors.request.use((config) => {
 
   return config;
 });
-instance.interceptors.response.use(
+export const resInterceptor = instance.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (!error.config?.disableNotiError) {
-      // 显示通知
-      const { message, description } = formatRequestError(error);
-      const config = {
-        message,
-        description: <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{description}</p>,
-      };
-      // 401 和 403 避免多次提示，所以设置key
-      if (["401", "403", "404"].includes(error?.response?.status)) {
-        config.key = error.response.status;
+      // 被取消的请求不提示错误
+      if (error.name !== "CanceledError") {
+        // 显示通知
+        const { message, description } = formatRequestError(error);
+        const config = {
+          message,
+          description: <p style={{ whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{description}</p>,
+        };
+        // 401 和 403 避免多次提示，所以设置key
+        if (["401", "403", "404"].includes(error?.response?.status)) {
+          config.key = error.response.status;
+        }
+        notification.error(config);
       }
-      notification.error(config);
     }
     return Promise.reject(error);
   }
 );
+
+// 在适当的时候移除拦截器
+// axios.interceptors.request.eject(reqInterceptor);
+// axios.interceptors.response.eject(resInterceptor);
 
 const emptyFn = () => {};
 
