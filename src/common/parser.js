@@ -2,7 +2,7 @@ import format from "string-format";
 import objectPath from "object-path";
 import libQuery from "query-string";
 import { DEFAULT_SEPARATOR, SorterEnum } from "src/common/constants";
-import { isArray, isBasicType, isBlank, isBoolean, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
+import { isArray, isBlank, isBoolean, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
 
 export const commonFormat = (template, ...values) => {
   if (isBlank(template)) {
@@ -217,13 +217,14 @@ export const parseQueryTypes = (query, types) => {
   let _query = {};
   Object.keys(query).forEach((key) => {
     let v = query[key];
-    if (!isEmpty(v) && isBasicType(v)) {
+    const _type = types[key];
+    if (!isEmpty(v) && !isEmpty(_type)) {
       // 只处理基础类型
-      if (types[key] === "string") {
+      if (_type === "string") {
         v = isArray(v) ? v.map((v) => toBeString(v)) : toBeString(v);
-      } else if (types[key] === "number") {
+      } else if (_type === "number") {
         v = isArray(v) ? v.map((v) => Number(v)) : Number(v);
-      } else if (types[key] === "boolean") {
+      } else if (_type === "boolean") {
         v = isArray(v) ? v.map((v) => Boolean(v)) : Boolean(v);
       }
     }

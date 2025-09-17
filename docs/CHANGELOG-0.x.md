@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.1.16
+- fix: 无论如何设置 parseOptions，确保 RestTable 中处理 page和page_size 一定是int类型
+- fix: 修复 `parseQueryTypes` 未正确处理数组值的问题
+
 ## 0.1.15
 - fix: 修复 RestTable 点击搜索时 未重置 页码`page=1` 的问题
 - fix: requests 请求 被取消时 不提示弹窗

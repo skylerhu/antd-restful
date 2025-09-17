@@ -566,7 +566,7 @@ describe("Parser", () => {
       expect(parser.parseQueryTypes(undefined, types)).toBeUndefined();
     });
 
-    test("should skip non-basic types", () => {
+    test("should convert non-basic types to string", () => {
       const query = {
         name: "John",
         user: { id: 1, name: "John" },
@@ -576,8 +576,8 @@ describe("Parser", () => {
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         name: "John",
-        user: { id: 1, name: "John" },
-        items: [{ id: 1 }, { id: 2 }]
+        user: '{"id":1,"name":"John"}',
+        items: ['{"id":1}', '{"id":2}']
       });
     });
 
@@ -593,6 +593,255 @@ describe("Parser", () => {
       const types = { name: "string", age: "number", active: "boolean" };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({ name: null, age: undefined, active: null });
+    });
+
+    test("should handle array with mixed types", () => {
+      const query = {
+        names: ["John", 123, true, null],
+        ages: ["25", "30", "invalid", ""],
+        flags: [true, false, "true", "false", 1, 0]
+      };
+      const types = { names: "string", ages: "number", flags: "boolean" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        names: ["John", "123", "true", ""],
+        ages: [25, 30, NaN, 0],
+        flags: [true, false, true, true, true, false]
+      });
+    });
+
+    test("should handle nested arrays", () => {
+      const query = {
+        matrix: [["1", "2"], ["3", "4"]],
+        numbers: [1, 2, 3]
+      };
+      const types = { matrix: "string", numbers: "number" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        matrix: ['["1","2"]', '["3","4"]'], // 嵌套数组会被转换为字符串
+        numbers: [1, 2, 3]
+      });
+    });
+
+    test("should handle special number values", () => {
+      const query = {
+        positive: "123",
+        negative: "-456",
+        decimal: "3.14",
+        zero: "0",
+        scientific: "1e5",
+        infinity: "Infinity",
+        negativeInfinity: "-Infinity",
+        nan: "NaN"
+      };
+      const types = {
+        positive: "number",
+        negative: "number",
+        decimal: "number",
+        zero: "number",
+        scientific: "number",
+        infinity: "number",
+        negativeInfinity: "number",
+        nan: "number"
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        positive: 123,
+        negative: -456,
+        decimal: 3.14,
+        zero: 0,
+        scientific: 100000,
+        infinity: Infinity,
+        negativeInfinity: -Infinity,
+        nan: NaN
+      });
+    });
+
+    test("should handle special boolean values", () => {
+      const query = {
+        truthy: "true",
+        falsy: "false",
+        one: "1",
+        zero: "0",
+        empty: "",
+        string: "hello",
+        nullVal: "null",
+        undefinedVal: "undefined"
+      };
+      const types = {
+        truthy: "boolean",
+        falsy: "boolean",
+        one: "boolean",
+        zero: "boolean",
+        empty: "boolean",
+        string: "boolean",
+        nullVal: "boolean",
+        undefinedVal: "boolean"
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        truthy: true,
+        falsy: true, // "false" 字符串转换为布尔值为 true
+        one: true,
+        zero: true, // "0" 字符串转换为布尔值为 true
+        empty: "", // 空字符串不会被转换，因为 isEmpty("") 返回 true
+        string: true,
+        nullVal: true,
+        undefinedVal: true
+      });
+    });
+
+    test("should handle special string values", () => {
+      const query = {
+        number: 123,
+        boolean: true,
+        nullVal: null,
+        undefinedVal: undefined,
+        object: { key: "value" },
+        array: [1, 2, 3],
+        empty: "",
+        zero: 0,
+        falseVal: false
+      };
+      const types = {
+        number: "string",
+        boolean: "string",
+        nullVal: "string",
+        undefinedVal: "string",
+        object: "string",
+        array: "string",
+        empty: "string",
+        zero: "string",
+        falseVal: "string"
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        number: "123",
+        boolean: "true",
+        nullVal: null, // null 不会被转换，因为 isEmpty(null) 返回 true
+        undefinedVal: undefined, // undefined 不会被转换，因为 isEmpty(undefined) 返回 true
+        object: '{"key":"value"}',
+        array: ["1", "2", "3"], // 数组会被转换为字符串数组
+        empty: "", // 空字符串不会被转换，因为 isEmpty("") 返回 true
+        zero: "0",
+        falseVal: "false"
+      });
+    });
+
+    test("should handle partial type definitions", () => {
+      const query = {
+        name: "John",
+        age: "30",
+        active: "true",
+        city: "New York"
+      };
+      const types = {
+        name: "string",
+        age: "number"
+        // active 和 city 没有类型定义
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        name: "John",
+        age: 30,
+        active: "true", // 保持原值
+        city: "New York" // 保持原值
+      });
+    });
+
+    test("should handle undefined type definitions", () => {
+      const query = {
+        name: "John",
+        age: "30"
+      };
+      const types = {
+        name: "string",
+        age: undefined // undefined 类型
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        name: "John",
+        age: "30" // 保持原值
+      });
+    });
+
+    test("should handle empty string type definitions", () => {
+      const query = {
+        name: "John",
+        age: "30"
+      };
+      const types = {
+        name: "string",
+        age: "" // 空字符串类型
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        name: "John",
+        age: "30" // 保持原值
+      });
+    });
+
+    test("should handle non-string type definitions", () => {
+      const query = {
+        name: "John",
+        age: "30"
+      };
+      const types = {
+        name: "string",
+        age: 123 // 非字符串类型定义
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        name: "John",
+        age: "30" // 保持原值
+      });
+    });
+
+    test("should convert objects and arrays to string", () => {
+      const query = {
+        user: { name: "John", age: 30 },
+        tags: ["tag1", "tag2"],
+        active: true
+      };
+      const types = {
+        user: "string",
+        tags: "string",
+        active: "string"
+      };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        user: '{"name":"John","age":30}', // 对象会被转换为字符串
+        tags: ["tag1", "tag2"], // 数组会被转换为字符串数组
+        active: "true"
+      });
+    });
+
+    test("should handle very large numbers", () => {
+      const query = {
+        large: "999999999999999",
+        small: "0.000000000000000001"
+      };
+      const types = { large: "number", small: "number" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        large: 999999999999999,
+        small: 0.000000000000000001
+      });
+    });
+
+    test("should handle unicode strings", () => {
+      const query = {
+        chinese: "你好世界",
+        emoji: "🚀🌟",
+        special: "特殊字符!@#$%^&*()"
+      };
+      const types = { chinese: "string", emoji: "string", special: "string" };
+      const result = parser.parseQueryTypes(query, types);
+      expect(result).toEqual({
+        chinese: "你好世界",
+        emoji: "🚀🌟",
+        special: "特殊字符!@#$%^&*()"
+      });
     });
   });
 
