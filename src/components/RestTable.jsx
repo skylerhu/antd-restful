@@ -446,39 +446,47 @@ const RestTable = forwardRef(
     // 更新筛选表单的值
     useEffect(() => {
       if (filterFormRef.current) {
-        const values = {};
-        filterFormKeys.forEach((field) => {
-          let v = memRouteParams ? memRouteParams[field.key] : undefined;
-          if (v === undefined) {
-            v = memBaseParams ? memBaseParams[field.key] : undefined;
-          }
-          if (v === undefined) {
-            // 需要重置表单的值
-            values[field.key] = null;
-          } else {
-            values[field.key] = v;
-          }
-          if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
-            // 为了能够正确显示“全部”选项
-            values[field.key] = "";
-          }
-        });
-        delete values[fieldPage];
-        delete values[fieldPageSize];
+        setFormFilters((oldV) => {
+          const values = {};
+          filterFormKeys.forEach((field) => {
+            // 表单提交过有值，则优先使用表单的值
+            let v = oldV ? oldV[field.key] : undefined;
+            if (v === undefined) {
+              // 路由参数有值，使用路由参数的值
+              v = memRouteParams ? memRouteParams[field.key] : undefined;
+            }
+            if (v === undefined) {
+              // 基础参数有值，使用基础参数的值
+              v = memBaseParams ? memBaseParams[field.key] : undefined;
+            }
+            if (v === undefined) {
+              // 需要重置表单的值
+              values[field.key] = null;
+            } else {
+              values[field.key] = v;
+            }
+            if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
+              // 为了能够正确显示“全部”选项
+              values[field.key] = "";
+            }
+          });
+          delete values[fieldPage];
+          delete values[fieldPageSize];
 
-        if (innerTools.advancedSearch) {
-          const noEmptyKeys = Object.keys(values).filter((key) => !isBlank(values[key]));
-          if (noEmptyKeys.length > 1) {
-            // 如果多个表单有值，则开启高级搜索
-            setEnableAdvancedSearch(true);
+          if (deepEqual(oldV, values)) {
+            return oldV;
           }
-        }
-        if (isEmpty(values)) {
-          filterFormRef.current.getFormInstance().resetFields();
-        } else {
+
+          if (innerTools.advancedSearch) {
+            const noEmptyKeys = Object.keys(values).filter((key) => !isBlank(values[key]));
+            if (noEmptyKeys.length > 1) {
+              // 如果多个表单有值，则开启高级搜索
+              setEnableAdvancedSearch(true);
+            }
+          }
           filterFormRef.current.getFormInstance().setFieldsValue(values);
-        }
-        setFormFilters((oldV) => (deepEqual(oldV, values) ? oldV : values));
+          return values;
+        });
       }
     }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
 

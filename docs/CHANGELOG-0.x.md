@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.18
+- fix: 修复 RestTable 表单值在路由参数变更时频繁更新的问题
+
 ## 0.1.17
 - style: 优化 RestTable 在没有筛选条件场景下 tools 按钮的位置样式
 
