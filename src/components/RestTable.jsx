@@ -1,19 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import {
-  Button,
-  Col,
-  Descriptions,
-  Dropdown,
-  Input,
-  InputNumber,
-  Row,
-  Space,
-  Spin,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
+import { Button, Col, Descriptions, Dropdown, Input, InputNumber, Row, Space, Spin, Table, Tag, Tooltip } from "antd";
 import {
   CloseOutlined,
   DownloadOutlined,
@@ -30,10 +17,10 @@ import {
   commonFormat,
   findDataByPath,
   genColumnKey,
+  genFields,
   tableSorterToApiSorter,
   toBeString,
   transformFilters,
-  genFields,
 } from "src/common/parser";
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
@@ -336,7 +323,10 @@ const RestTable = forwardRef(
       setShowColumnsKeys(keys);
     }, []);
 
-    const filterFields = useMemo(() => genFields(filterFormProps?.fields, filterFieldKeys), [filterFormProps?.fields, filterFieldKeys]);
+    const filterFields = useMemo(
+      () => genFields(filterFormProps?.fields, filterFieldKeys),
+      [filterFormProps?.fields, filterFieldKeys]
+    );
     const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
 
     useEffect(() => {
@@ -436,60 +426,62 @@ const RestTable = forwardRef(
       formFilters,
     ]);
 
-    const filterFormKeys = useDeepCompareMemoize(
+    const filterFormAllFields = useDeepCompareMemoize(
       filterFormProps?.fields?.map((field) => ({
-        key: field.key,
+        key: genColumnKey(field),
         type: field.type,
       })) || []
     );
-
     // 更新筛选表单的值
     useEffect(() => {
-      if (filterFormRef.current) {
-        setFormFilters((oldV) => {
-          const values = {};
-          filterFormKeys.forEach((field) => {
-            // 表单提交过有值，则优先使用表单的值
-            let v = oldV ? oldV[field.key] : undefined;
-            // 表单重置过值，则使用路由重置过的值
-            if (v !== null && v !== "") {
-              // 路由参数有值，使用路由参数的值
-              v = memRouteParams ? memRouteParams[field.key] : undefined;
-              if (v === undefined) {
-                // 基础参数有值，使用基础参数的值
-                v = memBaseParams ? memBaseParams[field.key] : undefined;
-              }
-            }
+      setFormFilters((oldV) => {
+        const values = {};
+        filterFields?.forEach((field) => {
+          let v = undefined;
+          // 表单提交过有值，则优先使用表单的值
+          v = oldV ? oldV[field.key] : undefined;
+          // 表单重置过值，则使用路由重置过的值
+          if (v !== null && v !== "") {
+            // 路由参数有值，使用路由参数的值
+            v = memRouteParams ? memRouteParams[field.key] : undefined;
             if (v === undefined) {
-              // 需要重置表单的值
-              values[field.key] = null;
-            } else {
-              values[field.key] = v;
-            }
-            if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
-              // 为了能够正确显示“全部”选项
-              values[field.key] = "";
-            }
-          });
-          delete values[fieldPage];
-          delete values[fieldPageSize];
-
-          if (deepEqual(oldV, values)) {
-            return oldV;
-          }
-
-          if (innerTools.advancedSearch) {
-            const noEmptyKeys = Object.keys(values).filter((key) => !isBlank(values[key]));
-            if (noEmptyKeys.length > 1) {
-              // 如果多个表单有值，则开启高级搜索
-              setEnableAdvancedSearch(true);
+              // 基础参数有值，使用基础参数的值
+              v = memBaseParams ? memBaseParams[field.key] : undefined;
             }
           }
-          filterFormRef.current.getFormInstance().setFieldsValue(values);
-          return values;
+          if (v === undefined) {
+            // 需要重置表单的值
+            values[field.key] = null;
+          } else {
+            values[field.key] = v;
+          }
+          if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
+            // 为了能够正确显示“全部”选项
+            values[field.key] = "";
+          }
         });
+        delete values[fieldPage];
+        delete values[fieldPageSize];
+
+        if (deepEqual(oldV, values)) {
+          return oldV;
+        }
+
+        return values;
+      });
+    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, filterFormAllFields]);
+
+    // 更新筛选form表单
+    useEffect(() => {
+      if (innerTools.advancedSearch) {
+        const noEmptyKeys = Object.keys(formFilters).filter((key) => !isBlank(formFilters[key]));
+        if (noEmptyKeys.length > 1) {
+          // 如果多个表单有值，则开启高级搜索
+          setEnableAdvancedSearch(true);
+        }
       }
-    }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
+      filterFormRef.current?.getFormInstance()?.setFieldsValue(formFilters);
+    }, [formFilters, innerTools.advancedSearch]);
 
     // 处理筛选条件变化 onFiltersChange
     useEffect(() => {
@@ -862,10 +854,7 @@ const RestTable = forwardRef(
               </Spin>
             )}
             {(!isEmpty(innerTools) || extraTools) && (
-              <div
-                style={{ position: "absolute", right: 10, bottom: 0 }}
-                className="cls-resttable-tools"
-              >
+              <div style={{ position: "absolute", right: 10, bottom: 0 }} className="cls-resttable-tools">
                 <Space key="tools">
                   {extraTools}
                   {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
@@ -929,7 +918,15 @@ const RestTable = forwardRef(
                   )}
                   {restful && filterFormProps && innerTools.advancedSearch && (
                     <FieldsSetting
-                      value={filterFormProps.fields}
+                      value={filterFormProps.fields.map((field) => {
+                        // 若是表单有值，设置了隐藏，路由上的参数不会被重置
+                        const hasFormValue = !isEmpty(formFilters[field.key]);
+                        return {
+                          ...field,
+                          hidden: !hasFormValue,
+                          tip: field.tip || (hasFormValue ? "表单项有值，请先重置/清除后再设置隐藏" : undefined),
+                        };
+                      })}
                       title="设置搜索选项"
                       storageKey={isString(innerTools.advancedSearch) ? innerTools.advancedSearch : `${restful}-filter`}
                       onChange={onToolsFilterChange}

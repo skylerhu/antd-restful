@@ -862,14 +862,6 @@ describe("Parser", () => {
       expect(result[1].key).toBe("email");
     });
 
-    test("should remove hidden property from filtered fields", () => {
-      const keys = ["email", "phone"];
-      const result = parser.genFields(testFields, keys);
-      expect(result).toHaveLength(2);
-      expect(result[0].hidden).toBe(false);
-      expect(result[1].hidden).toBe(false);
-    });
-
     test("should handle fields without key (using dataIndex)", () => {
       const keys = ["address"];
       const result = parser.genFields(testFields, keys);

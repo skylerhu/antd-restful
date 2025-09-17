@@ -849,7 +849,7 @@ exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
                 class="ant-space-item"
               >
                 <input
-                  class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined"
+                  class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined ant-input-status-success"
                   id="name"
                   type="text"
                   value=""

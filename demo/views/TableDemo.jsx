@@ -163,12 +163,13 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
-              hidden: false,
+              hidden: true,
             },
             {
               key: "search",
               label: "搜索",
               type: FieldType.INPUT,
+              hidden: false,
             },
             {
               key: "user",
