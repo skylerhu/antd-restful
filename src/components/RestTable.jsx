@@ -825,29 +825,39 @@ const RestTable = forwardRef(
                   advancedSearch={enableAdvancedSearch}
                   ref={filterFormRef}
                   onSubmit={(values) => {
+                    const newV = { ...values };
+                    // 此处点击搜索不清除隐藏的表单项
+                    // 是为支持分享出去的链接可以保留筛选条件，然后还可以继续修改筛选条件
                     setHeaderFilters((oldV) => {
                       return { ...oldV, [fieldPage]: 1 };
                     });
                     setFormFilters((oldV) => {
-                      if (deepEqual(oldV, values)) {
+                      if (deepEqual(oldV, newV)) {
                         // 数据没有变更刷新列表
                         fetchData();
                         return oldV;
                       }
-                      return values;
+                      return newV;
                     });
                   }}
                   onReset={(values) => {
+                    // 仅重置可以清除隐藏的表单项
+                    const newV = { ...values };
+                    filterFormAllFields.forEach((field) => {
+                      if (!filterFieldKeys.includes(field.key)) {
+                        newV[field.key] = null;
+                      }
+                    });
                     setHeaderFilters((oldV) => {
                       return { ...oldV, [fieldPage]: 1 };
                     });
                     setFormFilters((oldV) => {
-                      if (deepEqual(oldV, values)) {
+                      if (deepEqual(oldV, newV)) {
                         // 数据没有变更刷新列表
                         fetchData();
                         return oldV;
                       }
-                      return values;
+                      return newV;
                     });
                   }}
                 />
