@@ -873,7 +873,7 @@ exports[`RestTable 快照测试 should match snapshot with filter form 1`] = `
       </div>
       <div
         class="cls-resttable-tools"
-        style="position: absolute; right: 10px; bottom: 15px;"
+        style="position: absolute; right: 10px; bottom: 0px;"
       >
         <div
           class="ant-space css-dev-only-do-not-override-1kf000u ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small"
