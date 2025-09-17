@@ -451,13 +451,14 @@ const RestTable = forwardRef(
           filterFormKeys.forEach((field) => {
             // 表单提交过有值，则优先使用表单的值
             let v = oldV ? oldV[field.key] : undefined;
-            if (v === undefined) {
+            // 表单重置过值，则使用路由重置过的值
+            if (v !== null && v !== "") {
               // 路由参数有值，使用路由参数的值
               v = memRouteParams ? memRouteParams[field.key] : undefined;
-            }
-            if (v === undefined) {
-              // 基础参数有值，使用基础参数的值
-              v = memBaseParams ? memBaseParams[field.key] : undefined;
+              if (v === undefined) {
+                // 基础参数有值，使用基础参数的值
+                v = memBaseParams ? memBaseParams[field.key] : undefined;
+              }
             }
             if (v === undefined) {
               // 需要重置表单的值
