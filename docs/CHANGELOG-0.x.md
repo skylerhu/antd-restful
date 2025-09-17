@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.1.17
+- style: 优化 RestTable 在没有筛选条件场景下 tools 按钮的位置样式
+
 ## 0.1.16
 - fix: 无论如何设置 parseOptions，确保 RestTable 中处理 page和page_size 一定是int类型
 - fix: 修复 `parseQueryTypes` 未正确处理数组值的问题
