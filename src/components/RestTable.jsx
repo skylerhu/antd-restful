@@ -854,7 +854,7 @@ const RestTable = forwardRef(
             )}
             {(!isEmpty(innerTools) || extraTools) && (
               <div
-                style={{ position: "absolute", right: 10, bottom: 15 }}
+                style={{ position: "absolute", right: 10, bottom: (restful && filterFormProps) ? 15 : 0 }}
                 className="cls-resttable-tools"
               >
                 <Space key="tools">
