@@ -416,8 +416,8 @@ const RestTable = forwardRef(
           ...memForceParams,
         };
         // 避免传递过来空字符串的情况
-        newV[fieldPage] = newV[fieldPage] || DEFAULT_PAGE;
-        newV[fieldPageSize] = newV[fieldPageSize] || defaultPageSize;
+        newV[fieldPage] = parseInt(newV[fieldPage]) || DEFAULT_PAGE;
+        newV[fieldPageSize] = parseInt(newV[fieldPageSize]) || defaultPageSize;
         newV = transformFilters(newV, { skipEmpty: true, multipleMap });
         if (deepEqual(oldV, newV)) {
           return oldV;
