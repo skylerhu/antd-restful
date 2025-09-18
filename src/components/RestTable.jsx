@@ -472,7 +472,7 @@ const RestTable = forwardRef(
 
         return values;
       });
-    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, filterFormAllFields]);
+    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize]);
 
     // 更新筛选form表单
     useEffect(() => {
