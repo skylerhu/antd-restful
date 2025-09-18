@@ -832,6 +832,7 @@ const RestTable = forwardRef(
                     formFiltersRef.current = newV;
                     setFilterState({
                       headerFilters: {
+                        ...filterState.headerFilters,
                         [fieldPage]: 1,
                         [REFRESH_COUNTER_KEY]: (filterState.headerFilters[REFRESH_COUNTER_KEY] || 0) + 1,
                       },
@@ -849,6 +850,7 @@ const RestTable = forwardRef(
                     formFiltersRef.current = newV;
                     setFilterState({
                       headerFilters: {
+                        ...filterState.headerFilters,
                         [fieldPage]: 1,
                         [REFRESH_COUNTER_KEY]: (filterState.headerFilters[REFRESH_COUNTER_KEY] || 0) + 1,
                       },
