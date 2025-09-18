@@ -178,6 +178,7 @@ const TableDemo = () => {
               antdFieldProps: {
                 restful: "api/users/",
                 fieldNames: { label: "nickname", value: "id" },
+                mode: "multiple",
               },
             },
             {

@@ -347,21 +347,31 @@ const RestTable = forwardRef(
     // setMultipleMap
     useEffect(() => {
       setMultipleMap((oldV) => {
+        // 处理header上的筛选条件
         const newV = columns.reduce((acc, column) => {
-          const field = column.dataIndex || column.key;
+          const k = genColumnKey(column);
           if (column.filterMultiple === undefined) {
             if (column.filters) {
               // 如果开启了刷选，则默认是多选; 是table原生决定的
-              acc[field] = true;
+              acc[k] = true;
             }
           } else {
-            acc[field] = column.filterMultiple;
+            acc[k] = column.filterMultiple;
           }
           return acc;
         }, {});
+        // 处理表单上的筛选条件
+        filterFormProps?.fields?.forEach((field) => {
+          const k = genColumnKey(field);
+          if (field.type === FieldType.SELECT && field.antdFieldProps?.mode === "multiple") {
+            newV[k] = true;
+          } else if (field.type === FieldType.CHECKBOX) {
+            newV[k] = true;
+          }
+        });
         return deepEqual(oldV, newV) ? oldV : newV;
       });
-    }, [columns]);
+    }, [columns, filterFormProps?.fields]);
 
     const pageSize = useMemo(() => {
       return parseInt(innerFilters[fieldPageSize] || defaultPageSize);
@@ -464,11 +474,13 @@ const RestTable = forwardRef(
         // 避免传递过来空字符串的情况
         newV[fieldPage] = parseInt(newV[fieldPage]) || DEFAULT_PAGE;
         newV[fieldPageSize] = parseInt(newV[fieldPageSize]) || defaultPageSize;
-        newV = transformFilters(newV, { skipEmpty: true, multipleMap });
-        if (deepEqual(oldV, newV)) {
+        // 低版本 query-string在处理 [undefined, 1] 这种参数时，会转换成 [1]，导致参数丢失
+        // const newValues = globalConfig.queryParse(globalConfig.queryStringify(newV, memParseOptions), memParseOptions);
+        const newValues = transformFilters(newV, { skipEmpty: true, multipleMap });
+        if (deepEqual(oldV, newValues)) {
           return oldV;
         }
-        return newV;
+        return newValues;
       });
     }, [
       fieldPage,
@@ -791,13 +803,13 @@ const RestTable = forwardRef(
         } else {
           query._download = 1;
         }
-        const search = globalConfig.queryStringify(query);
+        const search = globalConfig.queryStringify(query, memParseOptions);
         if (search) {
           url += `?${search}`;
         }
         return url;
       },
-      [restful, innerFilters, fieldPage, fieldPageSize, innerTools.downloadKey]
+      [restful, innerFilters, fieldPage, fieldPageSize, innerTools.downloadKey, memParseOptions]
     );
 
     const hasHeader = useMemo(() => {
