@@ -1,7 +1,7 @@
 import format from "string-format";
 import objectPath from "object-path";
 import libQuery from "query-string";
-import { DEFAULT_SEPARATOR, SorterEnum } from "src/common/constants";
+import { DEFAULT_SEPARATOR, SorterEnum, FieldType } from "src/common/constants";
 import { isArray, isBlank, isBoolean, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
 
 export const commonFormat = (template, ...values) => {
@@ -375,4 +375,23 @@ export const genFields = (fields, keys) => {
   }
   const _fields = fields.filter((field) => keys.includes(genColumnKey(field)));
   return _fields;
+};
+
+export const handleFormValues = (values, fields) => {
+  if (!fields?.length) {
+    return values;
+  }
+  // 保证设置的值都有key
+  const data = { ...values };
+  fields.forEach((field) => {
+    const v = data[field.key];
+    if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(v)) {
+      // 为了能够正确显示“全部”选项
+      data[field.key] = "";
+    } else if (data[field.key] === undefined) {
+      // 需要重置表单的值
+      data[field.key] = null;
+    }
+  });
+  return data;
 };

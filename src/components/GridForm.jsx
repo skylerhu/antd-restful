@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, u
 import PropTypes from "prop-types";
 import { Button, Checkbox, Form, Input, InputNumber, List, message, Radio, Select, Space } from "antd";
 import { FieldType } from "src/common/constants";
+import { handleFormValues } from "src/common/parser";
 import { isEmpty, isFunction } from "src/common/typeTools";
 import FormItems from "src/components/formitems";
 import { useDeepCompareMemoize } from "src/hooks";
@@ -26,6 +27,7 @@ const GridForm = forwardRef(
     ref
   ) => {
     const [form] = Form.useForm();
+    const initValuesRef = useRef(initialValues);
 
     // 单项模式下，当前激活的表单项的key
     const [activeFieldKey, setActiveFieldKey] = useState();
@@ -83,22 +85,7 @@ const GridForm = forwardRef(
       [form, setFieldsValue]
     );
 
-    const handleValues = useCallback(
-      (values) => {
-        if (!fields?.length) {
-          return values;
-        }
-        // 保证设置的值都有key
-        const data = { ...values };
-        fields.forEach((item) => {
-          if (data[item.key] === undefined) {
-            data[item.key] = null;
-          }
-        });
-        return data;
-      },
-      [fields]
-    );
+    const handleValues = useCallback((values) => handleFormValues(values, fields), [fields]);
 
     const handleFinish = useCallback(
       (values) => {
@@ -111,12 +98,12 @@ const GridForm = forwardRef(
     );
 
     const handleReset = useCallback(() => {
-      form.resetFields();
+      const newV = handleValues(initValuesRef.current);
+      form.setFieldsValue(newV);
       if (isFunction(onReset)) {
-        const values = form.getFieldsValue();
-        onReset(handleValues(values));
+        onReset(newV);
       }
-    }, [form, onReset, handleValues]);
+    }, [form, onReset, handleValues, initValuesRef]);
 
     const renderItem = useCallback(
       (item) => {

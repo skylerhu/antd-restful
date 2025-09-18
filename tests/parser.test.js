@@ -1,4 +1,5 @@
 import * as parser from "src/common/parser";
+import { FieldType } from "src/common/constants";
 
 describe("Parser", () => {
   describe("commonFormat", () => {
@@ -293,7 +294,10 @@ describe("Parser", () => {
       expect(parser.queryString.parse("?active=true")).toEqual({ active: true });
       expect(parser.queryString.parse("?tags=a,b,c")).toEqual({ tags: ["a", "b", "c"] });
       expect(parser.queryString.parse("?active=true", { parseBooleans: false })).toEqual({ active: "true" });
-      expect(parser.queryString.parse("?name=John&age=30", { parseNumbers: false })).toEqual({ name: "John", age: "30" });
+      expect(parser.queryString.parse("?name=John&age=30", { parseNumbers: false })).toEqual({
+        name: "John",
+        age: "30",
+      });
     });
 
     test("should stringify object", () => {
@@ -443,8 +447,12 @@ describe("Parser", () => {
     });
 
     test("should format title with aggregation", () => {
-      expect(parser.getShowTitle(testRows, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 4 条数据 (active: 3, inactive: 1)");
-      expect(parser.getShowTitle(testRows, "选中 {count} 条数据 ({stat})", "name")).toBe("选中 4 条数据 (John: 1, Jane: 1, Bob: 1, Alice: 1)");
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据 ({stat})", "status")).toBe(
+        "选中 4 条数据 (active: 3, inactive: 1)"
+      );
+      expect(parser.getShowTitle(testRows, "选中 {count} 条数据 ({stat})", "name")).toBe(
+        "选中 4 条数据 (John: 1, Jane: 1, Bob: 1, Alice: 1)"
+      );
     });
 
     test("should handle empty aggregation path", () => {
@@ -463,7 +471,9 @@ describe("Parser", () => {
         { id: 2, name: "Jane", status: "active" },
         { id: 3, name: "Bob" },
       ];
-      expect(parser.getShowTitle(rowsWithMissingField, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 3 条数据 (-: 2, active: 1)");
+      expect(parser.getShowTitle(rowsWithMissingField, "选中 {count} 条数据 ({stat})", "status")).toBe(
+        "选中 3 条数据 (-: 2, active: 1)"
+      );
     });
 
     test("should handle rows with empty aggregation values", () => {
@@ -473,7 +483,9 @@ describe("Parser", () => {
         { id: 3, name: "Bob", status: undefined },
         { id: 4, name: "Alice", status: "active" },
       ];
-      expect(parser.getShowTitle(rowsWithEmptyValues, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 4 条数据 (-: 3, active: 1)");
+      expect(parser.getShowTitle(rowsWithEmptyValues, "选中 {count} 条数据 ({stat})", "status")).toBe(
+        "选中 4 条数据 (-: 3, active: 1)"
+      );
     });
 
     test("should sort aggregation results by count descending", () => {
@@ -485,7 +497,9 @@ describe("Parser", () => {
         { id: 5, status: "active" },
         { id: 6, status: "inactive" },
       ];
-      expect(parser.getShowTitle(rowsWithMixedStatus, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 6 条数据 (active: 3, inactive: 2, pending: 1)");
+      expect(parser.getShowTitle(rowsWithMixedStatus, "选中 {count} 条数据 ({stat})", "status")).toBe(
+        "选中 6 条数据 (active: 3, inactive: 2, pending: 1)"
+      );
     });
 
     test("should not show stat when template does not include {stat}", () => {
@@ -498,7 +512,9 @@ describe("Parser", () => {
         { id: 2, name: "Jane" },
         { id: 3, name: "Bob" },
       ];
-      expect(parser.getShowTitle(rowsWithNoStatus, "选中 {count} 条数据 ({stat})", "status")).toBe("选中 3 条数据 (-: 3)");
+      expect(parser.getShowTitle(rowsWithNoStatus, "选中 {count} 条数据 ({stat})", "status")).toBe(
+        "选中 3 条数据 (-: 3)"
+      );
     });
   });
 
@@ -570,14 +586,14 @@ describe("Parser", () => {
       const query = {
         name: "John",
         user: { id: 1, name: "John" },
-        items: [{ id: 1 }, { id: 2 }]
+        items: [{ id: 1 }, { id: 2 }],
       };
       const types = { name: "string", user: "string", items: "string" };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         name: "John",
         user: '{"id":1,"name":"John"}',
-        items: ['{"id":1}', '{"id":2}']
+        items: ['{"id":1}', '{"id":2}'],
       });
     });
 
@@ -599,27 +615,30 @@ describe("Parser", () => {
       const query = {
         names: ["John", 123, true, null],
         ages: ["25", "30", "invalid", ""],
-        flags: [true, false, "true", "false", 1, 0]
+        flags: [true, false, "true", "false", 1, 0],
       };
       const types = { names: "string", ages: "number", flags: "boolean" };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         names: ["John", "123", "true", ""],
         ages: [25, 30, NaN, 0],
-        flags: [true, false, true, true, true, false]
+        flags: [true, false, true, true, true, false],
       });
     });
 
     test("should handle nested arrays", () => {
       const query = {
-        matrix: [["1", "2"], ["3", "4"]],
-        numbers: [1, 2, 3]
+        matrix: [
+          ["1", "2"],
+          ["3", "4"],
+        ],
+        numbers: [1, 2, 3],
       };
       const types = { matrix: "string", numbers: "number" };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         matrix: ['["1","2"]', '["3","4"]'], // 嵌套数组会被转换为字符串
-        numbers: [1, 2, 3]
+        numbers: [1, 2, 3],
       });
     });
 
@@ -632,7 +651,7 @@ describe("Parser", () => {
         scientific: "1e5",
         infinity: "Infinity",
         negativeInfinity: "-Infinity",
-        nan: "NaN"
+        nan: "NaN",
       };
       const types = {
         positive: "number",
@@ -642,7 +661,7 @@ describe("Parser", () => {
         scientific: "number",
         infinity: "number",
         negativeInfinity: "number",
-        nan: "number"
+        nan: "number",
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
@@ -653,7 +672,7 @@ describe("Parser", () => {
         scientific: 100000,
         infinity: Infinity,
         negativeInfinity: -Infinity,
-        nan: NaN
+        nan: NaN,
       });
     });
 
@@ -666,7 +685,7 @@ describe("Parser", () => {
         empty: "",
         string: "hello",
         nullVal: "null",
-        undefinedVal: "undefined"
+        undefinedVal: "undefined",
       };
       const types = {
         truthy: "boolean",
@@ -676,7 +695,7 @@ describe("Parser", () => {
         empty: "boolean",
         string: "boolean",
         nullVal: "boolean",
-        undefinedVal: "boolean"
+        undefinedVal: "boolean",
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
@@ -687,7 +706,7 @@ describe("Parser", () => {
         empty: "", // 空字符串不会被转换，因为 isEmpty("") 返回 true
         string: true,
         nullVal: true,
-        undefinedVal: true
+        undefinedVal: true,
       });
     });
 
@@ -701,7 +720,7 @@ describe("Parser", () => {
         array: [1, 2, 3],
         empty: "",
         zero: 0,
-        falseVal: false
+        falseVal: false,
       };
       const types = {
         number: "string",
@@ -712,7 +731,7 @@ describe("Parser", () => {
         array: "string",
         empty: "string",
         zero: "string",
-        falseVal: "string"
+        falseVal: "string",
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
@@ -724,7 +743,7 @@ describe("Parser", () => {
         array: ["1", "2", "3"], // 数组会被转换为字符串数组
         empty: "", // 空字符串不会被转换，因为 isEmpty("") 返回 true
         zero: "0",
-        falseVal: "false"
+        falseVal: "false",
       });
     });
 
@@ -733,11 +752,11 @@ describe("Parser", () => {
         name: "John",
         age: "30",
         active: "true",
-        city: "New York"
+        city: "New York",
       };
       const types = {
         name: "string",
-        age: "number"
+        age: "number",
         // active 和 city 没有类型定义
       };
       const result = parser.parseQueryTypes(query, types);
@@ -745,55 +764,55 @@ describe("Parser", () => {
         name: "John",
         age: 30,
         active: "true", // 保持原值
-        city: "New York" // 保持原值
+        city: "New York", // 保持原值
       });
     });
 
     test("should handle undefined type definitions", () => {
       const query = {
         name: "John",
-        age: "30"
+        age: "30",
       };
       const types = {
         name: "string",
-        age: undefined // undefined 类型
+        age: undefined, // undefined 类型
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         name: "John",
-        age: "30" // 保持原值
+        age: "30", // 保持原值
       });
     });
 
     test("should handle empty string type definitions", () => {
       const query = {
         name: "John",
-        age: "30"
+        age: "30",
       };
       const types = {
         name: "string",
-        age: "" // 空字符串类型
+        age: "", // 空字符串类型
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         name: "John",
-        age: "30" // 保持原值
+        age: "30", // 保持原值
       });
     });
 
     test("should handle non-string type definitions", () => {
       const query = {
         name: "John",
-        age: "30"
+        age: "30",
       };
       const types = {
         name: "string",
-        age: 123 // 非字符串类型定义
+        age: 123, // 非字符串类型定义
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         name: "John",
-        age: "30" // 保持原值
+        age: "30", // 保持原值
       });
     });
 
@@ -801,31 +820,31 @@ describe("Parser", () => {
       const query = {
         user: { name: "John", age: 30 },
         tags: ["tag1", "tag2"],
-        active: true
+        active: true,
       };
       const types = {
         user: "string",
         tags: "string",
-        active: "string"
+        active: "string",
       };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         user: '{"name":"John","age":30}', // 对象会被转换为字符串
         tags: ["tag1", "tag2"], // 数组会被转换为字符串数组
-        active: "true"
+        active: "true",
       });
     });
 
     test("should handle very large numbers", () => {
       const query = {
         large: "999999999999999",
-        small: "0.000000000000000001"
+        small: "0.000000000000000001",
       };
       const types = { large: "number", small: "number" };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         large: 999999999999999,
-        small: 0.000000000000000001
+        small: 0.000000000000000001,
       });
     });
 
@@ -833,14 +852,14 @@ describe("Parser", () => {
       const query = {
         chinese: "你好世界",
         emoji: "🚀🌟",
-        special: "特殊字符!@#$%^&*()"
+        special: "特殊字符!@#$%^&*()",
       };
       const types = { chinese: "string", emoji: "string", special: "string" };
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         chinese: "你好世界",
         emoji: "🚀🌟",
-        special: "特殊字符!@#$%^&*()"
+        special: "特殊字符!@#$%^&*()",
       });
     });
   });
@@ -905,13 +924,13 @@ describe("Parser", () => {
 
     test("should handle fields with both key and dataIndex", () => {
       const fieldsWithBoth = [
-        { key: "custom_key", dataIndex: "name", title: "Name" },
+        { key: "customKey", dataIndex: "name", title: "Name" },
         { key: "age", title: "Age" },
       ];
-      const keys = ["custom_key", "age"];
+      const keys = ["customKey", "age"];
       const result = parser.genFields(fieldsWithBoth, keys);
       expect(result).toHaveLength(2);
-      expect(result[0].key).toBe("custom_key");
+      expect(result[0].key).toBe("customKey");
       expect(result[1].key).toBe("age");
     });
 
@@ -938,9 +957,9 @@ describe("Parser", () => {
 
   describe("genColumnKey 测试", () => {
     it("should return key when column has key", () => {
-      const column = { key: "custom_key", dataIndex: "name" };
+      const column = { key: "customKey", dataIndex: "name" };
       const result = parser.genColumnKey(column);
-      expect(result).toBe("custom_key");
+      expect(result).toBe("customKey");
     });
 
     it("should return dataIndex when column has no key", () => {
@@ -974,10 +993,237 @@ describe("Parser", () => {
     });
 
     it("should prioritize key over dataIndex", () => {
-      const column = { key: "priority_key", dataIndex: "fallback_name" };
+      const column = { key: "priorityKey", dataIndex: "fallbackName" };
       const result = parser.genColumnKey(column);
-      expect(result).toBe("priority_key");
+      expect(result).toBe("priorityKey");
     });
   });
 
+  describe("handleFormValues", () => {
+
+    test("should return original values when fields is empty", () => {
+      const values = { name: "John", age: 30 };
+      expect(parser.handleFormValues(values, [])).toEqual(values);
+      expect(parser.handleFormValues(values, null)).toEqual(values);
+      expect(parser.handleFormValues(values, undefined)).toEqual(values);
+    });
+
+    test("should return original values when fields is not an array", () => {
+      const values = { name: "John", age: 30 };
+      // 当 fields 是空对象时，fields?.length 为 undefined，条件为真，返回原始值
+      expect(parser.handleFormValues(values, {})).toEqual(values);
+      // 当 fields 是空字符串时，fields?.length 为 0，条件为真，返回原始值
+      expect(parser.handleFormValues(values, "")).toEqual(values);
+    });
+
+    test("should set undefined values to null for all fields", () => {
+      const values = { name: "John", age: 30 };
+      const fields = [{ key: "name" }, { key: "age" }, { key: "email" }, { key: "phone" }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        name: "John",
+        age: 30,
+        email: null,
+        phone: null,
+      });
+    });
+
+    test("should set blank values to empty string for CHECKBOX and RADIO fields", () => {
+      const values = {
+        checkbox1: null,
+        checkbox2: "",
+        radio1: undefined,
+        radio2: "value",
+        input1: null,
+        input2: "",
+      };
+      const fields = [
+        { key: "checkbox1", type: FieldType.CHECKBOX },
+        { key: "checkbox2", type: FieldType.CHECKBOX },
+        { key: "radio1", type: FieldType.RADIO },
+        { key: "radio2", type: FieldType.RADIO },
+        { key: "input1", type: FieldType.INPUT },
+        { key: "input2", type: FieldType.INPUT },
+      ];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        checkbox1: "",
+        checkbox2: "",
+        radio1: "",
+        radio2: "value",
+        input1: null,
+        input2: "",
+      });
+    });
+
+    test("should handle fields without type property", () => {
+      const values = { name: "John", email: undefined };
+      const fields = [{ key: "name" }, { key: "email" }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        name: "John",
+        email: null,
+      });
+    });
+
+    test("should handle fields with non-CHECKBOX/RADIO types", () => {
+      const values = {
+        input: null,
+        select: "",
+        number: undefined,
+        date: null,
+      };
+      const fields = [
+        { key: "input", type: FieldType.INPUT },
+        { key: "select", type: FieldType.SELECT },
+        { key: "number", type: FieldType.NUMBER },
+        { key: "date", type: FieldType.DATE_PICKER },
+      ];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        input: null,
+        select: "",
+        number: null,
+        date: null,
+      });
+    });
+
+    test("should not modify original values object", () => {
+      const values = { name: "John", email: undefined };
+      const fields = [{ key: "name" }, { key: "email" }];
+      const originalValues = { ...values };
+      parser.handleFormValues(values, fields);
+      expect(values).toEqual(originalValues);
+    });
+
+    test("should handle empty values object", () => {
+      const values = {};
+      const fields = [{ key: "name" }, { key: "email", type: FieldType.CHECKBOX }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        name: null,
+        email: "",
+      });
+    });
+
+    test("should handle null values object", () => {
+      const values = null;
+      const fields = [{ key: "name" }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        name: null,
+      });
+    });
+
+    test("should handle undefined values object", () => {
+      const values = undefined;
+      const fields = [{ key: "name" }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        name: null,
+      });
+    });
+
+    test("should handle mixed field types with various values", () => {
+      const values = {
+        text: "hello",
+        checkboxEmpty: null,
+        checkboxBlank: "",
+        radioEmpty: undefined,
+        radioValue: "option1",
+        select: "option2",
+        number: 42,
+        missingField: "should_be_ignored",
+      };
+      const fields = [
+        { key: "text", type: FieldType.INPUT },
+        { key: "checkboxEmpty", type: FieldType.CHECKBOX },
+        { key: "checkboxBlank", type: FieldType.CHECKBOX },
+        { key: "radioEmpty", type: FieldType.RADIO },
+        { key: "radioValue", type: FieldType.RADIO },
+        { key: "select", type: FieldType.SELECT },
+        { key: "number", type: FieldType.NUMBER },
+        { key: "undefinedField" },
+      ];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        text: "hello",
+        checkboxEmpty: "",
+        checkboxBlank: "",
+        radioEmpty: "",
+        radioValue: "option1",
+        select: "option2",
+        number: 42,
+        missingField: "should_be_ignored",
+        undefinedField: null,
+      });
+    });
+
+    test("should handle fields with array keys", () => {
+      const values = { "user.name": "John", "user.age": 30 };
+      const fields = [{ key: "user.name" }, { key: "user.age" }, { key: "user.email" }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        "user.name": "John",
+        "user.age": 30,
+        "user.email": null,
+      });
+    });
+
+    test("should handle fields with special characters in keys", () => {
+      const values = { "field-with-dash": "value1", fieldWithUnderscore: "value2" };
+      const fields = [{ key: "field-with-dash" }, { key: "fieldWithUnderscore" }, { key: "field.with.dot" }];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        "field-with-dash": "value1",
+        fieldWithUnderscore: "value2",
+        "field.with.dot": null,
+      });
+    });
+
+    test("should handle boolean values for CHECKBOX and RADIO fields", () => {
+      const values = {
+        checkboxTrue: true,
+        checkboxFalse: false,
+        radioTrue: true,
+        radioFalse: false,
+      };
+      const fields = [
+        { key: "checkboxTrue", type: FieldType.CHECKBOX },
+        { key: "checkboxFalse", type: FieldType.CHECKBOX },
+        { key: "radioTrue", type: FieldType.RADIO },
+        { key: "radioFalse", type: FieldType.RADIO },
+      ];
+      const result = parser.handleFormValues(values, fields);
+      expect(result).toEqual({
+        checkboxTrue: true,
+        checkboxFalse: false,
+        radioTrue: true,
+        radioFalse: false,
+      });
+    });
+
+    test("should handle zero and empty string for CHECKBOX and RADIO fields", () => {
+      const values = {
+        checkboxZero: 0,
+        checkboxEmptyString: "",
+        radioZero: 0,
+        radioEmptyString: "",
+      };
+      const fields = [
+        { key: "checkboxZero", type: FieldType.CHECKBOX },
+        { key: "checkboxEmptyString", type: FieldType.CHECKBOX },
+        { key: "radioZero", type: FieldType.RADIO },
+        { key: "radioEmptyString", type: FieldType.RADIO },
+      ];
+      const result = parser.handleFormValues(values, fields);
+      // 注意：isBlank(0) 返回 false，所以数字 0 不会被转换为空字符串
+      expect(result).toEqual({
+        checkboxZero: 0,
+        checkboxEmptyString: "",
+        radioZero: 0,
+        radioEmptyString: "",
+      });
+    });
+  });
 });

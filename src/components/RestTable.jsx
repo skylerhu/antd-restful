@@ -586,7 +586,7 @@ const RestTable = forwardRef(
             setLoading(false);
           });
       },
-      [rowKey, restful, urlDetailTemplate, fetchData, makeRequest]
+      [rowKey, restful, urlDetailTemplate, makeRequest, fetchData]
     );
 
     // 暴露给ref调用的方法
@@ -833,7 +833,6 @@ const RestTable = forwardRef(
                     });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, newV)) {
-                        // 数据没有变更刷新列表
                         fetchData();
                         return oldV;
                       }
@@ -853,7 +852,6 @@ const RestTable = forwardRef(
                     });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, newV)) {
-                        // 数据没有变更刷新列表
                         fetchData();
                         return oldV;
                       }
