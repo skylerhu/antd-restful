@@ -350,20 +350,20 @@ const RestTable = forwardRef(
         // 处理header上的筛选条件
         const newV = columns.reduce((acc, column) => {
           const k = genColumnKey(column);
-          if (column.filterMultiple === undefined) {
+          const dropdownConfig = column.filterDropdownConfig;
+          if (dropdownConfig) {
+            if (dropdownConfig.type === FieldType.SELECT && dropdownConfig.dropdownProps?.mode === "multiple") {
+              acc[k] = true;
+            } else if ([FieldType.CHECKBOX].includes(dropdownConfig.type)) {
+              acc[k] = true;
+            } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(dropdownConfig.type)) {
+              // range当做字符串处理
+              acc[k] = false;
+            }
+          } else if (column.filterMultiple === undefined) {
             if (column.filters) {
               // 如果开启了刷选，则默认是多选; 是table原生决定的
               acc[k] = true;
-            }
-            const dropdownConfig = column.filterDropdownConfig;
-            if (dropdownConfig) {
-              if (dropdownConfig.type === FieldType.SELECT && dropdownConfig.dropdownProps?.mode === "multiple") {
-                acc[k] = true;
-              } else if (
-                [FieldType.CHECKBOX, FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(dropdownConfig.type)
-              ) {
-                acc[k] = true;
-              }
             }
           } else {
             acc[k] = column.filterMultiple;
@@ -375,8 +375,11 @@ const RestTable = forwardRef(
           const k = genColumnKey(field);
           if (field.type === FieldType.SELECT && field.antdFieldProps?.mode === "multiple") {
             newV[k] = true;
-          } else if ([FieldType.CHECKBOX, FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
+          } else if ([FieldType.CHECKBOX].includes(field.type)) {
             newV[k] = true;
+          } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
+            // range当做字符串处理
+            newV[k] = false;
           }
         });
         return deepEqual(oldV, newV) ? oldV : newV;
@@ -445,11 +448,12 @@ const RestTable = forwardRef(
       delete values[fieldPage];
       delete values[fieldPageSize];
 
-      const newV = handleFormValues(values, filterFields);
+      let newV = transformFilters(values, { multipleMap });
+      newV = handleFormValues(newV, filterFields);
       if (!deepEqual(oldV, newV)) {
         setFilterState({ formFilters: newV });
       }
-    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, setFilterState]);
+    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, setFilterState, multipleMap]);
 
     // 更新筛选form表单
     useEffect(() => {
@@ -484,8 +488,6 @@ const RestTable = forwardRef(
         // 避免传递过来空字符串的情况
         newV[fieldPage] = parseInt(newV[fieldPage]) || DEFAULT_PAGE;
         newV[fieldPageSize] = parseInt(newV[fieldPageSize]) || defaultPageSize;
-        // 低版本 query-string在处理 [undefined, 1] 这种参数时，会转换成 [1]，导致参数丢失
-        // const newValues = globalConfig.queryParse(globalConfig.queryStringify(newV, memParseOptions), memParseOptions);
         const newValues = transformFilters(newV, { skipEmpty: true, multipleMap });
         if (deepEqual(oldV, newValues)) {
           return oldV;

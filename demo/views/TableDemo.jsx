@@ -118,7 +118,7 @@ const TableDemo = () => {
             title: "年龄",
             dataIndex: "age__range",
             sorter: true,
-            filterMultiple: false,
+            // filterMultiple: false,
             render: (value, record) => record.age,
             filterDropdownConfig: {
               type: FieldType.NUMBER_RANGE,
@@ -193,6 +193,25 @@ const TableDemo = () => {
                 ],
               },
             },
+            {
+              key: "age2__range",
+              label: "年龄范围",
+              type: FieldType.NUMBER_RANGE,
+              antdFieldProps: {
+                placeholder: ["最小年龄", "最大年龄"],
+              },
+            },
+            {
+              key: "gender2",
+              label: "性别",
+              type: FieldType.CHECKBOX,
+              antdFieldProps: {
+                options: [
+                  { label: "男", value: "male" },
+                  { label: "女", value: "female" },
+                ],
+              },
+            }
             // {
             //   key: "__placeholder",
             //   label: "占位",

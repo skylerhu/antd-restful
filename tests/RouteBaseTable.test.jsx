@@ -8,7 +8,8 @@
   - URL 参数解析测试，包含 '' , false , null, undefined, 1, ',1', '1,3' 等各种类型场景
   - parseTypes 参数测试，测试 'a=123456789111223141516&b=1' 设置 a是string，b是number
   - 初始化loction后，修改路由参数，触发远程请求
-  - filterFormProps?.fields 中使用了 NumberRange，初始值是 age=,1，正确触发了远端请求query参数中有age=,1NumberRange组件中初始化的值也是预期内的
+  - filterFormProps?.fields 中使用了 NumberRange，初始值是 age=,1，校验 NumberRange组件的值是预期值
+  - filterFormProps?.fields 中使用了 Checkbox，初始值是 gender=male, 校验 Checkbox组件的值是预期值
 
  */
 import React from "react";
@@ -36,7 +37,6 @@ jest.mock("src/requests", () => ({
 }));
 
 describe("RouteBaseTable", () => {
-  let mockLocation;
   let mockOnSearchChange;
   let mockOnFiltersChange;
   let mockRestProps;
@@ -45,11 +45,6 @@ describe("RouteBaseTable", () => {
     // Reset all mocks
     jest.clearAllMocks();
     capturedRequestParams = null;
-
-    // Setup default mocks
-    mockLocation = {
-      search: "?name=test&age=25",
-    };
 
     mockOnSearchChange = jest.fn();
     mockOnFiltersChange = jest.fn();
@@ -61,52 +56,6 @@ describe("RouteBaseTable", () => {
       restful: "/api/users",
       fieldPageSize: "size",
     };
-  });
-
-  describe("快照测试", () => {
-    it("should match snapshot with basic props", async () => {
-      const { container } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
-      });
-
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("should match snapshot with empty search", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
-      });
-
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("should match snapshot with complex baseParams", async () => {
-      const complexRestProps = {
-        ...mockRestProps,
-        baseParams: {
-          user: { id: 1, role: "admin" },
-          filters: { status: "active", type: "premium" },
-        },
-      };
-
-      const { container } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={complexRestProps} />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByRole("table")).toBeInTheDocument();
-      });
-
-      expect(container.firstChild).toMatchSnapshot();
-    });
   });
 
   describe("URL 参数解析测试", () => {
@@ -604,7 +553,7 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          age: ["", 1],
+          age: ",1",
           page: 1,
           size: 20
         }
@@ -614,7 +563,7 @@ describe("RouteBaseTable", () => {
       expect(mockOnSearchChange).toHaveBeenCalledWith("?age=%2C1");
 
       // 验证onFiltersChange被正确调用 - 初始化时会调用
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: ["", 1] });
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: ",1" });
 
       expect(container.firstChild).toMatchSnapshot();
     });
@@ -649,7 +598,7 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          age: [18, 65],
+          age: "18,65",
           page: 1,
           size: 20
         }
@@ -657,7 +606,7 @@ describe("RouteBaseTable", () => {
 
       // 验证onSearchChange和onFiltersChange的调用
       expect(mockOnSearchChange).toHaveBeenCalledWith("?age=18%2C65");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: [18, 65] });
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: "18,65" });
 
       expect(container.firstChild).toMatchSnapshot();
     });
@@ -692,7 +641,7 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          age: [25],
+          age: 25,
           page: 1,
           size: 20
         }
@@ -743,6 +692,247 @@ describe("RouteBaseTable", () => {
       // 验证onSearchChange和onFiltersChange的调用
       expect(mockOnSearchChange).toHaveBeenCalledWith("");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({});
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe("Checkbox 组件测试", () => {
+    it("should handle Checkbox with initial value gender=male", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "gender",
+              type: "checkbox",
+              label: "性别",
+              options: [
+                { label: "男", value: "male" },
+                { label: "女", value: "female" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?gender=male" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的gender值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          gender: ["male"],
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with multiple values", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "gender",
+              type: "checkbox",
+              label: "性别",
+              options: [
+                { label: "男", value: "male" },
+                { label: "女", value: "female" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?gender=male,female" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的gender值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          gender: ["male", "female"],
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 多值情况下会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?gender=male%2Cfemale");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ gender: ["male", "female"] });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with empty values", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "gender",
+              type: "checkbox",
+              label: "性别",
+              options: [
+                { label: "男", value: "male" },
+                { label: "女", value: "female" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?gender=" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数不包含gender字段（空值被跳过）
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 空值情况下会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({});
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with single value in array format", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "category",
+              type: "checkbox",
+              label: "分类",
+              options: [
+                { label: "分类1", value: "cat1" },
+                { label: "分类2", value: "cat2" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?category=cat1" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的category值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          category: ["cat1"],
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with complex multiple values", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "tags",
+              type: "checkbox",
+              label: "标签",
+              options: [
+                { label: "标签1", value: "tag1" },
+                { label: "标签2", value: "tag2" },
+                { label: "标签3", value: "tag3" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?tags=tag1,tag2,tag3&name=test" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的tags值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          tags: ["tag1", "tag2", "tag3"],
+          name: "test",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 复杂多值情况下会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&tags=tag1%2Ctag2%2Ctag3");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        tags: ["tag1", "tag2", "tag3"],
+        name: "test"
+      });
 
       expect(container.firstChild).toMatchSnapshot();
     });

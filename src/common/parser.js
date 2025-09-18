@@ -253,6 +253,9 @@ export const clearEmptyValue = (data) => {
  * @param {Object} options.multipleMap 多选字段映射，key为字段名，value为是否多选
  */
 export const transformFilters = (filters, { skipEmpty = false, multipleMap = {} }) => {
+  // 低版本 query-string在处理 [undefined, 1] 这种参数时，会转换成 '1'，导致参数丢失
+  // 否则可以按照以下方式处理
+  // globalConfig.queryParse(globalConfig.queryStringify(newV, memParseOptions), memParseOptions);
   if (isEmpty(filters)) {
     return {};
   }
