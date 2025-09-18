@@ -355,6 +355,16 @@ const RestTable = forwardRef(
               // 如果开启了刷选，则默认是多选; 是table原生决定的
               acc[k] = true;
             }
+            const dropdownConfig = column.filterDropdownConfig;
+            if (dropdownConfig) {
+              if (dropdownConfig.type === FieldType.SELECT && dropdownConfig.dropdownProps?.mode === "multiple") {
+                acc[k] = true;
+              } else if (
+                [FieldType.CHECKBOX, FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(dropdownConfig.type)
+              ) {
+                acc[k] = true;
+              }
+            }
           } else {
             acc[k] = column.filterMultiple;
           }
@@ -365,7 +375,7 @@ const RestTable = forwardRef(
           const k = genColumnKey(field);
           if (field.type === FieldType.SELECT && field.antdFieldProps?.mode === "multiple") {
             newV[k] = true;
-          } else if (field.type === FieldType.CHECKBOX) {
+          } else if ([FieldType.CHECKBOX, FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
             newV[k] = true;
           }
         });

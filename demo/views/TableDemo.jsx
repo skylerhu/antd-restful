@@ -65,7 +65,7 @@ const TableDemo = () => {
             title: "唯一标识",
             dataIndex: "username",
             sorter: true,
-            filterMultiple: true,
+            // filterMultiple: true,
             filterDropdownConfig: {
               type: FieldType.SELECT,
               dropdownProps: {
