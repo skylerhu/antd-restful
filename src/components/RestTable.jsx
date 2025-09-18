@@ -329,6 +329,9 @@ const RestTable = forwardRef(
     );
     const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
 
+    // 用于控制触发 远程获取数据刷新列表
+    const [refreshCount, setRefreshCount] = useState(0);
+
     useEffect(() => {
       if (isArray(dataSource)) {
         setInnerData((oldV) => {
@@ -556,7 +559,7 @@ const RestTable = forwardRef(
         return;
       }
       fetchData();
-    }, [innerFilters, fetchData, fieldPage]);
+    }, [innerFilters, fetchData, fieldPage, refreshCount]);
 
     const [runInterval] = useInterval(() => fetchData(), innerTools.refreshInterval, innerTools.refreshInterval > 0);
     // 删除行
@@ -580,13 +583,13 @@ const RestTable = forwardRef(
           .delete(url)
           .then(() => {
             // 删除成功后，刷新数据
-            fetchData();
+            setRefreshCount((oldV) => oldV + 1);
           })
           .catch(() => {
             setLoading(false);
           });
       },
-      [rowKey, restful, urlDetailTemplate, fetchData, makeRequest]
+      [rowKey, restful, urlDetailTemplate, makeRequest]
     );
 
     // 暴露给ref调用的方法
@@ -833,12 +836,12 @@ const RestTable = forwardRef(
                     });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, newV)) {
-                        // 数据没有变更刷新列表
-                        fetchData();
                         return oldV;
                       }
                       return newV;
                     });
+                    // 触发刷新列表
+                    setRefreshCount((oldV) => oldV + 1);
                   }}
                   onReset={(values) => {
                     // 仅重置可以清除隐藏的表单项
@@ -853,12 +856,12 @@ const RestTable = forwardRef(
                     });
                     setFormFilters((oldV) => {
                       if (deepEqual(oldV, newV)) {
-                        // 数据没有变更刷新列表
-                        fetchData();
                         return oldV;
                       }
                       return newV;
                     });
+                    // 触发刷新列表
+                    setRefreshCount((oldV) => oldV + 1);
                   }}
                 />
               </Spin>
