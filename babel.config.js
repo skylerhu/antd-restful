@@ -6,7 +6,12 @@ module.exports = {
         targets: {
           node: "12"
         },
-        modules: "auto"
+        modules: "auto",
+        useBuiltIns: "usage",
+        corejs: 3,
+        include: [
+          "es.string.replace-all"
+        ],
       }
     ],
     "@babel/preset-react"

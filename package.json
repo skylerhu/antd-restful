@@ -28,10 +28,11 @@
   "dependencies": {
     "brace-expansion": "^2.x",
     "copy-to-clipboard": "^3.x",
+    "core-js": "^3.45.1",
     "dequal": "^2.x",
     "js-enumerate": "^1.x",
     "object-path": "^0.x",
-    "query-string": "^9.3.1",
+    "query-string": "^9.x",
     "string-format": "^2.x"
   },
   "peerDependencies": {
