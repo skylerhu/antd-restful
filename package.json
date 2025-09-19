@@ -31,13 +31,13 @@
     "dequal": "^2.x",
     "js-enumerate": "^1.x",
     "object-path": "^0.x",
+    "query-string": ">=6.x",
     "string-format": "^2.x"
   },
   "peerDependencies": {
     "@ant-design/icons": ">=4",
     "antd": ">=4.24",
     "axios": ">=1.x",
-    "query-string": ">=6.x",
     "react": ">=18",
     "react-dom": ">=18"
   },
