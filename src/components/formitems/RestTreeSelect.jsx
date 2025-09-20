@@ -62,16 +62,6 @@ const RestTreeSelect = ({
     }
   }, [memTreeData]);
 
-  const initDataFirstRef = useRef(true);
-
-  useEffect(() => {
-    // 仅第一时候初始化一级结点
-    if (initDataFirstRef.current) {
-      initDataFirstRef.current = false;
-      refreshByNode();
-    }
-  }, [value, refreshByNode]);
-
   const onValueChange = useCallback(
     (value) => {
       setInnerValue(value);
@@ -137,6 +127,16 @@ const RestTreeSelect = ({
       fieldChildren,
     ]
   );
+
+  const initDataFirstRef = useRef(true);
+
+  useEffect(() => {
+    // 仅第一时候初始化一级结点
+    if (initDataFirstRef.current) {
+      initDataFirstRef.current = false;
+      refreshByNode();
+    }
+  }, [value, refreshByNode]);
 
   useEffect(() => {
     if (isArray(treeInnerData)) {

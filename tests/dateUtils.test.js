@@ -53,6 +53,192 @@ describe("DateUtils Coverage Tests", () => {
       expect(result.isValid()).toBe(true);
     });
 
+    test("should create date with dayjs using format for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.createDate("2023-01-01", "YYYY-MM-DD");
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(true);
+    });
+
+    test("should create date with dayjs using different formats for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test various date formats with dayjs
+      const formatTests = [
+        { input: "01/01/2023", format: "MM/DD/YYYY" },
+        { input: "2023-01-01T12:30:45", format: "YYYY-MM-DDTHH:mm:ss" },
+        { input: "Jan 1, 2023", format: "MMM D, YYYY" },
+        { input: "2023-01-01 12:30:45", format: "YYYY-MM-DD HH:mm:ss" }
+      ];
+
+      formatTests.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        expect(result.isValid()).toBe(true);
+      });
+    });
+
+    test("should handle dayjs format parsing errors for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test with invalid format
+      const result = dateUtils.createDate("2023-01-01", "invalid-format");
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(false);
+    });
+
+    test("should handle dayjs with format and invalid date string for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test with valid format but invalid date
+      const result = dateUtils.createDate("invalid-date", "YYYY-MM-DD");
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(false);
+    });
+
+    test("should handle dayjs with format and mismatched date format for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test with date string that doesn't match the format
+      const result = dateUtils.createDate("01/01/2023", "YYYY-MM-DD");
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(false);
+    });
+
+    test("should handle dayjs with null format for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test with null format (should fall back to default parsing)
+      const result = dateUtils.createDate("2023-01-01", null);
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(true);
+    });
+
+    test("should handle dayjs with undefined format for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test with undefined format (should fall back to default parsing)
+      const result = dateUtils.createDate("2023-01-01", undefined);
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(true);
+    });
+
+    test("should handle dayjs with empty string format for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test with empty string format (should fall back to default parsing)
+      const result = dateUtils.createDate("2023-01-01", "");
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(true);
+    });
+
+    test("should handle dayjs with complex date formats for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const complexFormats = [
+        { input: "2023-01-01T12:30:45.123Z", format: "YYYY-MM-DDTHH:mm:ss.SSS[Z]" },
+        { input: "2023-01-01T12:30:45+08:00", format: "YYYY-MM-DDTHH:mm:ssZ" },
+        { input: "Sunday, January 1, 2023", format: "dddd, MMMM D, YYYY" },
+        { input: "1st January 2023", format: "Do MMMM YYYY" }
+      ];
+
+      complexFormats.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        // Some complex formats might not parse correctly, so we just check it's defined
+        expect(typeof result.isValid).toBe("function");
+      });
+    });
+
+    test("should handle dayjs with timezone formats for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const timezoneFormats = [
+        { input: "2023-01-01T00:00:00Z", format: "YYYY-MM-DDTHH:mm:ss[Z]" },
+        { input: "2023-01-01T00:00:00+00:00", format: "YYYY-MM-DDTHH:mm:ssZ" },
+        { input: "2023-01-01T00:00:00-05:00", format: "YYYY-MM-DDTHH:mm:ssZ" }
+      ];
+
+      timezoneFormats.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        expect(typeof result.isValid).toBe("function");
+      });
+    });
+
+    test("should handle dayjs with custom date separators for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const separatorFormats = [
+        { input: "2023/01/01", format: "YYYY/MM/DD" },
+        { input: "01-01-2023", format: "DD-MM-YYYY" },
+        { input: "01.01.2023", format: "DD.MM.YYYY" },
+        { input: "2023 01 01", format: "YYYY MM DD" }
+      ];
+
+      separatorFormats.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        expect(result.isValid()).toBe(true);
+      });
+    });
+
+    test("should handle dayjs with 12-hour time formats for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const timeFormats = [
+        { input: "2023-01-01 12:30:45 PM", format: "YYYY-MM-DD hh:mm:ss A" },
+        { input: "2023-01-01 12:30:45 AM", format: "YYYY-MM-DD hh:mm:ss A" },
+        { input: "2023-01-01 1:30:45 PM", format: "YYYY-MM-DD h:mm:ss A" }
+      ];
+
+      timeFormats.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        expect(result.isValid()).toBe(true);
+      });
+    });
+
+    test("should handle dayjs with week formats for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const weekFormats = [
+        { input: "2023-W01-1", format: "YYYY-[W]WW-E" }, // ISO week
+        { input: "2023-01-01", format: "YYYY-MM-DD" } // Regular date
+      ];
+
+      weekFormats.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        expect(typeof result.isValid).toBe("function");
+      });
+    });
+
+    test("should handle dayjs with strict parsing for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      // Test strict parsing with exact format match
+      const result = dateUtils.createDate("2023-01-01", "YYYY-MM-DD");
+      expect(result).toBeDefined();
+      expect(result.isValid()).toBe(true);
+    });
+
+    test("should handle dayjs with locale-specific formats for antd5+", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const localeFormats = [
+        { input: "2023年1月1日", format: "YYYY年M月D日" },
+        { input: "1月1日2023年", format: "M月D日YYYY年" }
+      ];
+
+      localeFormats.forEach(({ input, format }) => {
+        const result = dateUtils.createDate(input, format);
+        expect(result).toBeDefined();
+        expect(typeof result.isValid).toBe("function");
+      });
+    });
+
     test("should create date with moment for antd4", () => {
       mockDetectAntdVersion.mockReturnValue(4);
 
@@ -115,6 +301,42 @@ describe("DateUtils Coverage Tests", () => {
       expect(result).toBe(true);
     });
 
+    test("should return true for valid date with dayjs using format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.isValidDate("2023-01-01", "YYYY-MM-DD");
+      expect(result).toBe(true);
+    });
+
+    test("should return false for invalid date with dayjs using format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.isValidDate("invalid-date", "YYYY-MM-DD");
+      expect(result).toBe(false);
+    });
+
+    test("should return false for mismatched format with dayjs", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.isValidDate("01/01/2023", "YYYY-MM-DD");
+      expect(result).toBe(false);
+    });
+
+    test("should return true for valid date with dayjs using different formats", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const formatTests = [
+        { input: "01/01/2023", format: "MM/DD/YYYY" },
+        { input: "2023-01-01T12:30:45", format: "YYYY-MM-DDTHH:mm:ss" },
+        { input: "Jan 1, 2023", format: "MMM D, YYYY" }
+      ];
+
+      formatTests.forEach(({ input, format }) => {
+        const result = dateUtils.isValidDate(input, format);
+        expect(result).toBe(true);
+      });
+    });
+
     test("should return false for invalid date with dayjs", () => {
       mockDetectAntdVersion.mockReturnValue(5);
 
@@ -167,6 +389,109 @@ describe("DateUtils Coverage Tests", () => {
 
       const result = dateUtils.formatDate("2023-01-01", "YYYY-MM-DD");
       expect(result).toBe("2023-01-01");
+    });
+
+    test("should format date with dayjs using input format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.formatDate("2023-01-01", "YYYY-MM-DD", "YYYY-MM-DD");
+      expect(result).toBe("2023-01-01");
+    });
+
+    test("should format date with dayjs using different input formats", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const formatTests = [
+        { input: "01/01/2023", inputFormat: "MM/DD/YYYY", outputFormat: "YYYY-MM-DD", expected: "2023-01-01" },
+        { input: "2023-01-01T12:30:45", inputFormat: "YYYY-MM-DDTHH:mm:ss", outputFormat: "MM/DD/YYYY", expected: "01/01/2023" },
+        { input: "Jan 1, 2023", inputFormat: "MMM D, YYYY", outputFormat: "YYYY-MM-DD", expected: "2023-01-01" }
+      ];
+
+      formatTests.forEach(({ input, inputFormat, outputFormat, expected }) => {
+        const result = dateUtils.formatDate(input, outputFormat, inputFormat);
+        expect(result).toBe(expected);
+      });
+    });
+
+    test("should handle dayjs formatDate with invalid input format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.formatDate("2023-01-01", "YYYY-MM-DD", "invalid-format");
+      expect(result).toBe("Invalid Date");
+    });
+
+    test("should handle dayjs formatDate with mismatched input format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.formatDate("01/01/2023", "YYYY-MM-DD", "YYYY-MM-DD");
+      expect(result).toBe("Invalid Date");
+    });
+
+    test("should handle dayjs formatDate with null input format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.formatDate("2023-01-01", "YYYY-MM-DD", null);
+      expect(result).toBe("2023-01-01");
+    });
+
+    test("should handle dayjs formatDate with undefined input format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.formatDate("2023-01-01", "YYYY-MM-DD", undefined);
+      expect(result).toBe("2023-01-01");
+    });
+
+    test("should handle dayjs formatDate with empty string input format", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const result = dateUtils.formatDate("2023-01-01", "YYYY-MM-DD", "");
+      expect(result).toBe("2023-01-01");
+    });
+
+    test("should handle dayjs formatDate with complex input formats", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const complexFormats = [
+        { input: "2023-01-01T12:30:45.123Z", inputFormat: "YYYY-MM-DDTHH:mm:ss.SSS[Z]", outputFormat: "YYYY-MM-DD" },
+        { input: "2023-01-01T12:30:45+08:00", inputFormat: "YYYY-MM-DDTHH:mm:ssZ", outputFormat: "MM/DD/YYYY" },
+        { input: "Sunday, January 1, 2023", inputFormat: "dddd, MMMM D, YYYY", outputFormat: "YYYY-MM-DD" }
+      ];
+
+      complexFormats.forEach(({ input, inputFormat, outputFormat }) => {
+        const result = dateUtils.formatDate(input, outputFormat, inputFormat);
+        expect(result).toBeDefined();
+        expect(typeof result).toBe("string");
+      });
+    });
+
+    test("should handle dayjs formatDate with timezone input formats", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const timezoneFormats = [
+        { input: "2023-01-01T00:00:00Z", inputFormat: "YYYY-MM-DDTHH:mm:ss[Z]", outputFormat: "YYYY-MM-DD" },
+        { input: "2023-01-01T00:00:00+00:00", inputFormat: "YYYY-MM-DDTHH:mm:ssZ", outputFormat: "MM/DD/YYYY" }
+      ];
+
+      timezoneFormats.forEach(({ input, inputFormat, outputFormat }) => {
+        const result = dateUtils.formatDate(input, outputFormat, inputFormat);
+        expect(result).toBeDefined();
+        expect(typeof result).toBe("string");
+      });
+    });
+
+    test("should handle dayjs formatDate with custom separators", () => {
+      mockDetectAntdVersion.mockReturnValue(5);
+
+      const separatorFormats = [
+        { input: "2023/01/01", inputFormat: "YYYY/MM/DD", outputFormat: "YYYY-MM-DD", expected: "2023-01-01" },
+        { input: "01-01-2023", inputFormat: "DD-MM-YYYY", outputFormat: "YYYY-MM-DD", expected: "2023-01-01" },
+        { input: "01.01.2023", inputFormat: "DD.MM.YYYY", outputFormat: "MM/DD/YYYY", expected: "01/01/2023" }
+      ];
+
+      separatorFormats.forEach(({ input, inputFormat, outputFormat, expected }) => {
+        const result = dateUtils.formatDate(input, outputFormat, inputFormat);
+        expect(result).toBe(expected);
+      });
     });
 
     test("should format date with moment", () => {

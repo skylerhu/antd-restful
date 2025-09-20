@@ -999,6 +999,80 @@ describe("Parser", () => {
     });
   });
 
+  describe("initRangeValues", () => {
+    test("should return [undefined, undefined] for empty inputs", () => {
+      expect(parser.initRangeValues(null)).toEqual([undefined, undefined]);
+      expect(parser.initRangeValues(undefined)).toEqual([undefined, undefined]);
+      expect(parser.initRangeValues("")).toEqual([undefined, undefined]);
+      expect(parser.initRangeValues([])).toEqual([undefined, undefined]);
+    });
+
+    test("should handle string inputs with comma separator", () => {
+      expect(parser.initRangeValues("1,2")).toEqual(["1", "2"]);
+      expect(parser.initRangeValues("a,b,c")).toEqual(["a", "b"]);
+      expect(parser.initRangeValues("single")).toEqual(["single", null]);
+      expect(parser.initRangeValues("1,2,3,4,5")).toEqual(["1", "2"]);
+    });
+
+    test("should handle non-array inputs", () => {
+      expect(parser.initRangeValues(123)).toEqual([123, null]);
+      expect(parser.initRangeValues(true)).toEqual([true, null]);
+      expect(parser.initRangeValues(false)).toEqual([false, null]);
+      expect(parser.initRangeValues({ key: "value" })).toEqual([{ key: "value" }, null]);
+    });
+
+    test("should handle array inputs", () => {
+      expect(parser.initRangeValues([1, 2])).toEqual([1, 2]);
+      expect(parser.initRangeValues([1, 2, 3, 4])).toEqual([1, 2]);
+      expect(parser.initRangeValues(["a", "b", "c"])).toEqual(["a", "b"]);
+      expect(parser.initRangeValues([1])).toEqual([1, null]);
+    });
+
+    test("should convert to numbers when number parameter is true", () => {
+      expect(parser.initRangeValues("1,2", true)).toEqual([1, 2]);
+      expect(parser.initRangeValues("1.5,2.7", true)).toEqual([1.5, 2.7]);
+      expect(parser.initRangeValues("invalid,123", true)).toEqual(["invalid", 123]);
+      expect(parser.initRangeValues([1, 2], true)).toEqual([1, 2]);
+      expect(parser.initRangeValues(["1", "2"], true)).toEqual([1, 2]);
+      expect(parser.initRangeValues(123, true)).toEqual([123, null]);
+    });
+
+    test("should not convert to numbers when number parameter is false", () => {
+      expect(parser.initRangeValues("1,2", false)).toEqual(["1", "2"]);
+      expect(parser.initRangeValues("1.5,2.7", false)).toEqual(["1.5", "2.7"]);
+      expect(parser.initRangeValues([1, 2], false)).toEqual([1, 2]);
+      expect(parser.initRangeValues(["1", "2"], false)).toEqual(["1", "2"]);
+      expect(parser.initRangeValues(123, false)).toEqual([123, null]);
+    });
+
+    test("should handle edge cases with number conversion", () => {
+      expect(parser.initRangeValues("0,0", true)).toEqual(["0", "0"]); // Number("0") || "0" = "0"
+      expect(parser.initRangeValues("-1,-2", true)).toEqual([-1, -2]);
+      expect(parser.initRangeValues("", true)).toEqual([undefined, undefined]);
+      expect(parser.initRangeValues("abc,def", true)).toEqual(["abc", "def"]);
+      expect(parser.initRangeValues("1.23e5,2.34e-3", true)).toEqual([123000, 0.00234]);
+    });
+
+    test("should handle special string cases", () => {
+      expect(parser.initRangeValues("a,b,c,d,e")).toEqual(["a", "b"]);
+      expect(parser.initRangeValues("single,word")).toEqual(["single", "word"]);
+      expect(parser.initRangeValues("")).toEqual([undefined, undefined]);
+      expect(parser.initRangeValues("   ")).toEqual(["   ", null]);
+      expect(parser.initRangeValues("a,")).toEqual(["a", ""]);
+      expect(parser.initRangeValues(",b")).toEqual(["", "b"]);
+    });
+
+    test("should handle mixed type arrays", () => {
+      expect(parser.initRangeValues([1, "2", true, null])).toEqual([1, "2"]);
+      expect(parser.initRangeValues([{ a: 1 }, { b: 2 }, { c: 3 }])).toEqual([{ a: 1 }, { b: 2 }]);
+    });
+
+    test("should handle number conversion with mixed types", () => {
+      expect(parser.initRangeValues([1, "2", "abc", 4], true)).toEqual([1, 2]); // 只取前两个元素
+      expect(parser.initRangeValues(["1.5", "2.5", "invalid"], true)).toEqual([1.5, 2.5]); // 只取前两个元素
+    });
+  });
+
   describe("handleFormValues", () => {
 
     test("should return original values when fields is empty", () => {

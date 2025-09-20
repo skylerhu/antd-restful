@@ -168,6 +168,31 @@ export const transformValue = (value, { options, fieldValue, labelTemplate }) =>
   }
   return item;
 };
+
+/**
+ * 初始化范围值
+*/
+export const initRangeValues = (input, number = false) => {
+  if (isEmpty(input)) {
+    return [undefined, undefined];
+  }
+  let values;
+  if (isString(input) && input.includes(",")) {
+    values = input.split(",").slice(0, 2);
+  } else if (!isArray(input)) {
+    values = [input];
+  } else {
+    values = input.slice(0, 2);
+  }
+  if (number) {
+    values = values.map((v) => (Number(v) || v));
+  }
+  if (values.length === 1) {
+    values.push(null);
+  }
+  return values;
+};
+
 // see https://github.com/sindresorhus/query-string
 export const queryString = {
   ...libQuery,
@@ -210,6 +235,10 @@ export const queryString = {
   },
 };
 
+/**
+ * 将query的值根据types的类型进行转换
+ * 因为低版本 query-string 从 9.x 才开始支持 types 指定个别字段的类型
+ */
 export const parseQueryTypes = (query, types) => {
   if (isEmpty(types) || isEmpty(query)) {
     return query;
@@ -364,6 +393,7 @@ export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
   return commonFormat(titleTemplate, { count: rows?.length || 0, stat: statStr });
 };
 
+// 生成列的唯一key
 export const genColumnKey = (column) => {
   let key = column.key || column.dataIndex;
   if (isArray(key)) {
@@ -372,6 +402,7 @@ export const genColumnKey = (column) => {
   return key;
 };
 
+// 根据keys返回需要的fields
 export const genFields = (fields, keys) => {
   if (!keys?.length) {
     return fields;
@@ -380,6 +411,7 @@ export const genFields = (fields, keys) => {
   return _fields;
 };
 
+// 处理表单值，保证所有字段都有值
 export const handleFormValues = (values, fields) => {
   if (!fields?.length) {
     return values;

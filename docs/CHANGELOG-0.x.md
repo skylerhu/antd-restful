@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.2.0
+- perf: 优化 RestTable 和 RouteBaseTable 处理路由参数
+    - 升级 query-string@9, `parseOptions` 支持通过 `types` 配置字段类型（连带打包无需额外安装）
+    - 默认会根据 `columns` 或是 `filterFormProps.fields` 的配置类型初始化 `types`
+- fix: 调整 `NumberRange` 和 `RangeStrPicker` 默认值的处理
+- fix: 修复 RangeStrPicker 在 antd>=5 版本场景下，dayjs 未正确处理 format 的问题；
+
 ## 0.1.18
 - fix: 修复 RestTable 表单值在路由参数变更时频繁更新的问题
     - 调整后，需要注意`路由参数`和`表单参数`的行为

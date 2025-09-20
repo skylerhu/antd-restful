@@ -4,8 +4,8 @@ import PropTypes from "prop-types";
 import { InputNumber, Space } from "antd";
 import { dequal as deepEqual } from "dequal";
 import { READ_ONLY_CLASS } from "src/common/constants";
-import { commonFormat } from "src/common/parser";
-import { isArray, isBlank, isEmpty, isFunction, isString } from "src/common/typeTools";
+import { commonFormat, initRangeValues } from "src/common/parser";
+import { isBlank, isFunction } from "src/common/typeTools";
 
 const NumberRange = ({
   style,
@@ -26,25 +26,12 @@ const NumberRange = ({
 }) => {
   const [innerValue, setInnerValue] = useState();
 
-  const getValue = useCallback((input) => {
-    if (isEmpty(input)) {
-      return [undefined, undefined];
-    }
-    if (isString(input) && input.includes(",")) {
-      return input.split(",");
-    }
-    if (!isArray(input)) {
-      return [input, undefined];
-    }
-    return input;
-  }, []);
-
   useEffect(() => {
     setInnerValue((oldV) => {
-      const newV = getValue(value);
+      const newV = initRangeValues(value, true);
       return deepEqual(newV, oldV) ? oldV : newV;
     });
-  }, [value, getValue]);
+  }, [value]);
 
   const onValueChange = useCallback(
     (v1, v2) => {

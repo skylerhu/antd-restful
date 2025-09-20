@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { DatePicker, TimePicker } from "antd";
 import { createDate } from "src/common/dateUtils";
 import { READ_ONLY_CLASS } from "src/common/constants";
+import { initRangeValues } from "src/common/parser";
 import { isArray, isEmpty, isFunction } from "src/common/typeTools";
 
 const RangeStrPicker = ({
@@ -32,12 +33,9 @@ const RangeStrPicker = ({
 
   const getDateValue = useCallback(
     (val) => {
-      if (isEmpty(val)) return undefined;
-      if (!isArray(val)) {
-        // 不是数组
-        val = val.split(",");
-      }
-      return val.map((item) => (item ? createDate(item, format) : undefined));
+      const rangeValues = initRangeValues(val);
+      const newV = rangeValues.map((item) => (item ? createDate(item, format) : item));
+      return newV;
     },
     [format]
   );
