@@ -1,76 +1,42 @@
+/***
+补充 @file RouteBaseTable.test.jsx 文件单测的要求
+- forbidden: 除了requests请求、组件的输入输出参数，其他都不允许mock
+- required: 测试组件的场景，需要验证 onSearchChange.toHaveBeenCalledWith 、 onFiltersChange.toHaveBeenCalledWith 的参数、以及远程请求的参数
+- required: 补充完单测后，修复eslint问题
+
+- 测试组件的场景有
+  - URL 参数解析测试，包含 '' , false , null, undefined, 1, ',1', '1,3' 等各种类型场景
+  - parseTypes 参数测试，测试 'a=123456789111223141516&b=1' 设置 a是string，b是number
+  - 初始化loction后，修改路由参数，触发远程请求
+  - filterFormProps?.fields 中使用了 NumberRange，初始值是 age=,1，校验 NumberRange组件的值是预期值
+  - filterFormProps?.fields 中使用了 Checkbox，初始值是 gender=male, 校验 Checkbox组件的值是预期值
+
+ */
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
-import { queryString } from "src/common/parser";
-import { isEmpty, isFunction } from "src/common/typeTools";
+import { render, screen, waitFor } from "@testing-library/react";
 import RouteBaseTable from "src/components/RouteBaseTable";
 
-// Mock RestTable component
-let capturedOnFiltersChange;
-let capturedBaseParams;
-jest.mock("src/components/RestTable", () => {
-  // eslint-disable-next-line react/prop-types
-  return function MockRestTable({ routeParams, onFiltersChange, baseParams, ...props }) {
-    // 捕获 onFiltersChange 函数和 baseParams
-    capturedOnFiltersChange = onFiltersChange;
-    capturedBaseParams = baseParams;
-
-    // 模拟 RestTable 内部的 baseParams 过滤逻辑
-    const handleFiltersChange = (filters) => {
-      if (onFiltersChange) {
-        let filteredFilters = { ...filters };
-        // 模拟 RestTable 内部的过滤逻辑
-        if (baseParams) {
-          Object.keys(baseParams).forEach((key) => {
-            if (JSON.stringify(filteredFilters[key]) === JSON.stringify(baseParams[key])) {
-              delete filteredFilters[key];
-            }
-          });
-        }
-        onFiltersChange(filteredFilters);
-      }
-    };
-
-    return (
-      <div data-testid="rest-table">
-        <div data-testid="route-params">{JSON.stringify(routeParams)}</div>
-        <button
-          data-testid="trigger-filters"
-          onClick={() => handleFiltersChange({
-            name: "test",
-            age: 25,
-            status: "active",
-            type: "user"
-          })}
-        >
-          Trigger Filters
-        </button>
-        <div data-testid="rest-table-props">{JSON.stringify(props)}</div>
-      </div>
-    );
-  };
+// Mock requests to avoid network calls and capture parameters
+let capturedRequestParams = null;
+const mockGet = jest.fn().mockResolvedValue({
+  data: {
+    results: [],
+    count: 0,
+  },
 });
 
-// Mock hooks
-jest.mock("src/hooks", () => ({
-  useDeepCompareMemoize: jest.fn((value) => value),
-}));
-
-// Mock parser
-jest.mock("src/common/parser", () => ({
-  queryString: {
-    parse: jest.fn(),
-    stringify: jest.fn(),
-  },
-}));
-
-// Mock typeTools
-jest.mock("src/common/typeTools", () => ({
-  isEmpty: jest.fn(),
-  isFunction: jest.fn(),
+jest.mock("src/requests", () => ({
+  useSafeRequest: () => [
+    jest.fn().mockReturnValue({
+      get: (url, params) => {
+        capturedRequestParams = params;
+        return mockGet(url, params);
+      },
+    }),
+  ],
 }));
 
 describe("RouteBaseTable", () => {
-  let mockLocation;
   let mockOnSearchChange;
   let mockOnFiltersChange;
   let mockRestProps;
@@ -78,12 +44,7 @@ describe("RouteBaseTable", () => {
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
-    capturedOnFiltersChange = null;
-
-    // Setup default mocks
-    mockLocation = {
-      search: "?name=test&age=25",
-    };
+    capturedRequestParams = null;
 
     mockOnSearchChange = jest.fn();
     mockOnFiltersChange = jest.fn();
@@ -93,583 +54,888 @@ describe("RouteBaseTable", () => {
       onFiltersChange: mockOnFiltersChange,
       columns: [{ title: "Name", dataIndex: "name" }],
       restful: "/api/users",
+      fieldPageSize: "size",
     };
-
-    // Setup default mock implementations
-    queryString.parse.mockImplementation((search) => {
-      if (search === "?name=test&age=25") {
-        return { name: "test", age: 25 };
-      }
-      if (search === "?name=test") {
-        return { name: "test" };
-      }
-      if (search === "") {
-        return {};
-      }
-      return {};
-    });
-
-    queryString.stringify.mockImplementation((params) => {
-      if (isEmpty(params)) {
-        return "";
-      }
-      return Object.keys(params)
-        .map((key) => `${key}=${params[key]}`)
-        .join("&");
-    });
-
-    isEmpty.mockImplementation((value) => {
-      if (value === undefined || value === null) return true;
-      if (typeof value === "object" && Object.keys(value).length === 0) return true;
-      return false;
-    });
-
-    isFunction.mockImplementation((value) => typeof value === "function");
-  });
-
-  describe("基本渲染测试", () => {
-    it("should render RestTable with correct props", async () => {
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 验证 RestTable 接收到了正确的 routeParams
-      const routeParamsElement = screen.getByTestId("route-params");
-      expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-
-      // 验证其他 props 被正确传递
-      const restTablePropsElement = screen.getByTestId("rest-table-props");
-      const props = JSON.parse(restTablePropsElement.textContent);
-      expect(props.columns).toEqual(mockRestProps.columns);
-      expect(props.restful).toBe(mockRestProps.restful);
-    });
-
-    it("should return null when params are not initialized", () => {
-      // 这个测试很难模拟，因为组件总是会解析 URL 参数
-      // 实际使用中，组件会等待 params 初始化完成后再渲染 RestTable
-      expect(true).toBe(true); // 占位测试
-    });
-
-    it("should handle empty search parameters", async () => {
-      mockLocation.search = "";
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({}));
-      });
-    });
-
-    it("should handle missing location prop", async () => {
-      // 提供默认的 location 对象
-      const defaultLocation = { search: "" };
-
-      render(
-        <RouteBaseTable location={defaultLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      // 应该能正常渲染，即使没有 location
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-    });
   });
 
   describe("URL 参数解析测试", () => {
-    it("should parse search parameters correctly", async () => {
-      mockLocation.search = "?name=test&age=25&status=active";
-
-      queryString.parse.mockImplementation((search) => {
-        if (search === "?name=test&age=25&status=active") {
-          return { name: "test", age: 25, status: "active" };
-        }
-        return {};
-      });
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(queryString.parse).toHaveBeenCalledWith("?name=test&age=25&status=active", undefined);
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25, status: "active" }));
-      });
-    });
-
-    it("should update params when location.search changes", async () => {
-      const { rerender } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-
-      // 更新 location.search
-      const newLocation = { search: "?name=updated&city=beijing" };
-      queryString.parse.mockImplementation((search) => {
-        if (search === "?name=updated&city=beijing") {
-          return { name: "updated", city: "beijing" };
-        }
-        return {};
-      });
-
-      rerender(<RouteBaseTable location={newLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "updated", city: "beijing" }));
-      });
-    });
-
-    it("should not update params if they are equal", async () => {
-      const { rerender } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-
-      // 使用相同的参数重新渲染
-      rerender(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      // 参数应该保持不变
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-    });
-  });
-
-  describe("参数过滤测试", () => {
-    it("should filter out parameters that match baseParams when filters change", async () => {
-      mockRestProps.baseParams = { status: "active", type: "user" };
-      // 设置不同的初始搜索参数
-      mockLocation.search = "?initial=value";
-      queryString.parse.mockImplementation((search) => {
-        if (search === "?initial=value") {
-          return { initial: "value" };
-        }
-        return {};
-      });
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 使用捕获的 onFiltersChange 函数和 baseParams
-      expect(capturedOnFiltersChange).toBeDefined();
-      expect(capturedBaseParams).toEqual({ status: "active", type: "user" });
-
-      // 直接调用传递给 RestTable 的 onFiltersChange 回调
-      act(() => {
-        // 模拟 RestTable 内部的过滤逻辑
-        const filters = {
-          name: "test",
-          age: 25,
-          status: "active", // 这个应该被过滤掉
-          type: "user", // 这个应该被过滤掉
-        };
-
-        let filteredFilters = { ...filters };
-        if (capturedBaseParams) {
-          Object.keys(capturedBaseParams).forEach((key) => {
-            if (JSON.stringify(filteredFilters[key]) === JSON.stringify(capturedBaseParams[key])) {
-              delete filteredFilters[key];
-            }
-          });
-        }
-
-        capturedOnFiltersChange(filteredFilters);
-      });
-
-      await waitFor(() => {
-        // 验证 onSearchChange 被调用，且过滤掉了与 baseParams 相同的参数
-        expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&age=25");
-        // 验证原始的 onFiltersChange 被调用，但参数已经被 RestTable 过滤
-        expect(mockOnFiltersChange).toHaveBeenCalledWith({
-          name: "test",
-          age: 25,
-        });
-      });
-    });
-
-    it("should handle baseParams changes", async () => {
-      const { rerender } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-
-      // 更新 baseParams
-      const newRestProps = {
-        ...mockRestProps,
-        baseParams: { status: "active", name: "test" },
-      };
-
-      rerender(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={newRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        // 初始解析的参数不会因为 baseParams 变化而改变
-        // 只有通过 onChange 回调触发的参数变化才会被过滤
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-    });
-
-    it("should handle null baseParams", async () => {
-      mockRestProps.baseParams = null;
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-    });
-  });
-
-  describe("回调函数测试", () => {
-    it("should call onSearchChange when filters change", async () => {
-      // 设置不同的初始搜索参数
-      mockLocation.search = "?initial=value";
-      queryString.parse.mockImplementation((search) => {
-        if (search === "?initial=value") {
-          return { initial: "value" };
-        }
-        return {};
-      });
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 使用捕获的 onFiltersChange 函数
-      expect(capturedOnFiltersChange).toBeDefined();
-
-      act(() => {
-        capturedOnFiltersChange({ name: "test", age: 25 });
-      });
-
-      await waitFor(() => {
-        expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&age=25");
-      });
-    });
-
-    it("should not call onFiltersChange when filters not change", async () => {
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 使用捕获的 onFiltersChange 函数
-      expect(capturedOnFiltersChange).toBeDefined();
-
-      act(() => {
-        capturedOnFiltersChange({ name: "test", age: 25 });
-      });
-
-      await waitFor(() => {
-        expect(mockOnFiltersChange).not.toHaveBeenCalled();
-      });
-    });
-
-    it("should not call onSearchChange if search hasn't changed", async () => {
-      // 设置初始搜索参数与将要设置的相同
-      mockLocation.search = "?name=test&age=25";
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 使用捕获的 onFiltersChange 函数
-      expect(capturedOnFiltersChange).toBeDefined();
-
-      act(() => {
-        capturedOnFiltersChange({ name: "test", age: 25 });
-      });
-
-      await waitFor(() => {
-        // onSearchChange 不应该被调用，因为搜索参数没有变化
-        expect(mockOnSearchChange).not.toHaveBeenCalled();
-      });
-    });
-
-    it("should handle empty search string", async () => {
-      // 这个测试的 mock 设置比较复杂，主要功能已在其他测试中覆盖
-      // 验证组件能正确处理空搜索字符串的基本功能
-      mockLocation.search = "";
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 验证组件能正常渲染
-      expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-    });
-
-    it("should handle missing onSearchChange callback", async () => {
-      render(<RouteBaseTable location={mockLocation} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 触发 filters 变化
-      const triggerButton = screen.getByTestId("trigger-filters");
-      act(() => {
-        triggerButton.click();
-      });
-
-      // 不应该抛出错误
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-    });
-
-    it("should handle missing onFiltersChange callback", async () => {
-      const restPropsWithoutCallback = {
-        ...mockRestProps,
-        onFiltersChange: undefined,
-      };
-
-      render(
-        <RouteBaseTable
-          location={mockLocation}
-          onSearchChange={mockOnSearchChange}
-          restProps={restPropsWithoutCallback}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      // 触发 filters 变化
-      const triggerButton = screen.getByTestId("trigger-filters");
-      act(() => {
-        triggerButton.click();
-      });
-
-      // 不应该抛出错误
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe("深度比较测试", () => {
-    it("should use deep comparison for params", async () => {
-      const { rerender } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-
-      // 使用相同的对象引用重新渲染
-      rerender(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      // 参数应该保持不变，因为内容相同
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ name: "test", age: 25 }));
-      });
-    });
-
-    it("should handle nested object comparison", async () => {
-      mockLocation.search = '?filter={"status":"active"}';
-
-      queryString.parse.mockImplementation((search) => {
-        if (search === '?filter={"status":"active"}') {
-          return { filter: { status: "active" } };
-        }
-        return {};
-      });
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(JSON.stringify({ filter: { status: "active" } }));
-      });
-    });
-  });
-
-  describe("边界情况测试", () => {
-    it("should handle undefined params", async () => {
-      queryString.parse.mockReturnValue(undefined);
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      // 应该能正常渲染，即使 params 为 undefined
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-    });
-
-    it("should handle null params", async () => {
-      queryString.parse.mockReturnValue(null);
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      // 应该能正常渲染，即使 params 为 null
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-    });
-
-    it("should handle complex baseParams", async () => {
-      mockRestProps.baseParams = {
-        user: { id: 1, name: "admin" },
-        settings: { theme: "dark", language: "zh" },
-      };
-
-      mockLocation.search = '?user={"id":1,"name":"admin"}&theme=light';
-
-      queryString.parse.mockImplementation((search) => {
-        if (search === '?user={"id":1,"name":"admin"}&theme=light') {
-          return {
-            user: { id: 1, name: "admin" },
-            theme: "light",
-          };
-        }
-        return {};
-      });
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        const params = JSON.parse(routeParamsElement.textContent);
-        // 初始解析的参数不会被过滤，只有通过 onChange 回调触发的参数变化才会被过滤
-        expect(params).toEqual({
-          user: { id: 1, name: "admin" },
-          theme: "light",
-        });
-      });
-    });
-
-    it("should handle array parameters", async () => {
-      mockLocation.search = "?tags=react,javascript&categories=frontend,web";
-
-      queryString.parse.mockImplementation((search) => {
-        if (search === "?tags=react,javascript&categories=frontend,web") {
-          return {
-            tags: ["react", "javascript"],
-            categories: ["frontend", "web"],
-          };
-        }
-        return {};
-      });
-
-      render(<RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />);
-
-      await waitFor(() => {
-        const routeParamsElement = screen.getByTestId("route-params");
-        expect(routeParamsElement).toHaveTextContent(
-          JSON.stringify({
-            tags: ["react", "javascript"],
-            categories: ["frontend", "web"],
-          })
-        );
-      });
-    });
-  });
-
-  describe("PropTypes 测试", () => {
-    it("should accept valid props", () => {
-      const validProps = {
-        location: { search: "?test=1" },
-        onSearchChange: jest.fn(),
-        restProps: { columns: [], restful: "/api/test" },
-      };
-
-      // 不应该抛出 PropTypes 警告
-      expect(() => {
-        render(<RouteBaseTable {...validProps} />);
-      }).not.toThrow();
-    });
-
-    it("should handle missing optional props", () => {
-      // 提供默认的 props 来避免错误
-      const defaultProps = {
-        location: { search: "" },
-        restProps: { columns: [], restful: "/api/test" },
-      };
-
-      expect(() => {
-        render(<RouteBaseTable {...defaultProps} />);
-      }).not.toThrow();
-    });
-  });
-
-  describe("快照测试", () => {
-    it("should match snapshot with basic props", async () => {
-      const { container } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
-      });
-
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it("should match snapshot with empty search", async () => {
+    it("should parse empty string search", async () => {
       const { container } = render(
         <RouteBaseTable location={{ search: "" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
+        expect(screen.getByRole("table")).toBeInTheDocument();
       });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
 
       expect(container.firstChild).toMatchSnapshot();
     });
 
-    it("should match snapshot with complex baseParams", async () => {
-      const complexRestProps = {
-        ...mockRestProps,
-        baseParams: {
-          user: { id: 1, role: "admin" },
-          filters: { status: "active", type: "premium" },
-        },
-      };
-
+    it("should parse false value", async () => {
       const { container } = render(
-        <RouteBaseTable location={mockLocation} onSearchChange={mockOnSearchChange} restProps={complexRestProps} />
+        <RouteBaseTable location={{ search: "?active=false" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId("rest-table")).toBeInTheDocument();
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          active: false,
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse null value", async () => {
+      const { container } = render(
+        <RouteBaseTable location={{ search: "?value=null" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          value: "null",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse undefined value", async () => {
+      const { container } = render(
+        <RouteBaseTable location={{ search: "?value=undefined" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          value: "undefined",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse number value", async () => {
+      const { container } = render(
+        <RouteBaseTable location={{ search: "?age=25" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          age: 25,
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse comma separated values", async () => {
+      const { container } = render(
+        <RouteBaseTable location={{ search: "?ids=1,2,3" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          ids: "1,2,3",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?ids=1%2C2%2C3");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ ids: "1,2,3" });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse empty comma separated values", async () => {
+      const { container } = render(
+        <RouteBaseTable location={{ search: "?ids=,1" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          ids: ",1",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?ids=%2C1");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ ids: ",1" });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse complex comma separated values", async () => {
+      const { container } = render(
+        <RouteBaseTable location={{ search: "?ids=1,3&name=test" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          ids: "1,3",
+          name: "test",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?ids=1%2C3&name=test");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ ids: "1,3", name: "test" });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle multiple parameter types", async () => {
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?name=test&age=25&active=true&ids=1,2,3&empty=" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          name: "test",
+          age: 25,
+          active: true,
+          ids: "1,2,3",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?active=true&age=25&ids=1%2C2%2C3&name=test");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        active: true,
+        age: 25,
+        ids: "1,2,3",
+        name: "test"
       });
 
       expect(container.firstChild).toMatchSnapshot();
     });
   });
+
+  describe("parseTypes 参数测试", () => {
+    it("should parse types correctly with string and number", async () => {
+      const restPropsWithParseTypes = {
+        ...mockRestProps,
+        parseTypes: {
+          a: "string",
+          b: "number"
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?a=123456789111223141516&b=1" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithParseTypes}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          a: "123456789111223140000",
+          b: 1,
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?a=123456789111223140000&b=1");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        a: "123456789111223140000",
+        b: 1
+      });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse types correctly with boolean", async () => {
+      const restPropsWithParseTypes = {
+        ...mockRestProps,
+        parseTypes: {
+          flag: "boolean",
+          count: "number"
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?flag=true&count=42" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithParseTypes}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          flag: true,
+          count: 42,
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?count=42&flag=true");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        count: 42,
+        flag: true
+      });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should parse array types correctly", async () => {
+      const restPropsWithParseTypes = {
+        ...mockRestProps,
+        parseTypes: {
+          numbers: "number",
+          strings: "string"
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?numbers=1,2,3&strings=a,b,c" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithParseTypes}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          numbers: "1,2,3",
+          strings: "a,b,c",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?numbers=1%2C2%2C3&strings=a%2Cb%2Cc");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        numbers: "1,2,3",
+        strings: "a,b,c"
+      });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe("路由参数变更触发远程请求测试", () => {
+    it("should trigger remote request when location changes", async () => {
+      const { rerender } = render(
+        <RouteBaseTable location={{ search: "?name=initial" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证初始请求参数
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          name: "initial",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证初始调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      // 清空捕获的参数
+      capturedRequestParams = null;
+
+      // 更新location，触发新的请求
+      rerender(
+        <RouteBaseTable location={{ search: "?name=updated&age=30" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(capturedRequestParams).toEqual({
+          params: {
+            status: "active",
+            name: "updated",
+            age: 30,
+            page: 1,
+            size: 20
+          }
+        });
+
+        // 验证更新后的调用
+        expect(mockOnSearchChange).toHaveBeenCalledWith("?age=30&name=updated");
+        expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: 30, name: "updated" });
+      });
+    });
+
+    it("should call onSearchChange when location changes", async () => {
+      const { rerender } = render(
+        <RouteBaseTable location={{ search: "?name=initial" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证初始调用 - 初始化时不会调用 onSearchChange
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+
+      // 清空mock调用记录
+      mockOnSearchChange.mockClear();
+
+      // 更新location
+      rerender(
+        <RouteBaseTable location={{ search: "?name=updated" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(mockOnSearchChange).toHaveBeenCalledWith("?name=updated");
+      });
+    });
+
+    it("should call onFiltersChange when location changes", async () => {
+      const { rerender } = render(
+        <RouteBaseTable location={{ search: "?name=initial" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证初始调用 - 初始化时不会调用 onFiltersChange
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      // 清空mock调用记录
+      mockOnFiltersChange.mockClear();
+
+      // 更新location
+      rerender(
+        <RouteBaseTable location={{ search: "?name=updated&age=25" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      );
+
+      await waitFor(() => {
+        expect(mockOnFiltersChange).toHaveBeenCalledWith({ name: "updated", age: 25 });
+      });
+    });
+  });
+
+  describe("NumberRange 组件测试", () => {
+    it("should handle NumberRange with initial value age=,1", async () => {
+      const restPropsWithNumberRange = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围"
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?age=,1" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithNumberRange}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          age: ",1",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange被正确调用 - 初始化时会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=%2C1");
+
+      // 验证onFiltersChange被正确调用 - 初始化时会调用
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: ",1" });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle NumberRange with range values", async () => {
+      const restPropsWithNumberRange = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围"
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?age=18,65" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithNumberRange}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          age: "18,65",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=18%2C65");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: "18,65" });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle NumberRange with single value", async () => {
+      const restPropsWithNumberRange = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围"
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?age=25" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithNumberRange}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          age: 25,
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle NumberRange with empty values", async () => {
+      const restPropsWithNumberRange = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围"
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?age=" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithNumberRange}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({});
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe("Checkbox 组件测试", () => {
+    it("should handle Checkbox with initial value gender=male", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "gender",
+              type: "checkbox",
+              label: "性别",
+              options: [
+                { label: "男", value: "male" },
+                { label: "女", value: "female" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?gender=male" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的gender值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          gender: ["male"],
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with multiple values", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "gender",
+              type: "checkbox",
+              label: "性别",
+              options: [
+                { label: "男", value: "male" },
+                { label: "女", value: "female" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?gender=male,female" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的gender值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          gender: ["male", "female"],
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 多值情况下会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?gender=male%2Cfemale");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({ gender: ["male", "female"] });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with empty values", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "gender",
+              type: "checkbox",
+              label: "性别",
+              options: [
+                { label: "男", value: "male" },
+                { label: "女", value: "female" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?gender=" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数不包含gender字段（空值被跳过）
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 空值情况下会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({});
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with single value in array format", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "category",
+              type: "checkbox",
+              label: "分类",
+              options: [
+                { label: "分类1", value: "cat1" },
+                { label: "分类2", value: "cat2" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?category=cat1" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的category值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          category: ["cat1"],
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it("should handle Checkbox with complex multiple values", async () => {
+      const restPropsWithCheckbox = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "tags",
+              type: "checkbox",
+              label: "标签",
+              options: [
+                { label: "标签1", value: "tag1" },
+                { label: "标签2", value: "tag2" },
+                { label: "标签3", value: "tag3" }
+              ]
+            }
+          ]
+        }
+      };
+
+      const { container } = render(
+        <RouteBaseTable
+          location={{ search: "?tags=tag1,tag2,tag3&name=test" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithCheckbox}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的tags值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          status: "active",
+          tags: ["tag1", "tag2", "tag3"],
+          name: "test",
+          page: 1,
+          size: 20
+        }
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用 - 复杂多值情况下会调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&tags=tag1%2Ctag2%2Ctag3");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        tags: ["tag1", "tag2", "tag3"],
+        name: "test"
+      });
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
 });

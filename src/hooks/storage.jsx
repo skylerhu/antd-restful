@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { dequal as deepEqual } from "dequal";
 import { genColumnKey } from "src/common/parser";
 import { isString } from "src/common/typeTools";
-import { useDeepCompareMemoize } from "./protect";
+import { useDeepCompareMemoize } from "./base";
 
 const _getStorageValue = (storage, key, defaultValue) => {
   let value;

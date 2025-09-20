@@ -1,8 +1,8 @@
 import { queryString } from "src/common/parser";
 
 const globalConfig = {
-  queryStringify: (params) => queryString.stringify(params),
-  queryParse: (params) => queryString.parse(params),
+  queryStringify: (params, options) => queryString.stringify(params, options),
+  queryParse: (params, options) => queryString.parse(params, options),
 };
 
 export const setGlobalConfig = (config) => {

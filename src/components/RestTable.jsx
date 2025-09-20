@@ -1,19 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import {
-  Button,
-  Col,
-  Descriptions,
-  Dropdown,
-  Input,
-  InputNumber,
-  Row,
-  Space,
-  Spin,
-  Table,
-  Tag,
-  Tooltip,
-} from "antd";
+import { Button, Col, Descriptions, Dropdown, Input, InputNumber, Row, Space, Spin, Table, Tag, Tooltip } from "antd";
 import {
   CloseOutlined,
   DownloadOutlined,
@@ -30,10 +17,11 @@ import {
   commonFormat,
   findDataByPath,
   genColumnKey,
+  genFields,
+  handleFormValues,
   tableSorterToApiSorter,
   toBeString,
   transformFilters,
-  genFields,
 } from "src/common/parser";
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
@@ -44,7 +32,7 @@ import RangeStrPicker from "src/components/formitems/RangeStrPicker";
 import RestSelect from "src/components/formitems/RestSelect";
 import GridForm from "src/components/GridForm";
 import globalConfig from "src/config";
-import { useDeepCompareMemoize, useInterval } from "src/hooks/index";
+import { useDeepCompareMemoize, useDictState, useInterval } from "src/hooks/index";
 import { useSafeRequest } from "src/requests";
 
 // 处理table表头中列的筛选
@@ -249,6 +237,8 @@ export const renderRowLabel = (record, column) => {
   return show;
 };
 
+const REFRESH_COUNTER_KEY = "____refresh";
+
 const RestTable = forwardRef(
   (
     {
@@ -306,9 +296,6 @@ const RestTable = forwardRef(
     const memBaseParams = useDeepCompareMemoize(baseParams);
     // 路由参数
     const memRouteParams = useDeepCompareMemoize(routeParams);
-    // table内置header上的筛选条件
-    const [headerFilters, setHeaderFilters] = useState({});
-    const [formFilters, setFormFilters] = useState({});
     // 强制参数
     const memForceParams = useDeepCompareMemoize(forceParams);
     // 真实用于请求的筛选条件
@@ -336,7 +323,10 @@ const RestTable = forwardRef(
       setShowColumnsKeys(keys);
     }, []);
 
-    const filterFields = useMemo(() => genFields(filterFormProps?.fields, filterFieldKeys), [filterFormProps?.fields, filterFieldKeys]);
+    const filterFields = useMemo(
+      () => genFields(filterFormProps?.fields, filterFieldKeys),
+      [filterFormProps?.fields, filterFieldKeys]
+    );
     const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
 
     useEffect(() => {
@@ -357,21 +347,44 @@ const RestTable = forwardRef(
     // setMultipleMap
     useEffect(() => {
       setMultipleMap((oldV) => {
+        // 处理header上的筛选条件
         const newV = columns.reduce((acc, column) => {
-          const field = column.dataIndex || column.key;
-          if (column.filterMultiple === undefined) {
+          const k = genColumnKey(column);
+          const dropdownConfig = column.filterDropdownConfig;
+          if (dropdownConfig) {
+            if (dropdownConfig.type === FieldType.SELECT && dropdownConfig.dropdownProps?.mode === "multiple") {
+              acc[k] = true;
+            } else if ([FieldType.CHECKBOX].includes(dropdownConfig.type)) {
+              acc[k] = true;
+            } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(dropdownConfig.type)) {
+              // range当做字符串处理
+              acc[k] = false;
+            }
+          } else if (column.filterMultiple === undefined) {
             if (column.filters) {
               // 如果开启了刷选，则默认是多选; 是table原生决定的
-              acc[field] = true;
+              acc[k] = true;
             }
           } else {
-            acc[field] = column.filterMultiple;
+            acc[k] = column.filterMultiple;
           }
           return acc;
         }, {});
+        // 处理表单上的筛选条件
+        filterFormProps?.fields?.forEach((field) => {
+          const k = genColumnKey(field);
+          if (field.type === FieldType.SELECT && field.antdFieldProps?.mode === "multiple") {
+            newV[k] = true;
+          } else if ([FieldType.CHECKBOX].includes(field.type)) {
+            newV[k] = true;
+          } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
+            // range当做字符串处理
+            newV[k] = false;
+          }
+        });
         return deepEqual(oldV, newV) ? oldV : newV;
       });
-    }, [columns]);
+    }, [columns, filterFormProps?.fields]);
 
     const pageSize = useMemo(() => {
       return parseInt(innerFilters[fieldPageSize] || defaultPageSize);
@@ -398,6 +411,63 @@ const RestTable = forwardRef(
       return opts;
     }, [pageSize, defaultPageSize, antdTableProps?.pagination?.pageSizeOptions, memBaseParams, fieldPageSize]);
 
+    const filterFormAllFields = useDeepCompareMemoize(
+      filterFormProps?.fields?.map((field) => ({
+        key: genColumnKey(field),
+        type: field.type,
+      })) || []
+    );
+
+    const formFiltersRef = useRef({});
+    const [filterState, setFilterState] = useDictState({
+      // table内置header上的筛选条件
+      headerFilters: {},
+      // 表单筛选条件
+      formFilters: {},
+    });
+
+    // 监听路由参数的变化更新筛选表单的值
+    useEffect(() => {
+      const oldV = formFiltersRef.current;
+      const values = {};
+      filterFields?.forEach((field) => {
+        let v = undefined;
+        // 表单提交过有值，则优先使用表单的值
+        v = oldV ? oldV[field.key] : undefined;
+        // 表单重置过值，则使用路由重置过的值
+        if (v !== null && v !== "") {
+          // 路由参数有值，使用路由参数的值
+          v = memRouteParams ? memRouteParams[field.key] : undefined;
+          if (v === undefined) {
+            // 基础参数有值，使用基础参数的值
+            v = memBaseParams ? memBaseParams[field.key] : undefined;
+          }
+        }
+        values[field.key] = v;
+      });
+      delete values[fieldPage];
+      delete values[fieldPageSize];
+
+      let newV = transformFilters(values, { multipleMap });
+      newV = handleFormValues(newV, filterFields);
+      if (!deepEqual(oldV, newV)) {
+        setFilterState({ formFilters: newV });
+      }
+    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, setFilterState, multipleMap]);
+
+    // 更新筛选form表单
+    useEffect(() => {
+      const formFilters = filterState.formFilters;
+      if (innerTools.advancedSearch) {
+        const noEmptyKeys = Object.keys(formFilters).filter((key) => !isBlank(formFilters[key]));
+        if (noEmptyKeys.length > 1) {
+          // 如果多个表单有值，则开启高级搜索
+          setEnableAdvancedSearch(true);
+        }
+      }
+      filterFormRef.current?.getFormInstance()?.setFieldsValue(formFilters);
+    }, [filterState.formFilters, innerTools.advancedSearch]);
+
     // setInnerFilters
     useEffect(() => {
       setInnerFilters((oldV) => {
@@ -411,18 +481,18 @@ const RestTable = forwardRef(
           // [fieldPageSize]: defaultPageSize,
           ...memBaseParams,
           ...memRouteParams,
-          ...headerFilters,
-          ...formFilters,
+          ...filterState.headerFilters,
+          ...filterState.formFilters,
           ...memForceParams,
         };
         // 避免传递过来空字符串的情况
         newV[fieldPage] = parseInt(newV[fieldPage]) || DEFAULT_PAGE;
         newV[fieldPageSize] = parseInt(newV[fieldPageSize]) || defaultPageSize;
-        newV = transformFilters(newV, { skipEmpty: true, multipleMap });
-        if (deepEqual(oldV, newV)) {
+        const newValues = transformFilters(newV, { skipEmpty: true, multipleMap });
+        if (deepEqual(oldV, newValues)) {
           return oldV;
         }
-        return newV;
+        return newValues;
       });
     }, [
       fieldPage,
@@ -431,56 +501,9 @@ const RestTable = forwardRef(
       memBaseParams,
       memRouteParams,
       memForceParams,
-      headerFilters,
+      filterState,
       multipleMap,
-      formFilters,
     ]);
-
-    const filterFormKeys = useDeepCompareMemoize(
-      filterFormProps?.fields?.map((field) => ({
-        key: field.key,
-        type: field.type,
-      })) || []
-    );
-
-    // 更新筛选表单的值
-    useEffect(() => {
-      if (filterFormRef.current) {
-        const values = {};
-        filterFormKeys.forEach((field) => {
-          let v = memRouteParams ? memRouteParams[field.key] : undefined;
-          if (v === undefined) {
-            v = memBaseParams ? memBaseParams[field.key] : undefined;
-          }
-          if (v === undefined) {
-            // 需要重置表单的值
-            values[field.key] = null;
-          } else {
-            values[field.key] = v;
-          }
-          if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(values[field.key])) {
-            // 为了能够正确显示“全部”选项
-            values[field.key] = "";
-          }
-        });
-        delete values[fieldPage];
-        delete values[fieldPageSize];
-
-        if (innerTools.advancedSearch) {
-          const noEmptyKeys = Object.keys(values).filter((key) => !isBlank(values[key]));
-          if (noEmptyKeys.length > 1) {
-            // 如果多个表单有值，则开启高级搜索
-            setEnableAdvancedSearch(true);
-          }
-        }
-        if (isEmpty(values)) {
-          filterFormRef.current.getFormInstance().resetFields();
-        } else {
-          filterFormRef.current.getFormInstance().setFieldsValue(values);
-        }
-        setFormFilters((oldV) => (deepEqual(oldV, values) ? oldV : values));
-      }
-    }, [memRouteParams, memBaseParams, filterFormKeys, fieldPage, fieldPageSize, innerTools.advancedSearch]);
 
     // 处理筛选条件变化 onFiltersChange
     useEffect(() => {
@@ -493,6 +516,7 @@ const RestTable = forwardRef(
           ...innerFilters,
         };
         // 删除默认值
+        delete filters[REFRESH_COUNTER_KEY];
         if (filters[fieldPage] === DEFAULT_PAGE) {
           delete filters[fieldPage];
         }
@@ -530,8 +554,10 @@ const RestTable = forwardRef(
         return;
       }
       setLoading(true);
+      const params = { ...innerFilters };
+      delete params[REFRESH_COUNTER_KEY];
       const _config = {
-        params: innerFilters,
+        params,
         ...reqConfigRef.current,
       };
       if (memParseOptions) {
@@ -585,7 +611,7 @@ const RestTable = forwardRef(
             setLoading(false);
           });
       },
-      [rowKey, restful, urlDetailTemplate, fetchData, makeRequest]
+      [rowKey, restful, urlDetailTemplate, makeRequest, fetchData]
     );
 
     // 暴露给ref调用的方法
@@ -767,9 +793,9 @@ const RestTable = forwardRef(
         const ordering = tableSorterToApiSorter(sorter);
         // 为空的时候也要赋值，需要覆盖routeParams，触发路由变更
         _filters[fieldOrdering] = ordering;
-        setHeaderFilters(_filters);
+        setFilterState({ headerFilters: _filters });
       },
-      [fieldPage, fieldPageSize, fieldOrdering]
+      [fieldPage, fieldPageSize, fieldOrdering, setFilterState]
     );
 
     // 生成下载链接
@@ -789,13 +815,13 @@ const RestTable = forwardRef(
         } else {
           query._download = 1;
         }
-        const search = globalConfig.queryStringify(query);
+        const search = globalConfig.queryStringify(query, memParseOptions);
         if (search) {
           url += `?${search}`;
         }
         return url;
       },
-      [restful, innerFilters, fieldPage, fieldPageSize, innerTools.downloadKey]
+      [restful, innerFilters, fieldPage, fieldPageSize, innerTools.downloadKey, memParseOptions]
     );
 
     const hasHeader = useMemo(() => {
@@ -824,39 +850,42 @@ const RestTable = forwardRef(
                   advancedSearch={enableAdvancedSearch}
                   ref={filterFormRef}
                   onSubmit={(values) => {
-                    setHeaderFilters((oldV) => {
-                      return { ...oldV, [fieldPage]: 1 };
-                    });
-                    setFormFilters((oldV) => {
-                      if (deepEqual(oldV, values)) {
-                        // 数据没有变更刷新列表
-                        fetchData();
-                        return oldV;
-                      }
-                      return values;
+                    const newV = { ...values };
+                    // 此处点击搜索不清除隐藏的表单项
+                    // 是为支持分享出去的链接可以保留筛选条件，然后还可以继续修改筛选条件
+                    formFiltersRef.current = newV;
+                    setFilterState({
+                      headerFilters: {
+                        ...filterState.headerFilters,
+                        [fieldPage]: 1,
+                        [REFRESH_COUNTER_KEY]: (filterState.headerFilters[REFRESH_COUNTER_KEY] || 0) + 1,
+                      },
+                      formFilters: newV,
                     });
                   }}
                   onReset={(values) => {
-                    setHeaderFilters((oldV) => {
-                      return { ...oldV, [fieldPage]: 1 };
-                    });
-                    setFormFilters((oldV) => {
-                      if (deepEqual(oldV, values)) {
-                        // 数据没有变更刷新列表
-                        fetchData();
-                        return oldV;
+                    // 仅重置可以清除隐藏的表单项
+                    const newV = { ...values };
+                    filterFormAllFields.forEach((field) => {
+                      if (!filterFieldKeys.includes(field.key)) {
+                        newV[field.key] = null;
                       }
-                      return values;
+                    });
+                    formFiltersRef.current = newV;
+                    setFilterState({
+                      headerFilters: {
+                        ...filterState.headerFilters,
+                        [fieldPage]: 1,
+                        [REFRESH_COUNTER_KEY]: (filterState.headerFilters[REFRESH_COUNTER_KEY] || 0) + 1,
+                      },
+                      formFilters: newV,
                     });
                   }}
                 />
               </Spin>
             )}
             {(!isEmpty(innerTools) || extraTools) && (
-              <div
-                style={{ position: "absolute", right: 10, bottom: 0 }}
-                className="cls-resttable-tools"
-              >
+              <div style={{ position: "absolute", right: 10, bottom: 0 }} className="cls-resttable-tools">
                 <Space key="tools">
                   {extraTools}
                   {innerTools.expandedAllRows !== undefined && memExpandableColumns.length > 0 && (
@@ -920,7 +949,15 @@ const RestTable = forwardRef(
                   )}
                   {restful && filterFormProps && innerTools.advancedSearch && (
                     <FieldsSetting
-                      value={filterFormProps.fields}
+                      value={filterFormProps.fields.map((field) => {
+                        // 若是表单有值，设置了隐藏，路由上的参数不会被重置
+                        const hasFormValue = !isEmpty(filterState.formFilters[field.key]);
+                        return {
+                          ...field,
+                          hidden: !hasFormValue,
+                          tip: field.tip || (hasFormValue ? "表单项有值，请先重置/清除后再设置隐藏" : undefined),
+                        };
+                      })}
                       title="设置搜索选项"
                       storageKey={isString(innerTools.advancedSearch) ? innerTools.advancedSearch : `${restful}-filter`}
                       onChange={onToolsFilterChange}
@@ -952,9 +989,7 @@ const RestTable = forwardRef(
                   closable={true}
                   closeIcon={<CloseOutlined />}
                   onClose={() => {
-                    setHeaderFilters((oldV) => {
-                      return { ...oldV, [item.key]: null };
-                    });
+                    setFilterState({ headerFilters: { ...filterState.headerFilters, [item.key]: null } });
                   }}
                 >
                   <span style={{ color: "#8c8c8c" }} className="cls-resttable-header-tag-label">
@@ -974,12 +1009,11 @@ const RestTable = forwardRef(
               size="small"
               style={{ fontSize: 12 }}
               onClick={() => {
-                setHeaderFilters((oldV) => {
-                  const newV = { ...oldV };
-                  headerTags.forEach((item) => {
-                    newV[item.key] = null;
-                  });
-                  return newV;
+                setFilterState({
+                  headerFilters: headerTags.reduce((acc, item) => {
+                    acc[item.key] = null;
+                    return acc;
+                  }, {}),
                 });
               }}
             >

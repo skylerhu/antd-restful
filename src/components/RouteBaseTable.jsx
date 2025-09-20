@@ -1,8 +1,9 @@
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { dequal as deepEqual } from "dequal";
-import { parseQueryTypes, queryString } from "src/common/parser";
+import { parseQueryTypes } from "src/common/parser";
 import { isEmpty, isFunction } from "src/common/typeTools";
+import globalConfig from "src/config";
 import RestTable from "src/components/RestTable";
 import { useDeepCompareMemoize } from "src/hooks";
 
@@ -17,7 +18,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
   const [params, setParams] = useState();
 
   useEffect(() => {
-    let query = queryString.parse(location.search, memParseOptions);
+    let query = globalConfig.queryParse(location.search, memParseOptions);
     if (memParseTypes) {
       // query-string > 9 支持直接 parasOptions 配置字段类型，但这个低版本node又不能使用
       // 主要是为了解决低版本 query参数中 超大int溢出 和 普通 int存在的场景，需要额外指定参数类型
@@ -35,7 +36,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
   const onChange = useCallback(
     (values) => {
       const filters = { ...values };
-      let changedSearch = queryString.stringify(filters, memParseOptions);
+      let changedSearch = globalConfig.queryStringify(filters, memParseOptions);
       if (isEmpty(changedSearch)) {
         changedSearch = "";
       } else {

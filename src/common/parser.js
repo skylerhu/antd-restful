@@ -1,7 +1,7 @@
 import format from "string-format";
 import objectPath from "object-path";
 import libQuery from "query-string";
-import { DEFAULT_SEPARATOR, SorterEnum } from "src/common/constants";
+import { DEFAULT_SEPARATOR, SorterEnum, FieldType } from "src/common/constants";
 import { isArray, isBlank, isBoolean, isDict, isEmpty, isNumber, isString } from "src/common/typeTools";
 
 export const commonFormat = (template, ...values) => {
@@ -253,6 +253,9 @@ export const clearEmptyValue = (data) => {
  * @param {Object} options.multipleMap 多选字段映射，key为字段名，value为是否多选
  */
 export const transformFilters = (filters, { skipEmpty = false, multipleMap = {} }) => {
+  // 低版本 query-string在处理 [undefined, 1] 这种参数时，会转换成 '1'，导致参数丢失
+  // 否则可以按照以下方式处理
+  // globalConfig.queryParse(globalConfig.queryStringify(newV, memParseOptions), memParseOptions);
   if (isEmpty(filters)) {
     return {};
   }
@@ -374,11 +377,24 @@ export const genFields = (fields, keys) => {
     return fields;
   }
   const _fields = fields.filter((field) => keys.includes(genColumnKey(field)));
-  _fields.forEach((field) => {
-    if (field.hidden) {
-      // 设置显示了不隐藏
-      field.hidden = false;
+  return _fields;
+};
+
+export const handleFormValues = (values, fields) => {
+  if (!fields?.length) {
+    return values;
+  }
+  // 保证设置的值都有key
+  const data = { ...values };
+  fields.forEach((field) => {
+    const v = data[field.key];
+    if (field.type && [FieldType.CHECKBOX, FieldType.RADIO].includes(field.type) && isBlank(v)) {
+      // 为了能够正确显示“全部”选项
+      data[field.key] = "";
+    } else if (data[field.key] === undefined) {
+      // 需要重置表单的值
+      data[field.key] = null;
     }
   });
-  return _fields;
+  return data;
 };

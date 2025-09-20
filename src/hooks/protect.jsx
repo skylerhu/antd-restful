@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef } from "react";
-import { dequal as deepEqual } from "dequal";
+import { useEffect, useRef } from "react";
 
 
 function protectFromUnmount() {
@@ -59,29 +58,4 @@ export function useProtect() {
   }, []);
 
   return [protectRef.current];
-}
-
-// 用于处理object参数频繁变更的问题
-export function useDeepCompareMemoize(value) {
-  const ref = useRef(value);
-
-  const memValue = useMemo(() => {
-    if (value === ref.current || deepEqual(value, ref.current)) {
-      return ref.current;
-    }
-    ref.current = value;
-    return value;
-  }, [value]);
-
-  return memValue;
-}
-
-function updateStateReducer(state, values) {
-  return { ...state, ...values };
-}
-// 多个state值集中维护管理
-export function useDictState(data) {
-  const [state, setState] = useReducer(updateStateReducer, data);
-
-  return [state, setState];
 }

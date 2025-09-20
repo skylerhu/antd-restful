@@ -65,7 +65,7 @@ const TableDemo = () => {
             title: "唯一标识",
             dataIndex: "username",
             sorter: true,
-            filterMultiple: true,
+            // filterMultiple: true,
             filterDropdownConfig: {
               type: FieldType.SELECT,
               dropdownProps: {
@@ -118,7 +118,7 @@ const TableDemo = () => {
             title: "年龄",
             dataIndex: "age__range",
             sorter: true,
-            filterMultiple: false,
+            // filterMultiple: false,
             render: (value, record) => record.age,
             filterDropdownConfig: {
               type: FieldType.NUMBER_RANGE,
@@ -163,12 +163,13 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
-              hidden: false,
+              hidden: true,
             },
             {
               key: "search",
               label: "搜索",
               type: FieldType.INPUT,
+              hidden: false,
             },
             {
               key: "user",
@@ -177,6 +178,7 @@ const TableDemo = () => {
               antdFieldProps: {
                 restful: "api/users/",
                 fieldNames: { label: "nickname", value: "id" },
+                mode: "multiple",
               },
             },
             {
@@ -191,6 +193,25 @@ const TableDemo = () => {
                 ],
               },
             },
+            {
+              key: "age2__range",
+              label: "年龄范围",
+              type: FieldType.NUMBER_RANGE,
+              antdFieldProps: {
+                placeholder: ["最小年龄", "最大年龄"],
+              },
+            },
+            {
+              key: "gender2",
+              label: "性别",
+              type: FieldType.CHECKBOX,
+              antdFieldProps: {
+                options: [
+                  { label: "男", value: "male" },
+                  { label: "女", value: "female" },
+                ],
+              },
+            }
             // {
             //   key: "__placeholder",
             //   label: "占位",
