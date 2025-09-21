@@ -52,6 +52,20 @@ export const toBeString = (value, separator, depth = 0) => {
   return JSON.stringify(value);
 };
 
+/**
+ * 为处理表单配置的类型，将字符串转换为数字
+ *  - "" / undefined / null 比较特殊，不能转换成 0
+ *  - false 能转换成 0
+ *  - 其他非数字的字符串会保持原值
+ */
+export const stringToNumber = (value) => {
+  if (isEmpty(value)) {
+    return value;
+  }
+  let newV = Number(value);
+  return isNaN(newV) ? value : newV;
+};
+
 // 根据values 从opts中查找对应的选项，只保留opts中包含的value的选项
 export const findTreeOptionsByValues = (opts, values, optKey = "value", optChildren = "children") => {
   if (isEmpty(opts) || isEmpty(values)) return [];
@@ -172,10 +186,7 @@ export const initRangeValues = (input, { number = false, defaultEmptyValue = nul
     values = input.slice(0, 2);
   }
   if (number) {
-    values = values.map((v) => {
-      let newV = Number(v);
-      return isNaN(newV) ? v : newV;
-    });
+    values = values.map((v) => stringToNumber(v));
   }
   if (values.length === 1) {
     values.push(defaultEmptyValue);
@@ -238,7 +249,7 @@ export const parseQueryTypes = (query, types) => {
       if (_type === "string") {
         v = isArray(v) ? v.map((v) => toBeString(v)) : toBeString(v);
       } else if (_type === "number") {
-        v = isArray(v) ? v.map((v) => isNumber(v) ? Number(v) : v) : (isNumber(v) ? Number(v) : v);
+        v = isArray(v) ? v.map((v) => stringToNumber(v)) : stringToNumber(v);
       } else if (_type === "boolean") {
         v = isArray(v) ? v.map((v) => Boolean(v)) : Boolean(v);
       }

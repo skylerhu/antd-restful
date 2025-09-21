@@ -554,7 +554,7 @@ describe("Parser", () => {
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         names: ["John", "123", "true", ""],
-        ages: [25, 30, "invalid", 0],
+        ages: [25, 30, "invalid", ""],
         flags: [true, false, true, true, true, false],
       });
     });
@@ -970,6 +970,7 @@ describe("Parser", () => {
       expect(parser.initRangeValues(123, { number: true })).toEqual([123, null]);
       expect(parser.initRangeValues("0", { number: true })).toEqual([0, null]);
       expect(parser.initRangeValues(false, { number: true })).toEqual([0, null]);
+      expect(parser.initRangeValues(",", { number: true })).toEqual([null, null]);
     });
 
     test("should not convert to numbers when number parameter is false", () => {
