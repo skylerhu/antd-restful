@@ -24,7 +24,15 @@
 | parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | 0.1.14 |
 | 其他参数 | 所有 RestTable 支持的参数 | - | - | - |
 
-> 在 `0.2.0` 版本开始，升级了 query-string@9 ，支持 `parseOptions.types` 配置指定key值的解析类型
+
+**parseOptions.types 的特殊说明**
+- 在 `0.2.0` 版本开始，升级了 `query-string@9` ，支持 `parseOptions.types` 配置指定key值的解析类型
+- 会根据配置的 `columns` 和 `filterFormProps.fields` 初始化默认的 `types`，可详见 `parser.guessQueryTypes` 函数的实现
+  - `FiledType.INPUT` 默认解析成 `string`
+  - `FieldType.SELECT` 默认解析成数组
+  - `FieldType.CHECKBOX`, `FieldType.NUMBER_RANGE`, `FieldType.DATE_RANGE_PICKER` 默认解析成数组
+  - 若是展示和列 columns 配置了 `filters` 也默认解析成数组
+  - 数组都统一配置的 `number[]`，若是字符串也会正确处理
 
 ### 使用示例
 
