@@ -131,19 +131,6 @@ export const findLabelFromTreeData = (
   return "";
 };
 
-// 将values转换为labels
-export const valuesToLablels = (values, options, optKey = "value", optLabel = "label") => {
-  if (isEmpty(values)) return [];
-  if (!isArray(values)) {
-    values = [values];
-  }
-  if (isEmpty(options)) return values;
-  return values.map((value) => {
-    const opt = options.find((opt) => opt[optKey] === value);
-    return opt?.[optLabel] || value;
-  });
-};
-
 // 将value转换需要的数据；包含value/label; 原来value是数组返回的还是数组
 export const transformValue = (value, { options, fieldValue, labelTemplate }) => {
   let item = {
@@ -168,6 +155,31 @@ export const transformValue = (value, { options, fieldValue, labelTemplate }) =>
   }
   return item;
 };
+
+/**
+ * 初始化范围值
+*/
+export const initRangeValues = (input, { number = false, defaultEmptyValue = null } = {}) => {
+  if (isEmpty(input)) {
+    return undefined;
+  }
+  let values;
+  if (isString(input) && input.includes(",")) {
+    values = input.split(",").slice(0, 2).map(v => v === "" ? defaultEmptyValue : v);
+  } else if (!isArray(input)) {
+    values = [input];
+  } else {
+    values = input.slice(0, 2);
+  }
+  if (number) {
+    values = values.map((v) => (Number(v) || v));
+  }
+  if (values.length === 1) {
+    values.push(defaultEmptyValue);
+  }
+  return values;
+};
+
 // see https://github.com/sindresorhus/query-string
 export const queryString = {
   ...libQuery,
@@ -182,8 +194,6 @@ export const queryString = {
   },
   stringify: (object, options) => {
     let _options = {
-      skipNull: true,
-      skipEmptyString: true,
       arrayFormat: "comma",
       ...options,
     };
@@ -201,8 +211,6 @@ export const queryString = {
   },
   stringifyUrl: (object, options) => {
     let _options = {
-      skipNull: true,
-      skipEmptyString: true,
       arrayFormat: "comma",
       ...options,
     };
@@ -210,6 +218,10 @@ export const queryString = {
   },
 };
 
+/**
+ * 将query的值根据types的类型进行转换
+ * 因为低版本 query-string 从 9.x 才开始支持 types 指定个别字段的类型
+ */
 export const parseQueryTypes = (query, types) => {
   if (isEmpty(types) || isEmpty(query)) {
     return query;
@@ -233,6 +245,40 @@ export const parseQueryTypes = (query, types) => {
   return _query;
 };
 
+/**
+ * 根据配置的显示列 或者 筛选表单项 猜测query中key值的类型
+ */
+export const guessQueryTypes = (fields) => {
+  if (isEmpty(fields)) {
+    return {};
+  }
+  // query-string@9 中处理结果：若是字符串类型，还会是字符串
+  const defaultArrayType = "number[]";
+  const newV = fields.reduce((acc, field) => {
+    const k = genColumnKey(field);
+    // 兼容 列表配置columns 和 筛选表单 filterFormProps.fields 两种场景
+    const fileType = field.type || field.filterDropdownConfig?.type;
+    const selectMode = field.antdFieldProps?.mode || field.filterDropdownConfig?.dropdownProps?.mode;
+    if (fileType === FieldType.INPUT) {
+      // 输入框肯定是字符串
+      acc[k] = "string";
+    } else if (fileType === FieldType.SELECT && selectMode === "multiple") {
+      acc[k] = defaultArrayType;
+    } else if (fileType === FieldType.CHECKBOX) {
+      // 这个在RestTable中没支持，可以通过 columns.filters 配置
+      acc[k] = defaultArrayType;
+    } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(fileType)) {
+      // range是数组
+      acc[k] = defaultArrayType;
+    } else if (field.filters) {
+      // 如果开启了刷选，则默认是多选; 是table原生决定的
+      acc[k] = defaultArrayType;
+    }
+    return acc;
+  }, {});
+  return newV;
+};
+
 export const clearEmptyValue = (data) => {
   let newV = {};
   Object.keys(data).forEach((key) => {
@@ -242,46 +288,6 @@ export const clearEmptyValue = (data) => {
     }
     newV[key] = v;
   });
-  return newV;
-};
-
-/**
- * 根据筛选类型 确保 值的类型是符合预期的
- * @param {Object} filters
- * @param {Object} options
- * @param {boolean} options.skipEmpty 是否跳过空值
- * @param {Object} options.multipleMap 多选字段映射，key为字段名，value为是否多选
- */
-export const transformFilters = (filters, { skipEmpty = false, multipleMap = {} }) => {
-  // 低版本 query-string在处理 [undefined, 1] 这种参数时，会转换成 '1'，导致参数丢失
-  // 否则可以按照以下方式处理
-  // globalConfig.queryParse(globalConfig.queryStringify(newV, memParseOptions), memParseOptions);
-  if (isEmpty(filters)) {
-    return {};
-  }
-  let newV = {};
-  Object.keys(filters).forEach((key) => {
-    const v = filters[key];
-    if (skipEmpty && isEmpty(v)) {
-      // 跳过空值
-    } else if (multipleMap[key]) {
-      newV[key] = v;
-      if (!isArray(v) && !isBlank(v)) {
-        // 转换为数组
-        if (isString(v) && v.includes(DEFAULT_SEPARATOR)) {
-          newV[key] = v.split(DEFAULT_SEPARATOR);
-        } else {
-          newV[key] = [v];
-        }
-      }
-    } else {
-      // 不是多选的值; 空数组在上面已经删除过了
-      newV[key] = isArray(v) ? v.join(DEFAULT_SEPARATOR) : v;
-    }
-  });
-  if (skipEmpty) {
-    newV = clearEmptyValue(newV);
-  }
   return newV;
 };
 
@@ -364,6 +370,7 @@ export const getShowTitle = (rows, titleTemplate, titleAggPath) => {
   return commonFormat(titleTemplate, { count: rows?.length || 0, stat: statStr });
 };
 
+// 生成列的唯一key
 export const genColumnKey = (column) => {
   let key = column.key || column.dataIndex;
   if (isArray(key)) {
@@ -372,6 +379,7 @@ export const genColumnKey = (column) => {
   return key;
 };
 
+// 根据keys返回需要的fields
 export const genFields = (fields, keys) => {
   if (!keys?.length) {
     return fields;
@@ -380,6 +388,7 @@ export const genFields = (fields, keys) => {
   return _fields;
 };
 
+// 处理表单值，保证所有字段都有值
 export const handleFormValues = (values, fields) => {
   if (!fields?.length) {
     return values;

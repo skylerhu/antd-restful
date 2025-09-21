@@ -44,9 +44,9 @@ const config = {
       {
         // 使用 babel-loader 来编译处理 js 和 jsx 文件
         test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
+        exclude: /node_modules\/(?!query-string|filter-obj)/,
         use: {
-          // 会自动读取 .labelrc 配置
+          // 会自动读取 babel.config.js 配置
           loader: "babel-loader",
         },
       },
@@ -75,7 +75,7 @@ const config = {
     "react-dom": "react-dom",
     antd: "antd",
     "@ant-design/icons": "@ant-design/icons",
-    "query-string": "query-string",
+    // "query-string": "query-string",
   },
 };
 

@@ -14,6 +14,7 @@ import { dequal as deepEqual } from "dequal";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
 import {
   apiSorterToTableSorterDict,
+  clearEmptyValue,
   commonFormat,
   findDataByPath,
   genColumnKey,
@@ -21,7 +22,6 @@ import {
   handleFormValues,
   tableSorterToApiSorter,
   toBeString,
-  transformFilters,
 } from "src/common/parser";
 import { commonFilter, commonSorter } from "src/common/sorter";
 import { isArray, isBlank, isDict, isEmpty, isFunction, isString } from "src/common/typeTools";
@@ -82,6 +82,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           searchItem = (
             <NumberRange
               {...config.dropdownProps}
+              defaultEmptyValue={""}
               placeholder={placeholder}
               value={_value}
               onChange={(v) => setSelectedKeys(isBlank(v) ? [] : isArray(v) ? v : [v])}
@@ -95,6 +96,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           searchItem = (
             <RangeStrPicker
               {...config.dropdownProps}
+              defaultEmptyValue={""}
               placeholder={placeholder}
               value={_value}
               onChange={(v) => setSelectedKeys(isBlank(v) ? [] : isArray(v) ? v : [v])}
@@ -300,10 +302,6 @@ const RestTable = forwardRef(
     const memForceParams = useDeepCompareMemoize(forceParams);
     // 真实用于请求的筛选条件
     const [innerFilters, setInnerFilters] = useState({});
-
-    // 标记字段 是否开启了 多选，用于处理query参数转化成数组
-    const [multipleMap, setMultipleMap] = useState({});
-
     // 默认开启高级搜索和列显示隐藏设置
     const innerTools = useDeepCompareMemoize(
       tools ? Object.assign({ advancedSearch: true, refreshInterval: 0, settings: true }, tools) : {}
@@ -343,48 +341,6 @@ const RestTable = forwardRef(
         onDataSourceChange(innerData);
       }
     }, [innerData, onDataSourceChange]);
-
-    // setMultipleMap
-    useEffect(() => {
-      setMultipleMap((oldV) => {
-        // 处理header上的筛选条件
-        const newV = columns.reduce((acc, column) => {
-          const k = genColumnKey(column);
-          const dropdownConfig = column.filterDropdownConfig;
-          if (dropdownConfig) {
-            if (dropdownConfig.type === FieldType.SELECT && dropdownConfig.dropdownProps?.mode === "multiple") {
-              acc[k] = true;
-            } else if ([FieldType.CHECKBOX].includes(dropdownConfig.type)) {
-              acc[k] = true;
-            } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(dropdownConfig.type)) {
-              // range当做字符串处理
-              acc[k] = false;
-            }
-          } else if (column.filterMultiple === undefined) {
-            if (column.filters) {
-              // 如果开启了刷选，则默认是多选; 是table原生决定的
-              acc[k] = true;
-            }
-          } else {
-            acc[k] = column.filterMultiple;
-          }
-          return acc;
-        }, {});
-        // 处理表单上的筛选条件
-        filterFormProps?.fields?.forEach((field) => {
-          const k = genColumnKey(field);
-          if (field.type === FieldType.SELECT && field.antdFieldProps?.mode === "multiple") {
-            newV[k] = true;
-          } else if ([FieldType.CHECKBOX].includes(field.type)) {
-            newV[k] = true;
-          } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
-            // range当做字符串处理
-            newV[k] = false;
-          }
-        });
-        return deepEqual(oldV, newV) ? oldV : newV;
-      });
-    }, [columns, filterFormProps?.fields]);
 
     const pageSize = useMemo(() => {
       return parseInt(innerFilters[fieldPageSize] || defaultPageSize);
@@ -448,12 +404,11 @@ const RestTable = forwardRef(
       delete values[fieldPage];
       delete values[fieldPageSize];
 
-      let newV = transformFilters(values, { multipleMap });
-      newV = handleFormValues(newV, filterFields);
+      let newV = handleFormValues(values, filterFields);
       if (!deepEqual(oldV, newV)) {
         setFilterState({ formFilters: newV });
       }
-    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, setFilterState, multipleMap]);
+    }, [memRouteParams, memBaseParams, filterFields, fieldPage, fieldPageSize, setFilterState]);
 
     // 更新筛选form表单
     useEffect(() => {
@@ -488,11 +443,12 @@ const RestTable = forwardRef(
         // 避免传递过来空字符串的情况
         newV[fieldPage] = parseInt(newV[fieldPage]) || DEFAULT_PAGE;
         newV[fieldPageSize] = parseInt(newV[fieldPageSize]) || defaultPageSize;
-        const newValues = transformFilters(newV, { skipEmpty: true, multipleMap });
-        if (deepEqual(oldV, newValues)) {
+        // 避免传递过来空字符串的情况
+        newV = clearEmptyValue(newV);
+        if (deepEqual(oldV, newV)) {
           return oldV;
         }
-        return newValues;
+        return newV;
       });
     }, [
       fieldPage,
@@ -502,7 +458,6 @@ const RestTable = forwardRef(
       memRouteParams,
       memForceParams,
       filterState,
-      multipleMap,
     ]);
 
     // 处理筛选条件变化 onFiltersChange
@@ -805,16 +760,13 @@ const RestTable = forwardRef(
           return "";
         }
         let url = restful;
-        const query = { ...innerFilters, [innerTools.downloadKey]: 1 };
+        const query = { ...innerFilters };
         if (isAll) {
           delete query[fieldPage];
           delete query[fieldPageSize];
         }
-        if (isString(innerTools.downloadKey)) {
-          query[innerTools.downloadKey] = 1;
-        } else {
-          query._download = 1;
-        }
+        const k = isString(innerTools.downloadKey) ? innerTools.downloadKey : "_download";
+        query[k] = 1;
         const search = globalConfig.queryStringify(query, memParseOptions);
         if (search) {
           url += `?${search}`;

@@ -1,6 +1,7 @@
 /***
 补充 @file RouteBaseTable.test.jsx 文件单测的要求
 - forbidden: 除了requests请求、组件的输入输出参数，其他都不允许mock
+- forbidden: 禁止对 RouteBaseTable 使用 toMatchSnapshot
 - required: 测试组件的场景，需要验证 onSearchChange.toHaveBeenCalledWith 、 onFiltersChange.toHaveBeenCalledWith 的参数、以及远程请求的参数
 - required: 补充完单测后，修复eslint问题
 
@@ -10,6 +11,7 @@
   - 初始化loction后，修改路由参数，触发远程请求
   - filterFormProps?.fields 中使用了 NumberRange，初始值是 age=,1，校验 NumberRange组件的值是预期值
   - filterFormProps?.fields 中使用了 Checkbox，初始值是 gender=male, 校验 Checkbox组件的值是预期值
+  - serarch值为 "dayRange=,2025-09-22&age=15,"，filterFormProps?.fields配置dayRange是时间范围选择、age是数值范围选择，该场景下校验远程请求的值
 
  */
 import React from "react";
@@ -55,12 +57,14 @@ describe("RouteBaseTable", () => {
       columns: [{ title: "Name", dataIndex: "name" }],
       restful: "/api/users",
       fieldPageSize: "size",
+      filterFormProps: { fields: [] },
+      parseOptions: { types: {} },
     };
   });
 
   describe("URL 参数解析测试", () => {
     it("should parse empty string search", async () => {
-      const { container } = render(
+      render(
         <RouteBaseTable location={{ search: "" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
       );
 
@@ -72,20 +76,23 @@ describe("RouteBaseTable", () => {
         params: {
           status: "active",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse false value", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?active=false" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?active=false" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -97,20 +104,23 @@ describe("RouteBaseTable", () => {
           status: "active",
           active: false,
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse null value", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?value=null" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?value=null" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -122,20 +132,23 @@ describe("RouteBaseTable", () => {
           status: "active",
           value: "null",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse undefined value", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?value=undefined" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?value=undefined" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -147,20 +160,23 @@ describe("RouteBaseTable", () => {
           status: "active",
           value: "undefined",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse number value", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?age=25" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?age=25" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -172,20 +188,23 @@ describe("RouteBaseTable", () => {
           status: "active",
           age: 25,
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse comma separated values", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?ids=1,2,3" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?ids=1,2,3" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -195,22 +214,25 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          ids: "1,2,3",
+          ids: [1, 2, 3],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange和onFiltersChange的调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?ids=1%2C2%2C3");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ ids: "1,2,3" });
-
-      expect(container.firstChild).toMatchSnapshot();
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
     });
 
     it("should parse empty comma separated values", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?ids=,1" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?ids=,1" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -220,22 +242,25 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          ids: ",1",
+          ids: ["", 1],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange和onFiltersChange的调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?ids=%2C1");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ ids: ",1" });
-
-      expect(container.firstChild).toMatchSnapshot();
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
     });
 
     it("should parse complex comma separated values", async () => {
-      const { container } = render(
-        <RouteBaseTable location={{ search: "?ids=1,3&name=test" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+      render(
+        <RouteBaseTable
+          location={{ search: "?ids=1,3&name=test" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -245,22 +270,21 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          ids: "1,3",
+          ids: [1, 3],
           name: "test",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange和onFiltersChange的调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?ids=1%2C3&name=test");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ ids: "1,3", name: "test" });
-
-      expect(container.firstChild).toMatchSnapshot();
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
     });
 
     it("should handle multiple parameter types", async () => {
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?name=test&age=25&active=true&ids=1,2,3&empty=" }}
           onSearchChange={mockOnSearchChange}
@@ -278,22 +302,21 @@ describe("RouteBaseTable", () => {
           name: "test",
           age: 25,
           active: true,
-          ids: "1,2,3",
+          ids: [1, 2, 3],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?active=true&age=25&ids=1%2C2%2C3&name=test");
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?active=true&age=25&ids=1,2,3&name=test");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({
         active: true,
         age: 25,
-        ids: "1,2,3",
-        name: "test"
+        ids: [1, 2, 3],
+        name: "test",
       });
-
-      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
@@ -303,11 +326,11 @@ describe("RouteBaseTable", () => {
         ...mockRestProps,
         parseTypes: {
           a: "string",
-          b: "number"
-        }
+          b: "number",
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?a=123456789111223141516&b=1" }}
           onSearchChange={mockOnSearchChange}
@@ -325,18 +348,17 @@ describe("RouteBaseTable", () => {
           a: "123456789111223140000",
           b: 1,
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用
       expect(mockOnSearchChange).toHaveBeenCalledWith("?a=123456789111223140000&b=1");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({
         a: "123456789111223140000",
-        b: 1
+        b: 1,
       });
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse types correctly with boolean", async () => {
@@ -344,11 +366,11 @@ describe("RouteBaseTable", () => {
         ...mockRestProps,
         parseTypes: {
           flag: "boolean",
-          count: "number"
-        }
+          count: "number",
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?flag=true&count=42" }}
           onSearchChange={mockOnSearchChange}
@@ -366,18 +388,17 @@ describe("RouteBaseTable", () => {
           flag: true,
           count: 42,
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用
       expect(mockOnSearchChange).toHaveBeenCalledWith("?count=42&flag=true");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({
         count: 42,
-        flag: true
+        flag: true,
       });
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should parse array types correctly", async () => {
@@ -385,11 +406,11 @@ describe("RouteBaseTable", () => {
         ...mockRestProps,
         parseTypes: {
           numbers: "number",
-          strings: "string"
-        }
+          strings: "string",
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?numbers=1,2,3&strings=a,b,c" }}
           onSearchChange={mockOnSearchChange}
@@ -404,28 +425,28 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          numbers: "1,2,3",
-          strings: "a,b,c",
+          numbers: [1, 2, 3],
+          strings: ["a", "b", "c"],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange和onFiltersChange的调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?numbers=1%2C2%2C3&strings=a%2Cb%2Cc");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({
-        numbers: "1,2,3",
-        strings: "a,b,c"
-      });
-
-      expect(container.firstChild).toMatchSnapshot();
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
     });
   });
 
   describe("路由参数变更触发远程请求测试", () => {
     it("should trigger remote request when location changes", async () => {
       const { rerender } = render(
-        <RouteBaseTable location={{ search: "?name=initial" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+        <RouteBaseTable
+          location={{ search: "?name=initial" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -438,8 +459,9 @@ describe("RouteBaseTable", () => {
           status: "active",
           name: "initial",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证初始调用 - 初始化时不会调用
@@ -451,7 +473,11 @@ describe("RouteBaseTable", () => {
 
       // 更新location，触发新的请求
       rerender(
-        <RouteBaseTable location={{ search: "?name=updated&age=30" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+        <RouteBaseTable
+          location={{ search: "?name=updated&age=30" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -461,8 +487,9 @@ describe("RouteBaseTable", () => {
             name: "updated",
             age: 30,
             page: 1,
-            size: 20
-          }
+            size: 20,
+          },
+          paramsSerializer: expect.any(Function),
         });
 
         // 验证更新后的调用
@@ -473,7 +500,11 @@ describe("RouteBaseTable", () => {
 
     it("should call onSearchChange when location changes", async () => {
       const { rerender } = render(
-        <RouteBaseTable location={{ search: "?name=initial" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+        <RouteBaseTable
+          location={{ search: "?name=initial" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -488,7 +519,11 @@ describe("RouteBaseTable", () => {
 
       // 更新location
       rerender(
-        <RouteBaseTable location={{ search: "?name=updated" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+        <RouteBaseTable
+          location={{ search: "?name=updated" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -498,7 +533,11 @@ describe("RouteBaseTable", () => {
 
     it("should call onFiltersChange when location changes", async () => {
       const { rerender } = render(
-        <RouteBaseTable location={{ search: "?name=initial" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+        <RouteBaseTable
+          location={{ search: "?name=initial" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -513,7 +552,11 @@ describe("RouteBaseTable", () => {
 
       // 更新location
       rerender(
-        <RouteBaseTable location={{ search: "?name=updated&age=25" }} onSearchChange={mockOnSearchChange} restProps={mockRestProps} />
+        <RouteBaseTable
+          location={{ search: "?name=updated&age=25" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={mockRestProps}
+        />
       );
 
       await waitFor(() => {
@@ -531,13 +574,13 @@ describe("RouteBaseTable", () => {
             {
               key: "age",
               type: "number-range",
-              label: "年龄范围"
-            }
-          ]
-        }
+              label: "年龄范围",
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?age=,1" }}
           onSearchChange={mockOnSearchChange}
@@ -553,19 +596,17 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          age: ",1",
+          age: ["", 1],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange被正确调用 - 初始化时会调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=%2C1");
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
 
-      // 验证onFiltersChange被正确调用 - 初始化时会调用
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: ",1" });
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should handle NumberRange with range values", async () => {
@@ -576,13 +617,13 @@ describe("RouteBaseTable", () => {
             {
               key: "age",
               type: "number-range",
-              label: "年龄范围"
-            }
-          ]
-        }
+              label: "年龄范围",
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?age=18,65" }}
           onSearchChange={mockOnSearchChange}
@@ -598,17 +639,17 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          age: "18,65",
+          age: [18, 65],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange和onFiltersChange的调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=18%2C65");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ age: "18,65" });
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
 
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should handle NumberRange with single value", async () => {
@@ -619,13 +660,13 @@ describe("RouteBaseTable", () => {
             {
               key: "age",
               type: "number-range",
-              label: "年龄范围"
-            }
-          ]
-        }
+              label: "年龄范围",
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?age=25" }}
           onSearchChange={mockOnSearchChange}
@@ -641,17 +682,17 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          age: 25,
+          age: [25],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
 
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should handle NumberRange with empty values", async () => {
@@ -662,13 +703,13 @@ describe("RouteBaseTable", () => {
             {
               key: "age",
               type: "number-range",
-              label: "年龄范围"
-            }
-          ]
-        }
+              label: "年龄范围",
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?age=" }}
           onSearchChange={mockOnSearchChange}
@@ -685,15 +726,14 @@ describe("RouteBaseTable", () => {
         params: {
           status: "active",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用
       expect(mockOnSearchChange).toHaveBeenCalledWith("");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({});
-
-      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
@@ -709,14 +749,14 @@ describe("RouteBaseTable", () => {
               label: "性别",
               options: [
                 { label: "男", value: "male" },
-                { label: "女", value: "female" }
-              ]
-            }
-          ]
-        }
+                { label: "女", value: "female" },
+              ],
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?gender=male" }}
           onSearchChange={mockOnSearchChange}
@@ -732,17 +772,16 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          gender: ["male"],
+          gender: "male",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should handle Checkbox with multiple values", async () => {
@@ -756,14 +795,14 @@ describe("RouteBaseTable", () => {
               label: "性别",
               options: [
                 { label: "男", value: "male" },
-                { label: "女", value: "female" }
-              ]
-            }
-          ]
-        }
+                { label: "女", value: "female" },
+              ],
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?gender=male,female" }}
           onSearchChange={mockOnSearchChange}
@@ -781,15 +820,14 @@ describe("RouteBaseTable", () => {
           status: "active",
           gender: ["male", "female"],
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
-      // 验证onSearchChange和onFiltersChange的调用 - 多值情况下会调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?gender=male%2Cfemale");
-      expect(mockOnFiltersChange).toHaveBeenCalledWith({ gender: ["male", "female"] });
-
-      expect(container.firstChild).toMatchSnapshot();
+      // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
+      expect(mockOnSearchChange).not.toHaveBeenCalled();
+      expect(mockOnFiltersChange).not.toHaveBeenCalled();
     });
 
     it("should handle Checkbox with empty values", async () => {
@@ -803,14 +841,14 @@ describe("RouteBaseTable", () => {
               label: "性别",
               options: [
                 { label: "男", value: "male" },
-                { label: "女", value: "female" }
-              ]
-            }
-          ]
-        }
+                { label: "女", value: "female" },
+              ],
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?gender=" }}
           onSearchChange={mockOnSearchChange}
@@ -827,15 +865,14 @@ describe("RouteBaseTable", () => {
         params: {
           status: "active",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 空值情况下会调用
       expect(mockOnSearchChange).toHaveBeenCalledWith("");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({});
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should handle Checkbox with single value in array format", async () => {
@@ -849,14 +886,14 @@ describe("RouteBaseTable", () => {
               label: "分类",
               options: [
                 { label: "分类1", value: "cat1" },
-                { label: "分类2", value: "cat2" }
-              ]
-            }
-          ]
-        }
+                { label: "分类2", value: "cat2" },
+              ],
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?category=cat1" }}
           onSearchChange={mockOnSearchChange}
@@ -872,17 +909,16 @@ describe("RouteBaseTable", () => {
       expect(capturedRequestParams).toEqual({
         params: {
           status: "active",
-          category: ["cat1"],
+          category: "cat1",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 初始化时不会调用
       expect(mockOnSearchChange).not.toHaveBeenCalled();
       expect(mockOnFiltersChange).not.toHaveBeenCalled();
-
-      expect(container.firstChild).toMatchSnapshot();
     });
 
     it("should handle Checkbox with complex multiple values", async () => {
@@ -897,14 +933,14 @@ describe("RouteBaseTable", () => {
               options: [
                 { label: "标签1", value: "tag1" },
                 { label: "标签2", value: "tag2" },
-                { label: "标签3", value: "tag3" }
-              ]
-            }
-          ]
-        }
+                { label: "标签3", value: "tag3" },
+              ],
+            },
+          ],
+        },
       };
 
-      const { container } = render(
+      render(
         <RouteBaseTable
           location={{ search: "?tags=tag1,tag2,tag3&name=test" }}
           onSearchChange={mockOnSearchChange}
@@ -923,19 +959,172 @@ describe("RouteBaseTable", () => {
           tags: ["tag1", "tag2", "tag3"],
           name: "test",
           page: 1,
-          size: 20
-        }
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
       });
 
       // 验证onSearchChange和onFiltersChange的调用 - 复杂多值情况下会调用
-      expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&tags=tag1%2Ctag2%2Ctag3");
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?name=test&tags=tag1,tag2,tag3");
       expect(mockOnFiltersChange).toHaveBeenCalledWith({
         tags: ["tag1", "tag2", "tag3"],
-        name: "test"
+        name: "test",
       });
-
-      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
+  describe("范围选择字段测试", () => {
+    it("should handle dayRange and age range fields with search value 'dayRange=,2025-09-22&age=15,'", async () => {
+      const restPropsWithRangeFields = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "dayRange",
+              type: "date-range-picker",
+              label: "日期范围",
+            },
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围",
+            },
+          ],
+        },
+      };
+
+      render(
+        <RouteBaseTable
+          location={{ search: "?dayRange=,2025-09-22&age=15," }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithRangeFields}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的dayRange和age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          dayRange: ["", "2025-09-22"],
+          age: [15, ""],
+          status: "active",
+          page: 1,
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=15,&dayRange=,2025-09-22");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        dayRange: ["", "2025-09-22"],
+        age: [15, ""],
+      });
+    });
+
+    it("should handle dayRange and age range fields with complete range values", async () => {
+      const restPropsWithRangeFields = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "dayRange",
+              type: "date-range-picker",
+              label: "日期范围",
+            },
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围",
+            },
+          ],
+        },
+      };
+
+      render(
+        <RouteBaseTable
+          location={{ search: "?dayRange=2025-01-01,2025-12-31&age=18,65" }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithRangeFields}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的dayRange和age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          dayRange: ["2025-01-01", "2025-12-31"],
+          age: [18, 65],
+          status: "active",
+          page: 1,
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=18,65&dayRange=2025-01-01,2025-12-31");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        dayRange: ["2025-01-01", "2025-12-31"],
+        age: [18, 65],
+      });
+    });
+
+    it("should handle dayRange and age range fields with empty values", async () => {
+      const restPropsWithRangeFields = {
+        ...mockRestProps,
+        filterFormProps: {
+          fields: [
+            {
+              key: "dayRange",
+              type: "date-range-picker",
+              label: "日期范围",
+            },
+            {
+              key: "age",
+              type: "number-range",
+              label: "年龄范围",
+            },
+          ],
+        },
+      };
+
+      render(
+        <RouteBaseTable
+          location={{ search: "?dayRange=,&age=," }}
+          onSearchChange={mockOnSearchChange}
+          restProps={restPropsWithRangeFields}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole("table")).toBeInTheDocument();
+      });
+
+      // 验证远程请求参数包含正确的dayRange和age值
+      expect(capturedRequestParams).toEqual({
+        params: {
+          dayRange: ["", ""],
+          age: ["", ""],
+          status: "active",
+          page: 1,
+          size: 20,
+        },
+        paramsSerializer: expect.any(Function),
+      });
+
+      // 验证onSearchChange和onFiltersChange的调用
+      expect(mockOnSearchChange).toHaveBeenCalledWith("?age=,&dayRange=,");
+      expect(mockOnFiltersChange).toHaveBeenCalledWith({
+        dayRange: ["", ""],
+        age: ["", ""],
+      });
+    });
+  });
 });

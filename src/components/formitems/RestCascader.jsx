@@ -84,21 +84,6 @@ const RestCascader = ({
     [onChange, optKey, optChildren, antdCascaderProps?.multiple]
   );
 
-  const initFirstRef = useRef(true);
-  useEffect(() => {
-    // 仅在第一次的时候回主动初始化options
-    if (initFirstRef.current) {
-      initFirstRef.current = false;
-      fetchOptions();
-    }
-  }, [fetchOptions, value]);
-
-  useEffect(() => {
-    if (isEmpty(innerValue)) {
-      fetchOptions([]);
-    }
-  }, [innerValue, fetchOptions]);
-
   // 是否已经初始化过options
   const isOptsInited = useRef(false);
   // 避免多次重复请求, 同一个值只请求一次
@@ -157,6 +142,21 @@ const RestCascader = ({
     },
     [makeRequest, restful, fieldParent, optKey, optChildren, memBaseParams, parseRowsPath, disabled, readOnly]
   );
+
+  const initFirstRef = useRef(true);
+  useEffect(() => {
+    // 仅在第一次的时候回主动初始化options
+    if (initFirstRef.current) {
+      initFirstRef.current = false;
+      fetchOptions();
+    }
+  }, [fetchOptions, value]);
+
+  useEffect(() => {
+    if (isEmpty(innerValue)) {
+      fetchOptions([]);
+    }
+  }, [innerValue, fetchOptions]);
 
   let view = null;
   if (readOnly) {

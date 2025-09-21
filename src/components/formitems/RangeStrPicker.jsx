@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { DatePicker, TimePicker } from "antd";
 import { createDate } from "src/common/dateUtils";
 import { READ_ONLY_CLASS } from "src/common/constants";
+import { initRangeValues } from "src/common/parser";
 import { isArray, isEmpty, isFunction } from "src/common/typeTools";
 
 const RangeStrPicker = ({
@@ -10,6 +11,7 @@ const RangeStrPicker = ({
   className,
   value,
   defaultValue,
+  defaultEmptyValue = null,
   format,
   onChange,
   disabled = false,
@@ -21,7 +23,7 @@ const RangeStrPicker = ({
     (dates, dateStrings) => {
       if (isFunction(onChange)) {
         if (isEmpty(dateStrings) || dateStrings.every(v => isEmpty(v))) {
-          onChange(null, null);
+          onChange(undefined);
         } else {
           onChange(dateStrings, dates);
         }
@@ -32,14 +34,11 @@ const RangeStrPicker = ({
 
   const getDateValue = useCallback(
     (val) => {
-      if (isEmpty(val)) return undefined;
-      if (!isArray(val)) {
-        // 不是数组
-        val = val.split(",");
-      }
-      return val.map((item) => (item ? createDate(item, format) : undefined));
+      const rangeValues = initRangeValues(val, { defaultEmptyValue });
+      const newV = rangeValues?.map((item) => (item ? createDate(item, format) : item));
+      return newV;
     },
-    [format]
+    [format, defaultEmptyValue]
   );
 
   if (readOnly) {
@@ -76,6 +75,7 @@ RangeStrPicker.propTypes = {
   onChange: PropTypes.func,
   // 原生组件支持的配置
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+  defaultEmptyValue: PropTypes.oneOf([null, undefined, ""]),
   format: PropTypes.string,
 
   disabled: PropTypes.bool,
