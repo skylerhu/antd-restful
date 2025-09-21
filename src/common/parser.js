@@ -172,7 +172,10 @@ export const initRangeValues = (input, { number = false, defaultEmptyValue = nul
     values = input.slice(0, 2);
   }
   if (number) {
-    values = values.map((v) => (Number(v) || v));
+    values = values.map((v) => {
+      let newV = Number(v);
+      return isNaN(newV) ? v : newV;
+    });
   }
   if (values.length === 1) {
     values.push(defaultEmptyValue);
@@ -235,7 +238,7 @@ export const parseQueryTypes = (query, types) => {
       if (_type === "string") {
         v = isArray(v) ? v.map((v) => toBeString(v)) : toBeString(v);
       } else if (_type === "number") {
-        v = isArray(v) ? v.map((v) => Number(v)) : Number(v);
+        v = isArray(v) ? v.map((v) => isNumber(v) ? Number(v) : v) : (isNumber(v) ? Number(v) : v);
       } else if (_type === "boolean") {
         v = isArray(v) ? v.map((v) => Boolean(v)) : Boolean(v);
       }

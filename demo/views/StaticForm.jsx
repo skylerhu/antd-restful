@@ -325,7 +325,7 @@ export default function StaticForm() {
             { id: 2, username: "skyler", nickname: "Skyler" },
           ],
           dateStr: "2025-05-25",
-          dateRange: ",2025年05月25日00:00:00",
+          // dateRange: ",2025年05月25日00:00:00",
           // dateRange: ["2025-05-25", "2025-05-26"],
           city: ["anhui", "anqing"],
           // expansion: {

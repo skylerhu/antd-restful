@@ -463,7 +463,7 @@ describe("Parser", () => {
       const query = { name: "John", age: "30", count: "5" };
       const types = { name: "number", age: "number", count: "number" };
       const result = parser.parseQueryTypes(query, types);
-      expect(result).toEqual({ name: NaN, age: 30, count: 5 });
+      expect(result).toEqual({ name: "John", age: 30, count: 5 });
     });
 
     test("should convert boolean types", () => {
@@ -554,7 +554,7 @@ describe("Parser", () => {
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         names: ["John", "123", "true", ""],
-        ages: [25, 30, NaN, 0],
+        ages: [25, 30, "invalid", 0],
         flags: [true, false, true, true, true, false],
       });
     });
@@ -605,7 +605,7 @@ describe("Parser", () => {
         scientific: 100000,
         infinity: Infinity,
         negativeInfinity: -Infinity,
-        nan: NaN,
+        nan: "NaN",
       });
     });
 
@@ -968,6 +968,8 @@ describe("Parser", () => {
       expect(parser.initRangeValues([1, 2], { number: true })).toEqual([1, 2]);
       expect(parser.initRangeValues(["1", "2"], { number: true })).toEqual([1, 2]); // Number("1") || "1" = 1
       expect(parser.initRangeValues(123, { number: true })).toEqual([123, null]);
+      expect(parser.initRangeValues("0", { number: true })).toEqual([0, null]);
+      expect(parser.initRangeValues(false, { number: true })).toEqual([0, null]);
     });
 
     test("should not convert to numbers when number parameter is false", () => {
@@ -979,7 +981,7 @@ describe("Parser", () => {
     });
 
     test("should handle edge cases with number conversion", () => {
-      expect(parser.initRangeValues("0,0", { number: true })).toEqual(["0", "0"]); // Number("0") || "0" = "0"
+      expect(parser.initRangeValues("0,0", { number: true })).toEqual([0, 0]);
       expect(parser.initRangeValues("-1,-2", { number: true })).toEqual([-1, -2]); // Number("-1") || "-1" = -1
       expect(parser.initRangeValues("", { number: true })).toBeUndefined();
       expect(parser.initRangeValues("abc,def", { number: true })).toEqual(["abc", "def"]);
