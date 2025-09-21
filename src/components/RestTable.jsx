@@ -322,7 +322,18 @@ const RestTable = forwardRef(
     }, []);
 
     const filterFields = useMemo(
-      () => genFields(filterFormProps?.fields, filterFieldKeys),
+      () => {
+        const fields = genFields(filterFormProps?.fields, filterFieldKeys);
+        fields.forEach((field) => {
+          if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
+            field.antdFieldProps = {
+              defaultEmptyValue: "",
+              ...field.antdFieldProps,
+            };
+          }
+        });
+        return fields;
+      },
       [filterFormProps?.fields, filterFieldKeys]
     );
     const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
