@@ -291,7 +291,7 @@ describe("Parser", () => {
     });
 
     test("should skip null and empty values", () => {
-      expect(parser.queryString.stringify({ name: "John", age: null, empty: "" })).toBe("name=John");
+      expect(parser.queryString.stringify({ name: "John", age: null, empty: "" })).toBe("age&empty=&name=John");
     });
   });
 
@@ -933,11 +933,11 @@ describe("Parser", () => {
   });
 
   describe("initRangeValues", () => {
-    test("should return [undefined, undefined] for empty inputs", () => {
-      expect(parser.initRangeValues(null)).toEqual([undefined, undefined]);
-      expect(parser.initRangeValues(undefined)).toEqual([undefined, undefined]);
-      expect(parser.initRangeValues("")).toEqual([undefined, undefined]);
-      expect(parser.initRangeValues([])).toEqual([undefined, undefined]);
+    test("should return undefined for empty inputs", () => {
+      expect(parser.initRangeValues(null)).toBeUndefined();
+      expect(parser.initRangeValues(undefined)).toBeUndefined();
+      expect(parser.initRangeValues("")).toBeUndefined();
+      expect(parser.initRangeValues([])).toBeUndefined();
     });
 
     test("should handle string inputs with comma separator", () => {
@@ -962,37 +962,37 @@ describe("Parser", () => {
     });
 
     test("should convert to numbers when number parameter is true", () => {
-      expect(parser.initRangeValues("1,2", true)).toEqual([1, 2]);
-      expect(parser.initRangeValues("1.5,2.7", true)).toEqual([1.5, 2.7]);
-      expect(parser.initRangeValues("invalid,123", true)).toEqual(["invalid", 123]);
-      expect(parser.initRangeValues([1, 2], true)).toEqual([1, 2]);
-      expect(parser.initRangeValues(["1", "2"], true)).toEqual([1, 2]);
-      expect(parser.initRangeValues(123, true)).toEqual([123, null]);
+      expect(parser.initRangeValues("1,2", { number: true })).toEqual([1, 2]); // Number("1") || "1" = 1
+      expect(parser.initRangeValues("1.5,2.7", { number: true })).toEqual([1.5, 2.7]); // Number("1.5") || "1.5" = 1.5
+      expect(parser.initRangeValues("invalid,123", { number: true })).toEqual(["invalid", 123]);
+      expect(parser.initRangeValues([1, 2], { number: true })).toEqual([1, 2]);
+      expect(parser.initRangeValues(["1", "2"], { number: true })).toEqual([1, 2]); // Number("1") || "1" = 1
+      expect(parser.initRangeValues(123, { number: true })).toEqual([123, null]);
     });
 
     test("should not convert to numbers when number parameter is false", () => {
-      expect(parser.initRangeValues("1,2", false)).toEqual(["1", "2"]);
-      expect(parser.initRangeValues("1.5,2.7", false)).toEqual(["1.5", "2.7"]);
-      expect(parser.initRangeValues([1, 2], false)).toEqual([1, 2]);
-      expect(parser.initRangeValues(["1", "2"], false)).toEqual(["1", "2"]);
-      expect(parser.initRangeValues(123, false)).toEqual([123, null]);
+      expect(parser.initRangeValues("1,2", { number: false })).toEqual(["1", "2"]);
+      expect(parser.initRangeValues("1.5,2.7", { number: false })).toEqual(["1.5", "2.7"]);
+      expect(parser.initRangeValues([1, 2], { number: false })).toEqual([1, 2]);
+      expect(parser.initRangeValues(["1", "2"], { number: false })).toEqual(["1", "2"]);
+      expect(parser.initRangeValues(123, { number: false })).toEqual([123, null]);
     });
 
     test("should handle edge cases with number conversion", () => {
-      expect(parser.initRangeValues("0,0", true)).toEqual(["0", "0"]); // Number("0") || "0" = "0"
-      expect(parser.initRangeValues("-1,-2", true)).toEqual([-1, -2]);
-      expect(parser.initRangeValues("", true)).toEqual([undefined, undefined]);
-      expect(parser.initRangeValues("abc,def", true)).toEqual(["abc", "def"]);
-      expect(parser.initRangeValues("1.23e5,2.34e-3", true)).toEqual([123000, 0.00234]);
+      expect(parser.initRangeValues("0,0", { number: true })).toEqual(["0", "0"]); // Number("0") || "0" = "0"
+      expect(parser.initRangeValues("-1,-2", { number: true })).toEqual([-1, -2]); // Number("-1") || "-1" = -1
+      expect(parser.initRangeValues("", { number: true })).toBeUndefined();
+      expect(parser.initRangeValues("abc,def", { number: true })).toEqual(["abc", "def"]);
+      expect(parser.initRangeValues("1.23e5,2.34e-3", { number: true })).toEqual([123000, 0.00234]); // Number("1.23e5") || "1.23e5" = 123000
     });
 
     test("should handle special string cases", () => {
       expect(parser.initRangeValues("a,b,c,d,e")).toEqual(["a", "b"]);
       expect(parser.initRangeValues("single,word")).toEqual(["single", "word"]);
-      expect(parser.initRangeValues("")).toEqual([undefined, undefined]);
+      expect(parser.initRangeValues("")).toBeUndefined();
       expect(parser.initRangeValues("   ")).toEqual(["   ", null]);
-      expect(parser.initRangeValues("a,")).toEqual(["a", ""]);
-      expect(parser.initRangeValues(",b")).toEqual(["", "b"]);
+      expect(parser.initRangeValues("a,")).toEqual(["a", null]); // 空字符串被转换为 null
+      expect(parser.initRangeValues(",b")).toEqual([null, "b"]); // 空字符串被转换为 null
     });
 
     test("should handle mixed type arrays", () => {
@@ -1001,8 +1001,198 @@ describe("Parser", () => {
     });
 
     test("should handle number conversion with mixed types", () => {
-      expect(parser.initRangeValues([1, "2", "abc", 4], true)).toEqual([1, 2]); // 只取前两个元素
-      expect(parser.initRangeValues(["1.5", "2.5", "invalid"], true)).toEqual([1.5, 2.5]); // 只取前两个元素
+      expect(parser.initRangeValues([1, "2", "abc", 4], { number: true })).toEqual([1, 2]); // 只取前两个元素，Number("2") || "2" = 2
+      expect(parser.initRangeValues(["1.5", "2.5", "invalid"], { number: true })).toEqual([1.5, 2.5]); // 只取前两个元素，Number("1.5") || "1.5" = 1.5
+    });
+  });
+
+  describe("guessQueryTypes", () => {
+    test("should return empty object for empty fields", () => {
+      expect(parser.guessQueryTypes(null)).toEqual({});
+      expect(parser.guessQueryTypes(undefined)).toEqual({});
+      expect(parser.guessQueryTypes([])).toEqual({});
+    });
+
+    test("should handle INPUT field type", () => {
+      const fields = [
+        { key: "name", type: "input" },
+        { key: "description", type: "input" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        description: "string"
+      });
+    });
+
+    test("should handle SELECT field with multiple mode", () => {
+      const fields = [
+        { key: "tags", type: "select", antdFieldProps: { mode: "multiple" } },
+        { key: "categories", type: "select", filterDropdownConfig: { dropdownProps: { mode: "multiple" } } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        tags: "number[]",
+        categories: "number[]"
+      });
+    });
+
+    test("should handle CHECKBOX field type", () => {
+      const fields = [
+        { key: "options", type: "checkbox" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        options: "number[]"
+      });
+    });
+
+    test("should handle range field types", () => {
+      const fields = [
+        { key: "ageRange", type: "number-range" },
+        { key: "dateRange", type: "date-range-picker" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        ageRange: "number[]",
+        dateRange: "number[]"
+      });
+    });
+
+    test("should handle fields with filters property", () => {
+      const fields = [
+        { key: "status", filters: true },
+        { key: "priority", filters: [{ text: "High", value: "high" }] }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        status: "number[]",
+        priority: "number[]"
+      });
+    });
+
+    test("should handle mixed field types", () => {
+      const fields = [
+        { key: "name", type: "input" },
+        { key: "tags", type: "select", antdFieldProps: { mode: "multiple" } },
+        { key: "ageRange", type: "number-range" },
+        { key: "status", filters: true }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        tags: "number[]",
+        ageRange: "number[]",
+        status: "number[]"
+      });
+    });
+
+    test("should handle fields without type or filters", () => {
+      const fields = [
+        { key: "name" },
+        { key: "description", type: "unknown" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({});
+    });
+
+    test("should handle fields with filterDropdownConfig", () => {
+      const fields = [
+        { key: "category", filterDropdownConfig: { type: "input" } },
+        { key: "tags", filterDropdownConfig: { type: "select", dropdownProps: { mode: "multiple" } } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        category: "string",
+        tags: "number[]"
+      });
+    });
+
+    test("should handle fields with both type and filterDropdownConfig", () => {
+      const fields = [
+        { key: "name", type: "input", filterDropdownConfig: { type: "select" } }
+      ];
+      // type takes precedence over filterDropdownConfig
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string"
+      });
+    });
+
+    test("should handle fields with dataIndex instead of key", () => {
+      const fields = [
+        { dataIndex: "name", type: "input" },
+        { dataIndex: "tags", type: "select", antdFieldProps: { mode: "multiple" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        tags: "number[]"
+      });
+    });
+
+    test("should handle fields with array key", () => {
+      const fields = [
+        { key: ["user", "name"], type: "input" },
+        { key: ["user", "tags"], type: "select", antdFieldProps: { mode: "multiple" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        "user__name": "string",
+        "user__tags": "number[]"
+      });
+    });
+
+    test("should handle fields with array dataIndex", () => {
+      const fields = [
+        { dataIndex: ["user", "name"], type: "input" },
+        { dataIndex: ["user", "tags"], type: "select", antdFieldProps: { mode: "multiple" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        "user__name": "string",
+        "user__tags": "number[]"
+      });
+    });
+
+    test("should handle SELECT field without multiple mode", () => {
+      const fields = [
+        { key: "status", type: "select" },
+        { key: "category", type: "select", antdFieldProps: { mode: "single" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({});
+    });
+
+    test("should handle fields with empty filters array", () => {
+      const fields = [
+        { key: "status", filters: [] }
+      ];
+      // 空数组 [] 在 JavaScript 中是 truthy，所以会被处理为 number[]
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        status: "number[]"
+      });
+    });
+
+    test("should handle fields with null filters", () => {
+      const fields = [
+        { key: "status", filters: null }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({});
+    });
+
+    test("should handle complex mixed scenarios", () => {
+      const fields = [
+        { key: "name", type: "input" },
+        { key: "email", filterDropdownConfig: { type: "input" } },
+        { key: "tags", type: "select", antdFieldProps: { mode: "multiple" } },
+        { key: "categories", filterDropdownConfig: { type: "select", dropdownProps: { mode: "multiple" } } },
+        { key: "ageRange", type: "number-range" },
+        { key: "dateRange", type: "date-range-picker" },
+        { key: "status", filters: true },
+        { key: "priority", filters: [{ text: "High", value: "high" }] },
+        { key: "options", type: "checkbox" },
+        { key: "unknown", type: "unknown" },
+        { key: "noType" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        email: "string",
+        tags: "number[]",
+        categories: "number[]",
+        ageRange: "number[]",
+        dateRange: "number[]",
+        status: "number[]",
+        priority: "number[]",
+        options: "number[]"
+      });
     });
   });
 

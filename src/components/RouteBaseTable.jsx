@@ -14,7 +14,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
     parseTypes,
     onFiltersChange,
     columns,
-    filterFormProps: { fields },
+    filterFormProps,
   } = restProps;
   const searchRef = useRef(location.search);
   // 后续可以废弃
@@ -34,13 +34,13 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
 
   useEffect(() => {
     setGuessTypes((oldV) => {
-      const newV = { ...guessQueryTypes(columns), ...guessQueryTypes(fields) };
+      const newV = { ...guessQueryTypes(columns), ...guessQueryTypes(filterFormProps?.fields) };
       if (deepEqual(newV, oldV)) {
         return oldV;
       }
       return newV;
     });
-  }, [columns, fields]);
+  }, [columns, filterFormProps?.fields]);
 
   useEffect(() => {
     let query = globalConfig.queryParse(location.search, memParseOptions);
