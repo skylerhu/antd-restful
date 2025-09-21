@@ -16,6 +16,7 @@
 | value | 当前选中的日期范围（字符串或字符串数组） | `string \| array<string>` | - | - |
 | onChange | 值变化时的回调函数 | `function(dateStrings, dates)` | - | - |
 | **日期配置** | | | | |
+| defaultEmptyValue | 单个输入框为空时的默认值 | `undefined\|null\|''` | `null` | 0.2.0 |
 | defaultValue | 默认日期范围（字符串或字符串数组） | `string \| array<string>` | - | - |
 | format | 日期格式 | `string` | - | - |
 | isTime | 是否为时间选择器 | `boolean` | `false` | - |
