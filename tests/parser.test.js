@@ -314,43 +314,6 @@ describe("Parser", () => {
     });
   });
 
-  describe("transformFilters", () => {
-    test("should transform filters with multipleMap", () => {
-      const filters = {
-        name: "John",
-        tags: "a,b,c",
-        status: ["active", "inactive"],
-      };
-      const result = parser.transformFilters(filters, {
-        multipleMap: { tags: true, status: false },
-      });
-      expect(result).toEqual({
-        name: "John",
-        tags: ["a", "b", "c"],
-        status: "active,inactive",
-      });
-    });
-
-    test("should skip empty values when skipEmpty is true", () => {
-      const filters = {
-        name: "John",
-        age: null,
-        email: "",
-        tags: [],
-      };
-      const result = parser.transformFilters(filters, { skipEmpty: true });
-      expect(result).toEqual({ name: "John" });
-    });
-
-    test("should handle array to string conversion", () => {
-      const filters = { status: ["active"] };
-      const result = parser.transformFilters(filters, {
-        multipleMap: { status: false },
-      });
-      expect(result).toEqual({ status: "active" });
-    });
-  });
-
   describe("tableSorterToApiSorter", () => {
     test("should convert table sorter to API sorter", () => {
       expect(parser.tableSorterToApiSorter({ field: "name", order: "ascend" })).toBe("name");

@@ -14,6 +14,7 @@ import { dequal as deepEqual } from "dequal";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType, FilterType } from "src/common/constants";
 import {
   apiSorterToTableSorterDict,
+  clearEmptyValue,
   commonFormat,
   findDataByPath,
   genColumnKey,
@@ -81,6 +82,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           searchItem = (
             <NumberRange
               {...config.dropdownProps}
+              defaultEmptyValue={""}
               placeholder={placeholder}
               value={_value}
               onChange={(v) => setSelectedKeys(isBlank(v) ? [] : isArray(v) ? v : [v])}
@@ -94,6 +96,7 @@ export const getColumnSearchProps = (dataIndex, column, inputRef) => {
           searchItem = (
             <RangeStrPicker
               {...config.dropdownProps}
+              defaultEmptyValue={""}
               placeholder={placeholder}
               value={_value}
               onChange={(v) => setSelectedKeys(isBlank(v) ? [] : isArray(v) ? v : [v])}
@@ -440,6 +443,8 @@ const RestTable = forwardRef(
         // 避免传递过来空字符串的情况
         newV[fieldPage] = parseInt(newV[fieldPage]) || DEFAULT_PAGE;
         newV[fieldPageSize] = parseInt(newV[fieldPageSize]) || defaultPageSize;
+        // 避免传递过来空字符串的情况
+        newV = clearEmptyValue(newV);
         if (deepEqual(oldV, newV)) {
           return oldV;
         }
@@ -755,16 +760,13 @@ const RestTable = forwardRef(
           return "";
         }
         let url = restful;
-        const query = { ...innerFilters, [innerTools.downloadKey]: 1 };
+        const query = { ...innerFilters };
         if (isAll) {
           delete query[fieldPage];
           delete query[fieldPageSize];
         }
-        if (isString(innerTools.downloadKey)) {
-          query[innerTools.downloadKey] = 1;
-        } else {
-          query._download = 1;
-        }
+        const k = isString(innerTools.downloadKey) ? innerTools.downloadKey : "_download";
+        query[k] = 1;
         const search = globalConfig.queryStringify(query, memParseOptions);
         if (search) {
           url += `?${search}`;

@@ -134,11 +134,11 @@ const GridForm = forwardRef(
               break;
             }
             case FieldType.DATE_RANGE_PICKER: {
-              view = <FormItems.RangeStrPicker {...fieldProps} />;
+              view = <FormItems.RangeStrPicker defaultEmptyValue={""} {...fieldProps} />;
               break;
             }
             case FieldType.NUMBER_RANGE: {
-              view = <FormItems.NumberRange {...fieldProps} />;
+              view = <FormItems.NumberRange defaultEmptyValue={""} {...fieldProps} />;
               break;
             }
             case FieldType.AUTO_COMPLETE: {

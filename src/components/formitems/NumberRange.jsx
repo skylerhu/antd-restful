@@ -14,6 +14,7 @@ const NumberRange = ({
   value,
   onChange,
 
+  defaultEmptyValue = null,
   labelTemplate = "[{0},{1}]",
 
   disabled = false,
@@ -28,10 +29,10 @@ const NumberRange = ({
 
   useEffect(() => {
     setInnerValue((oldV) => {
-      const newV = initRangeValues(value, true);
+      const newV = initRangeValues(value, { number: true, defaultEmptyValue });
       return deepEqual(newV, oldV) ? oldV : newV;
     });
-  }, [value]);
+  }, [value, defaultEmptyValue]);
 
   const onValueChange = useCallback(
     (v1, v2) => {
@@ -50,8 +51,8 @@ const NumberRange = ({
     [onChange]
   );
 
-  const startValue = innerValue && innerValue.length > 0 ? innerValue[0] : null;
-  const endValue = innerValue && innerValue.length > 1 ? innerValue[1] : null;
+  const startValue = innerValue && innerValue.length > 0 ? innerValue[0] : defaultEmptyValue;
+  const endValue = innerValue && innerValue.length > 1 ? innerValue[1] : defaultEmptyValue;
 
   if (readOnly) {
     return (
@@ -91,6 +92,8 @@ NumberRange.propTypes = {
   value: PropTypes.oneOfType([PropTypes.array, PropTypes.string, PropTypes.number]),
   onChange: PropTypes.func,
 
+  // 默认空值
+  defaultEmptyValue: PropTypes.oneOf([null, undefined, ""]),
   // 只读场景下，显示的模板，模板中 {0} 是 startValue，{1} 是 endValue
   labelTemplate: PropTypes.string,
 

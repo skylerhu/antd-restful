@@ -1,7 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { dequal as deepEqual } from "dequal";
-import { guessQueryTypes, parseQueryTypes, clearEmptyValue } from "src/common/parser";
+import { guessQueryTypes, parseQueryTypes } from "src/common/parser";
 import { isEmpty, isFunction } from "src/common/typeTools";
 import RestTable from "src/components/RestTable";
 import globalConfig from "src/config";
@@ -60,7 +60,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
 
   const onChange = useCallback(
     (values) => {
-      const filters = clearEmptyValue(values);
+      const filters = { ...values };
       let changedSearch = globalConfig.queryStringify(filters, memParseOptions);
       if (isEmpty(changedSearch)) {
         changedSearch = "";

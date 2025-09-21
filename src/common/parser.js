@@ -159,13 +159,13 @@ export const transformValue = (value, { options, fieldValue, labelTemplate }) =>
 /**
  * 初始化范围值
 */
-export const initRangeValues = (input, number = false) => {
+export const initRangeValues = (input, { number = false, defaultEmptyValue = null } = {}) => {
   if (isEmpty(input)) {
     return undefined;
   }
   let values;
   if (isString(input) && input.includes(",")) {
-    values = input.split(",").slice(0, 2);
+    values = input.split(",").slice(0, 2).map(v => v === "" ? defaultEmptyValue : v);
   } else if (!isArray(input)) {
     values = [input];
   } else {
@@ -175,7 +175,7 @@ export const initRangeValues = (input, number = false) => {
     values = values.map((v) => (Number(v) || v));
   }
   if (values.length === 1) {
-    values.push(null);
+    values.push(defaultEmptyValue);
   }
   return values;
 };
@@ -194,8 +194,6 @@ export const queryString = {
   },
   stringify: (object, options) => {
     let _options = {
-      // skipNull: true,
-      // skipEmptyString: true,
       arrayFormat: "comma",
       ...options,
     };
@@ -213,8 +211,6 @@ export const queryString = {
   },
   stringifyUrl: (object, options) => {
     let _options = {
-      // skipNull: true,
-      // skipEmptyString: true,
       arrayFormat: "comma",
       ...options,
     };
@@ -292,46 +288,6 @@ export const clearEmptyValue = (data) => {
     }
     newV[key] = v;
   });
-  return newV;
-};
-
-/**
- * 根据筛选类型 确保 值的类型是符合预期的
- * @param {Object} filters
- * @param {Object} options
- * @param {boolean} options.skipEmpty 是否跳过空值
- * @param {Object} options.multipleMap 多选字段映射，key为字段名，value为是否多选
- */
-export const transformFilters = (filters, { skipEmpty = false, multipleMap = {} }) => {
-  // 低版本 query-string在处理 [undefined, 1] 这种参数时，会转换成 '1'，导致参数丢失
-  // 否则可以按照以下方式处理
-  // globalConfig.queryParse(globalConfig.queryStringify(newV, memParseOptions), memParseOptions);
-  if (isEmpty(filters)) {
-    return {};
-  }
-  let newV = {};
-  Object.keys(filters).forEach((key) => {
-    const v = filters[key];
-    if (skipEmpty && isEmpty(v)) {
-      // 跳过空值
-    } else if (multipleMap[key]) {
-      newV[key] = v;
-      if (!isArray(v) && !isBlank(v)) {
-        // 转换为数组
-        if (isString(v) && v.includes(DEFAULT_SEPARATOR)) {
-          newV[key] = v.split(DEFAULT_SEPARATOR);
-        } else {
-          newV[key] = [v];
-        }
-      }
-    } else {
-      // 不是多选的值; 空数组在上面已经删除过了
-      newV[key] = isArray(v) ? v.join(DEFAULT_SEPARATOR) : v;
-    }
-  });
-  if (skipEmpty) {
-    newV = clearEmptyValue(newV);
-  }
   return newV;
 };
 

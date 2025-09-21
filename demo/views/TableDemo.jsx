@@ -211,7 +211,15 @@ const TableDemo = () => {
                   { label: "女", value: "female" },
                 ],
               },
-            }
+            },
+            {
+              key: "created_at__range",
+              label: "时间范围",
+              type: FieldType.DATE_RANGE_PICKER,
+              antdFieldProps: {
+                placeholder: ["开始时间", "结束时间"],
+              },
+            },
             // {
             //   key: "__placeholder",
             //   label: "占位",
