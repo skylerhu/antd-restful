@@ -131,19 +131,6 @@ export const findLabelFromTreeData = (
   return "";
 };
 
-// 将values转换为labels
-export const valuesToLablels = (values, options, optKey = "value", optLabel = "label") => {
-  if (isEmpty(values)) return [];
-  if (!isArray(values)) {
-    values = [values];
-  }
-  if (isEmpty(options)) return values;
-  return values.map((value) => {
-    const opt = options.find((opt) => opt[optKey] === value);
-    return opt?.[optLabel] || value;
-  });
-};
-
 // 将value转换需要的数据；包含value/label; 原来value是数组返回的还是数组
 export const transformValue = (value, { options, fieldValue, labelTemplate }) => {
   let item = {
@@ -174,7 +161,7 @@ export const transformValue = (value, { options, fieldValue, labelTemplate }) =>
 */
 export const initRangeValues = (input, number = false) => {
   if (isEmpty(input)) {
-    return [undefined, undefined];
+    return undefined;
   }
   let values;
   if (isString(input) && input.includes(",")) {
@@ -207,8 +194,8 @@ export const queryString = {
   },
   stringify: (object, options) => {
     let _options = {
-      skipNull: true,
-      skipEmptyString: true,
+      // skipNull: true,
+      // skipEmptyString: true,
       arrayFormat: "comma",
       ...options,
     };
@@ -226,8 +213,8 @@ export const queryString = {
   },
   stringifyUrl: (object, options) => {
     let _options = {
-      skipNull: true,
-      skipEmptyString: true,
+      // skipNull: true,
+      // skipEmptyString: true,
       arrayFormat: "comma",
       ...options,
     };
@@ -260,6 +247,40 @@ export const parseQueryTypes = (query, types) => {
     _query[key] = v;
   });
   return _query;
+};
+
+/**
+ * 根据配置的显示列 或者 筛选表单项 猜测query中key值的类型
+ */
+export const guessQueryTypes = (fields) => {
+  if (isEmpty(fields)) {
+    return {};
+  }
+  // query-string@9 中处理结果：若是字符串类型，还会是字符串
+  const defaultArrayType = "number[]";
+  const newV = fields.reduce((acc, field) => {
+    const k = genColumnKey(field);
+    // 兼容 列表配置columns 和 筛选表单 filterFormProps.fields 两种场景
+    const fileType = field.type || field.filterDropdownConfig?.type;
+    const selectMode = field.antdFieldProps?.mode || field.filterDropdownConfig?.dropdownProps?.mode;
+    if (fileType === FieldType.INPUT) {
+      // 输入框肯定是字符串
+      acc[k] = "string";
+    } else if (fileType === FieldType.SELECT && selectMode === "multiple") {
+      acc[k] = defaultArrayType;
+    } else if (fileType === FieldType.CHECKBOX) {
+      // 这个在RestTable中没支持，可以通过 columns.filters 配置
+      acc[k] = defaultArrayType;
+    } else if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(fileType)) {
+      // range是数组
+      acc[k] = defaultArrayType;
+    } else if (field.filters) {
+      // 如果开启了刷选，则默认是多选; 是table原生决定的
+      acc[k] = defaultArrayType;
+    }
+    return acc;
+  }, {});
+  return newV;
 };
 
 export const clearEmptyValue = (data) => {

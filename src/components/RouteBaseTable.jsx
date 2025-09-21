@@ -1,21 +1,46 @@
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { dequal as deepEqual } from "dequal";
-import { parseQueryTypes } from "src/common/parser";
+import { guessQueryTypes, parseQueryTypes, clearEmptyValue } from "src/common/parser";
 import { isEmpty, isFunction } from "src/common/typeTools";
-import globalConfig from "src/config";
 import RestTable from "src/components/RestTable";
+import globalConfig from "src/config";
 import { useDeepCompareMemoize } from "src/hooks";
 
 // 因为兼容不了react-router v5和v6 版本，所以传递 location 进来，然后父类组件实现路由的变更
 const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref) => {
-  const { parseOptions, parseTypes, onFiltersChange } = restProps;
+  const {
+    parseOptions,
+    parseTypes,
+    onFiltersChange,
+    columns,
+    filterFormProps: { fields },
+  } = restProps;
   const searchRef = useRef(location.search);
-
+  // 后续可以废弃
   const memParseTypes = useDeepCompareMemoize(parseTypes);
-  const memParseOptions = useDeepCompareMemoize(parseOptions);
 
   const [params, setParams] = useState();
+  // 猜测的类型
+  const [guessTypes, setGuessTypes] = useState({});
+  // 合并猜测的类型和配置的类型
+  const memParseOptions = useDeepCompareMemoize({
+    ...parseOptions,
+    types: {
+      ...guessTypes,
+      ...parseOptions.types,
+    },
+  });
+
+  useEffect(() => {
+    setGuessTypes((oldV) => {
+      const newV = { ...guessQueryTypes(columns), ...guessQueryTypes(fields) };
+      if (deepEqual(newV, oldV)) {
+        return oldV;
+      }
+      return newV;
+    });
+  }, [columns, fields]);
 
   useEffect(() => {
     let query = globalConfig.queryParse(location.search, memParseOptions);
@@ -35,7 +60,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
 
   const onChange = useCallback(
     (values) => {
-      const filters = { ...values };
+      const filters = clearEmptyValue(values);
       let changedSearch = globalConfig.queryStringify(filters, memParseOptions);
       if (isEmpty(changedSearch)) {
         changedSearch = "";

@@ -209,36 +209,6 @@ describe("Parser", () => {
     });
   });
 
-  describe("valuesToLablels", () => {
-    const options = [
-      { value: "1", label: "Option 1" },
-      { value: "2", label: "Option 2" },
-      { value: "3", label: "Option 3" },
-    ];
-
-    test("should convert values to labels", () => {
-      expect(parser.valuesToLablels(["1", "2"], options)).toEqual(["Option 1", "Option 2"]);
-      expect(parser.valuesToLablels("1", options)).toEqual(["Option 1"]);
-    });
-
-    test("should handle values not in options", () => {
-      expect(parser.valuesToLablels(["1", "4"], options)).toEqual(["Option 1", "4"]);
-    });
-
-    test("should handle empty inputs", () => {
-      expect(parser.valuesToLablels([], options)).toEqual([]);
-      expect(parser.valuesToLablels(["1"], [])).toEqual(["1"]);
-    });
-
-    test("should handle custom key names", () => {
-      const customOptions = [
-        { id: "1", name: "Option 1" },
-        { id: "2", name: "Option 2" },
-      ];
-      expect(parser.valuesToLablels(["1", "2"], customOptions, "id", "name")).toEqual(["Option 1", "Option 2"]);
-    });
-  });
-
   describe("transformValue", () => {
     const options = [
       { value: "1", label: "Option 1" },

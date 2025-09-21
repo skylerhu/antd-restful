@@ -116,10 +116,10 @@ export default function StaticForm() {
     {
       key: "dateRange",
       label: "日期范围",
-      antdFormItemProps: {
-        required: true,
-        rules: [{ required: true, message: "请选择日期范围" }],
-      },
+      // antdFormItemProps: {
+      //   required: true,
+      //   rules: [{ required: true, message: "请选择日期范围" }],
+      // },
       type: FieldType.DATE_RANGE_PICKER,
       antdFieldProps: {
         format: "YYYY年MM月DD日HH:mm:ss",

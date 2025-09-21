@@ -41,7 +41,7 @@ const NumberRange = ({
       });
       if (isFunction(onChange)) {
         if (isBlank(v1) && isBlank(v2)) {
-          onChange(undefined);
+          onChange(null);
         } else {
           onChange([v1, v2]);
         }
@@ -50,8 +50,8 @@ const NumberRange = ({
     [onChange]
   );
 
-  const startValue = innerValue && innerValue.length > 0 ? innerValue[0] : undefined;
-  const endValue = innerValue && innerValue.length > 1 ? innerValue[1] : undefined;
+  const startValue = innerValue && innerValue.length > 0 ? innerValue[0] : null;
+  const endValue = innerValue && innerValue.length > 1 ? innerValue[1] : null;
 
   if (readOnly) {
     return (

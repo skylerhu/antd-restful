@@ -22,7 +22,7 @@ const RangeStrPicker = ({
     (dates, dateStrings) => {
       if (isFunction(onChange)) {
         if (isEmpty(dateStrings) || dateStrings.every(v => isEmpty(v))) {
-          onChange(null, null);
+          onChange(undefined);
         } else {
           onChange(dateStrings, dates);
         }
@@ -34,7 +34,7 @@ const RangeStrPicker = ({
   const getDateValue = useCallback(
     (val) => {
       const rangeValues = initRangeValues(val);
-      const newV = rangeValues.map((item) => (item ? createDate(item, format) : item));
+      const newV = rangeValues?.map((item) => (item ? createDate(item, format) : item));
       return newV;
     },
     [format]
