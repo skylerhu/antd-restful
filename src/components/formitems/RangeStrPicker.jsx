@@ -23,7 +23,7 @@ const RangeStrPicker = ({
     (dates, dateStrings) => {
       if (isFunction(onChange)) {
         if (isEmpty(dateStrings) || dateStrings.every(v => isEmpty(v))) {
-          onChange(undefined);
+          onChange(undefined, undefined);
         } else {
           const values = dateStrings.map((v) => v ? v : defaultEmptyValue);
           onChange(values, dates);
