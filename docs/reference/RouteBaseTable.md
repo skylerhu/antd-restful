@@ -24,6 +24,8 @@
 | parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | 0.1.14 |
 | 其他参数 | 所有 RestTable 支持的参数 | - | - | - |
 
+> 在 `0.2.0` 版本开始，升级了 query-string@9 ，支持 `parseOptions.types` 配置指定key值的解析类型
+
 ### 使用示例
 
 ```jsx

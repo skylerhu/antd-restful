@@ -324,7 +324,7 @@ const RestTable = forwardRef(
     const filterFields = useMemo(
       () => {
         const fields = genFields(filterFormProps?.fields, filterFieldKeys);
-        fields.forEach((field) => {
+        fields?.forEach((field) => {
           if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
             field.antdFieldProps = {
               defaultEmptyValue: "",
