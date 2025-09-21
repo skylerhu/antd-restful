@@ -25,11 +25,12 @@ const RangeStrPicker = ({
         if (isEmpty(dateStrings) || dateStrings.every(v => isEmpty(v))) {
           onChange(undefined);
         } else {
-          onChange(dateStrings, dates);
+          const values = dateStrings.map((v) => v ? v : defaultEmptyValue);
+          onChange(values, dates);
         }
       }
     },
-    [onChange]
+    [onChange, defaultEmptyValue]
   );
 
   const getDateValue = useCallback(
