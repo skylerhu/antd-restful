@@ -74,7 +74,14 @@ describe("types", () => {
   it("isNumber should return true for number or numeric string", () => {
     expect(types.isNumber(123)).toBe(true);
     expect(types.isNumber("123")).toBe(true);
+    expect(types.isNumber("1.23")).toBe(true);
+    expect(types.isNumber("0")).toBe(true);
     expect(types.isNumber("abc")).toBe(false);
+    expect(types.isNumber("")).toBe(false);
+    expect(types.isNumber(null)).toBe(false);
+    expect(types.isNumber(undefined)).toBe(false);
+    expect(types.isNumber(false)).toBe(false);
+    expect(types.isNumber(true)).toBe(false);
   });
 
   it("isArray should return true for arrays", () => {

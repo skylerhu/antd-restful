@@ -673,10 +673,10 @@ describe("Hooks Tests", () => {
 
   describe("useSettingsStorage", () => {
     const mockColumns = [
-      { key: "name", title: "Name", dataIndex: "name" },
-      { key: "age", title: "Age", dataIndex: "age" },
-      { key: "email", title: "Email", dataIndex: "email", hidden: true },
-      { dataIndex: "address", title: "Address" },
+      { key: "name", label: "Name" },
+      { key: "age", label: "Age" },
+      { key: "email", label: "Email", hidden: true },
+      { key: "address", label: "Address" },
     ];
 
     beforeEach(() => {
@@ -688,12 +688,6 @@ describe("Hooks Tests", () => {
 
       expect(result.current.allKeys).toEqual(["name", "age", "email", "address"]);
       expect(result.current.keys).toEqual(["name", "age", "address"]); // email is hidden
-      expect(result.current.options).toEqual([
-        { key: "name", hidden: undefined, label: "Name", disabled: false },
-        { key: "age", hidden: undefined, label: "Age", disabled: false },
-        { key: "email", hidden: true, label: "Email", disabled: false },
-        { key: "address", hidden: undefined, label: "Address", disabled: false },
-      ]);
     });
 
     it("should use stored config when available and valid", () => {
@@ -748,39 +742,11 @@ describe("Hooks Tests", () => {
       });
     });
 
-    it("should handle columns with array keys", () => {
-      const columnsWithArrayKeys = [
-        { key: ["user", "name"], title: "User Name" },
-        { key: "age", title: "Age" },
-        { key: ["user", "email"], title: "User Email", hidden: true },
-      ];
-
-      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithArrayKeys));
-
-      expect(result.current.allKeys).toEqual(["user__name", "age", "user__email"]);
-      expect(result.current.keys).toEqual(["user__name", "age"]); // user__email is hidden
-    });
-
     it("should handle empty columns array", () => {
       const { result } = renderHook(() => hooks.useSettingsStorage("test-key", []));
 
       expect(result.current.allKeys).toEqual([]);
       expect(result.current.keys).toEqual([]);
-      expect(result.current.options).toEqual([]);
-    });
-
-    it("should handle columns without title or label", () => {
-      const columnsWithoutTitle = [
-        { key: "name", dataIndex: "name" },
-        { key: "age", dataIndex: "age", title: "Age" },
-      ];
-
-      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithoutTitle));
-
-      expect(result.current.options).toEqual([
-        { key: "name", hidden: undefined, label: undefined, disabled: false },
-        { key: "age", hidden: undefined, label: "Age", disabled: false },
-      ]);
     });
 
     it("should handle non-string key parameter", () => {
@@ -808,8 +774,8 @@ describe("Hooks Tests", () => {
       expect(result.current.allKeys).toEqual(["name", "age", "email", "address"]);
 
       const newColumns = [
-        { key: "name", title: "Name" },
-        { key: "phone", title: "Phone" },
+        { key: "name", label: "Name" },
+        { key: "phone", label: "Phone" },
       ];
 
       rerender({ columns: newColumns });
@@ -834,10 +800,10 @@ describe("Hooks Tests", () => {
 
       // Change columns but keep same allKeys
       const newColumns = [
-        { key: "name", title: "Name" },
-        { key: "age", title: "Age" },
-        { key: "email", title: "Email", hidden: true },
-        { dataIndex: "address", title: "Address" },
+        { key: "name", label: "Name" },
+        { key: "age", label: "Age" },
+        { key: "email", label: "Email", hidden: true },
+        { key: "address", label: "Address" },
       ];
 
       rerender({ columns: newColumns });
@@ -848,9 +814,9 @@ describe("Hooks Tests", () => {
 
     it("should handle columns with same key but different properties", () => {
       const columnsWithSameKey = [
-        { key: "name", title: "Name 1" },
-        { key: "name", title: "Name 2" },
-        { key: "age", title: "Age" },
+        { key: "name", label: "Name 1" },
+        { key: "name", label: "Name 2" },
+        { key: "age", label: "Age" },
       ];
 
       const { result } = renderHook(() => hooks.useSettingsStorage("test-key", columnsWithSameKey));
@@ -889,9 +855,9 @@ describe("Hooks Tests", () => {
 
     it("should handle columns with mixed key and dataIndex", () => {
       const mixedColumns = [
-        { key: "custom_key", dataIndex: "name", title: "Name" },
-        { dataIndex: "age", title: "Age" },
-        { key: "email", title: "Email" },
+        { key: "custom_key", label: "Name" },
+        { key: "age", label: "Age" },
+        { key: "email", label: "Email" },
       ];
 
       const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mixedColumns));

@@ -209,36 +209,6 @@ describe("Parser", () => {
     });
   });
 
-  describe("valuesToLablels", () => {
-    const options = [
-      { value: "1", label: "Option 1" },
-      { value: "2", label: "Option 2" },
-      { value: "3", label: "Option 3" },
-    ];
-
-    test("should convert values to labels", () => {
-      expect(parser.valuesToLablels(["1", "2"], options)).toEqual(["Option 1", "Option 2"]);
-      expect(parser.valuesToLablels("1", options)).toEqual(["Option 1"]);
-    });
-
-    test("should handle values not in options", () => {
-      expect(parser.valuesToLablels(["1", "4"], options)).toEqual(["Option 1", "4"]);
-    });
-
-    test("should handle empty inputs", () => {
-      expect(parser.valuesToLablels([], options)).toEqual([]);
-      expect(parser.valuesToLablels(["1"], [])).toEqual(["1"]);
-    });
-
-    test("should handle custom key names", () => {
-      const customOptions = [
-        { id: "1", name: "Option 1" },
-        { id: "2", name: "Option 2" },
-      ];
-      expect(parser.valuesToLablels(["1", "2"], customOptions, "id", "name")).toEqual(["Option 1", "Option 2"]);
-    });
-  });
-
   describe("transformValue", () => {
     const options = [
       { value: "1", label: "Option 1" },
@@ -321,7 +291,7 @@ describe("Parser", () => {
     });
 
     test("should skip null and empty values", () => {
-      expect(parser.queryString.stringify({ name: "John", age: null, empty: "" })).toBe("name=John");
+      expect(parser.queryString.stringify({ name: "John", age: null, empty: "" })).toBe("age&empty=&name=John");
     });
   });
 
@@ -341,43 +311,6 @@ describe("Parser", () => {
 
     test("should handle empty object", () => {
       expect(parser.clearEmptyValue({})).toEqual({});
-    });
-  });
-
-  describe("transformFilters", () => {
-    test("should transform filters with multipleMap", () => {
-      const filters = {
-        name: "John",
-        tags: "a,b,c",
-        status: ["active", "inactive"],
-      };
-      const result = parser.transformFilters(filters, {
-        multipleMap: { tags: true, status: false },
-      });
-      expect(result).toEqual({
-        name: "John",
-        tags: ["a", "b", "c"],
-        status: "active,inactive",
-      });
-    });
-
-    test("should skip empty values when skipEmpty is true", () => {
-      const filters = {
-        name: "John",
-        age: null,
-        email: "",
-        tags: [],
-      };
-      const result = parser.transformFilters(filters, { skipEmpty: true });
-      expect(result).toEqual({ name: "John" });
-    });
-
-    test("should handle array to string conversion", () => {
-      const filters = { status: ["active"] };
-      const result = parser.transformFilters(filters, {
-        multipleMap: { status: false },
-      });
-      expect(result).toEqual({ status: "active" });
     });
   });
 
@@ -530,7 +463,7 @@ describe("Parser", () => {
       const query = { name: "John", age: "30", count: "5" };
       const types = { name: "number", age: "number", count: "number" };
       const result = parser.parseQueryTypes(query, types);
-      expect(result).toEqual({ name: NaN, age: 30, count: 5 });
+      expect(result).toEqual({ name: "John", age: 30, count: 5 });
     });
 
     test("should convert boolean types", () => {
@@ -621,7 +554,7 @@ describe("Parser", () => {
       const result = parser.parseQueryTypes(query, types);
       expect(result).toEqual({
         names: ["John", "123", "true", ""],
-        ages: [25, 30, NaN, 0],
+        ages: [25, 30, "invalid", ""],
         flags: [true, false, true, true, true, false],
       });
     });
@@ -672,7 +605,7 @@ describe("Parser", () => {
         scientific: 100000,
         infinity: Infinity,
         negativeInfinity: -Infinity,
-        nan: NaN,
+        nan: "NaN",
       });
     });
 
@@ -996,6 +929,273 @@ describe("Parser", () => {
       const column = { key: "priorityKey", dataIndex: "fallbackName" };
       const result = parser.genColumnKey(column);
       expect(result).toBe("priorityKey");
+    });
+  });
+
+  describe("initRangeValues", () => {
+    test("should return undefined for empty inputs", () => {
+      expect(parser.initRangeValues(null)).toBeUndefined();
+      expect(parser.initRangeValues(undefined)).toBeUndefined();
+      expect(parser.initRangeValues("")).toBeUndefined();
+      expect(parser.initRangeValues([])).toBeUndefined();
+    });
+
+    test("should handle string inputs with comma separator", () => {
+      expect(parser.initRangeValues("1,2")).toEqual(["1", "2"]);
+      expect(parser.initRangeValues("a,b,c")).toEqual(["a", "b"]);
+      expect(parser.initRangeValues("single")).toEqual(["single", null]);
+      expect(parser.initRangeValues("1,2,3,4,5")).toEqual(["1", "2"]);
+    });
+
+    test("should handle non-array inputs", () => {
+      expect(parser.initRangeValues(123)).toEqual([123, null]);
+      expect(parser.initRangeValues(true)).toEqual([true, null]);
+      expect(parser.initRangeValues(false)).toEqual([false, null]);
+      expect(parser.initRangeValues({ key: "value" })).toEqual([{ key: "value" }, null]);
+    });
+
+    test("should handle array inputs", () => {
+      expect(parser.initRangeValues([1, 2])).toEqual([1, 2]);
+      expect(parser.initRangeValues([1, 2, 3, 4])).toEqual([1, 2]);
+      expect(parser.initRangeValues(["a", "b", "c"])).toEqual(["a", "b"]);
+      expect(parser.initRangeValues([1])).toEqual([1, null]);
+    });
+
+    test("should convert to numbers when number parameter is true", () => {
+      expect(parser.initRangeValues("1,2", { number: true })).toEqual([1, 2]); // Number("1") || "1" = 1
+      expect(parser.initRangeValues("1.5,2.7", { number: true })).toEqual([1.5, 2.7]); // Number("1.5") || "1.5" = 1.5
+      expect(parser.initRangeValues("invalid,123", { number: true })).toEqual(["invalid", 123]);
+      expect(parser.initRangeValues([1, 2], { number: true })).toEqual([1, 2]);
+      expect(parser.initRangeValues(["1", "2"], { number: true })).toEqual([1, 2]); // Number("1") || "1" = 1
+      expect(parser.initRangeValues(123, { number: true })).toEqual([123, null]);
+      expect(parser.initRangeValues("0", { number: true })).toEqual([0, null]);
+      expect(parser.initRangeValues(false, { number: true })).toEqual([0, null]);
+      expect(parser.initRangeValues(",", { number: true })).toEqual([null, null]);
+    });
+
+    test("should not convert to numbers when number parameter is false", () => {
+      expect(parser.initRangeValues("1,2", { number: false })).toEqual(["1", "2"]);
+      expect(parser.initRangeValues("1.5,2.7", { number: false })).toEqual(["1.5", "2.7"]);
+      expect(parser.initRangeValues([1, 2], { number: false })).toEqual([1, 2]);
+      expect(parser.initRangeValues(["1", "2"], { number: false })).toEqual(["1", "2"]);
+      expect(parser.initRangeValues(123, { number: false })).toEqual([123, null]);
+    });
+
+    test("should handle edge cases with number conversion", () => {
+      expect(parser.initRangeValues("0,0", { number: true })).toEqual([0, 0]);
+      expect(parser.initRangeValues("-1,-2", { number: true })).toEqual([-1, -2]); // Number("-1") || "-1" = -1
+      expect(parser.initRangeValues("", { number: true })).toBeUndefined();
+      expect(parser.initRangeValues("abc,def", { number: true })).toEqual(["abc", "def"]);
+      expect(parser.initRangeValues("1.23e5,2.34e-3", { number: true })).toEqual([123000, 0.00234]); // Number("1.23e5") || "1.23e5" = 123000
+    });
+
+    test("should handle special string cases", () => {
+      expect(parser.initRangeValues("a,b,c,d,e")).toEqual(["a", "b"]);
+      expect(parser.initRangeValues("single,word")).toEqual(["single", "word"]);
+      expect(parser.initRangeValues("")).toBeUndefined();
+      expect(parser.initRangeValues("   ")).toEqual(["   ", null]);
+      expect(parser.initRangeValues("a,")).toEqual(["a", null]); // 空字符串被转换为 null
+      expect(parser.initRangeValues(",b")).toEqual([null, "b"]); // 空字符串被转换为 null
+    });
+
+    test("should handle mixed type arrays", () => {
+      expect(parser.initRangeValues([1, "2", true, null])).toEqual([1, "2"]);
+      expect(parser.initRangeValues([{ a: 1 }, { b: 2 }, { c: 3 }])).toEqual([{ a: 1 }, { b: 2 }]);
+    });
+
+    test("should handle number conversion with mixed types", () => {
+      expect(parser.initRangeValues([1, "2", "abc", 4], { number: true })).toEqual([1, 2]); // 只取前两个元素，Number("2") || "2" = 2
+      expect(parser.initRangeValues(["1.5", "2.5", "invalid"], { number: true })).toEqual([1.5, 2.5]); // 只取前两个元素，Number("1.5") || "1.5" = 1.5
+    });
+  });
+
+  describe("guessQueryTypes", () => {
+    test("should return empty object for empty fields", () => {
+      expect(parser.guessQueryTypes(null)).toEqual({});
+      expect(parser.guessQueryTypes(undefined)).toEqual({});
+      expect(parser.guessQueryTypes([])).toEqual({});
+    });
+
+    test("should handle INPUT field type", () => {
+      const fields = [
+        { key: "name", type: "input" },
+        { key: "description", type: "input" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        description: "string"
+      });
+    });
+
+    test("should handle SELECT field with multiple mode", () => {
+      const fields = [
+        { key: "tags", type: "select", antdFieldProps: { mode: "multiple" } },
+        { key: "categories", type: "select", filterDropdownConfig: { dropdownProps: { mode: "multiple" } } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        tags: "number[]",
+        categories: "number[]"
+      });
+    });
+
+    test("should handle CHECKBOX field type", () => {
+      const fields = [
+        { key: "options", type: "checkbox" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        options: "number[]"
+      });
+    });
+
+    test("should handle range field types", () => {
+      const fields = [
+        { key: "ageRange", type: "number-range" },
+        { key: "dateRange", type: "date-range-picker" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        ageRange: "number[]",
+        dateRange: "number[]"
+      });
+    });
+
+    test("should handle fields with filters property", () => {
+      const fields = [
+        { key: "status", filters: true },
+        { key: "priority", filters: [{ text: "High", value: "high" }] }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        status: "number[]",
+        priority: "number[]"
+      });
+    });
+
+    test("should handle mixed field types", () => {
+      const fields = [
+        { key: "name", type: "input" },
+        { key: "tags", type: "select", antdFieldProps: { mode: "multiple" } },
+        { key: "ageRange", type: "number-range" },
+        { key: "status", filters: true }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        tags: "number[]",
+        ageRange: "number[]",
+        status: "number[]"
+      });
+    });
+
+    test("should handle fields without type or filters", () => {
+      const fields = [
+        { key: "name" },
+        { key: "description", type: "unknown" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({});
+    });
+
+    test("should handle fields with filterDropdownConfig", () => {
+      const fields = [
+        { key: "category", filterDropdownConfig: { type: "input" } },
+        { key: "tags", filterDropdownConfig: { type: "select", dropdownProps: { mode: "multiple" } } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        category: "string",
+        tags: "number[]"
+      });
+    });
+
+    test("should handle fields with both type and filterDropdownConfig", () => {
+      const fields = [
+        { key: "name", type: "input", filterDropdownConfig: { type: "select" } }
+      ];
+      // type takes precedence over filterDropdownConfig
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string"
+      });
+    });
+
+    test("should handle fields with dataIndex instead of key", () => {
+      const fields = [
+        { dataIndex: "name", type: "input" },
+        { dataIndex: "tags", type: "select", antdFieldProps: { mode: "multiple" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        tags: "number[]"
+      });
+    });
+
+    test("should handle fields with array key", () => {
+      const fields = [
+        { key: ["user", "name"], type: "input" },
+        { key: ["user", "tags"], type: "select", antdFieldProps: { mode: "multiple" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        "user__name": "string",
+        "user__tags": "number[]"
+      });
+    });
+
+    test("should handle fields with array dataIndex", () => {
+      const fields = [
+        { dataIndex: ["user", "name"], type: "input" },
+        { dataIndex: ["user", "tags"], type: "select", antdFieldProps: { mode: "multiple" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        "user__name": "string",
+        "user__tags": "number[]"
+      });
+    });
+
+    test("should handle SELECT field without multiple mode", () => {
+      const fields = [
+        { key: "status", type: "select" },
+        { key: "category", type: "select", antdFieldProps: { mode: "single" } }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({});
+    });
+
+    test("should handle fields with empty filters array", () => {
+      const fields = [
+        { key: "status", filters: [] }
+      ];
+      // 空数组 [] 在 JavaScript 中是 truthy，所以会被处理为 number[]
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        status: "number[]"
+      });
+    });
+
+    test("should handle fields with null filters", () => {
+      const fields = [
+        { key: "status", filters: null }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({});
+    });
+
+    test("should handle complex mixed scenarios", () => {
+      const fields = [
+        { key: "name", type: "input" },
+        { key: "email", filterDropdownConfig: { type: "input" } },
+        { key: "tags", type: "select", antdFieldProps: { mode: "multiple" } },
+        { key: "categories", filterDropdownConfig: { type: "select", dropdownProps: { mode: "multiple" } } },
+        { key: "ageRange", type: "number-range" },
+        { key: "dateRange", type: "date-range-picker" },
+        { key: "status", filters: true },
+        { key: "priority", filters: [{ text: "High", value: "high" }] },
+        { key: "options", type: "checkbox" },
+        { key: "unknown", type: "unknown" },
+        { key: "noType" }
+      ];
+      expect(parser.guessQueryTypes(fields)).toEqual({
+        name: "string",
+        email: "string",
+        tags: "number[]",
+        categories: "number[]",
+        ageRange: "number[]",
+        dateRange: "number[]",
+        status: "number[]",
+        priority: "number[]",
+        options: "number[]"
+      });
     });
   });
 

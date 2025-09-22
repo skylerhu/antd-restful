@@ -117,7 +117,7 @@ describe("NumberRange", () => {
     await user.clear(inputs[1]);
 
     await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledWith(undefined);
+      expect(handleChange).toHaveBeenCalledWith(null);
     });
   });
 
@@ -133,7 +133,7 @@ describe("NumberRange", () => {
     await user.type(inputs[0], "50");
 
     await waitFor(() => {
-      expect(handleChange).toHaveBeenCalledWith([50, undefined]);
+      expect(handleChange).toHaveBeenCalledWith([50, null]);
     });
   });
 

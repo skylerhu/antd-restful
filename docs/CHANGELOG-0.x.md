@@ -1,9 +1,20 @@
 # Release Notes
 
+## 0.2.0
+- perf: 优化 RestTable 和 RouteBaseTable 处理路由参数
+    - 升级 query-string@9, `parseOptions` 支持通过 `types` 配置字段类型（连带打包无需额外安装）
+    - 默认会根据 `columns` 或是 `filterFormProps.fields` 的配置类型初始化 `types`
+- fix: 统一 `NumberRange` 和 `RangeStrPicker` 默认值的处理，并提供 `defaultEmptyValue` 配置单项的默认值
+- fix: `parser.queryString` 使用 `query-sting` 默认参数中去掉了 `{skipNull:true, skipEmptyString: true}`
+    - 为了解决 Range 组件有null值的场景，例如 [null, 1] 需要处理成 ",1"
+    - 会在 RestTable 组件中自行调用 `clearEmptyValue` 处理远程请求时去掉空值
+- fix: 修复 RangeStrPicker 在 antd>=5 版本场景下，dayjs 未正确处理 format 的问题
+- fix: 修复 `typeTools.isNumber` 判断问题，`""` 不是数值
+
 ## 0.1.18
 - fix: 修复 RestTable 表单值在路由参数变更时频繁更新的问题
     - 调整后，需要注意`路由参数`和`表单参数`的行为
-        - 表单配置`展示`的筛选项无法`手动`从路由上新增参数 (原则上，无论表单项展示与否，其对应key在路由上的参数都不支持手动修改)
+        - 表单配置`展示`的筛选项无法`手动`从路由上新增参数 (原则上，无论表单项展示与否，其对应key在路由上的参数都不支持手动修改) (从0.2.0开始可手动从路由上新增了)
         - 点击`重置`可以清除隐藏的表单项的筛选条件 (点击搜索按钮不会清除，支持分享链接场景点开后还可以在此基础上修改筛选条件)
         - 筛选表单项有值时不允许设置隐藏，需要先清空数据后再操作隐藏
     - 修复点击 搜索/重置 按钮 会多次触发请求的问题

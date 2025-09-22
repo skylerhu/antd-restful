@@ -24,15 +24,15 @@ const TableDemo = () => {
         联动路由
       </Checkbox>
       <Component
-        parseOptions={{
-          parseNumbers: false,
-          // types: {
-          //   user: "number",
-          // },
-        }}
-        parseTypes={{
-          user: "number",
-        }}
+        // parseOptions={{
+        //   parseNumbers: false,
+        //   // types: {
+        //   //   user: "number",
+        //   // },
+        // }}
+        // parseTypes={{
+        //   user: "number",
+        // }}
         restful="api/users/"
         baseParams={{
           search: "u",
@@ -163,7 +163,6 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
-              hidden: true,
             },
             {
               key: "search",
@@ -173,7 +172,7 @@ const TableDemo = () => {
             },
             {
               key: "user",
-              label: "用户",
+              label: (<span>用户</span>),
               type: FieldType.SELECT,
               antdFieldProps: {
                 restful: "api/users/",
@@ -211,7 +210,15 @@ const TableDemo = () => {
                   { label: "女", value: "female" },
                 ],
               },
-            }
+            },
+            {
+              key: "created_at__range",
+              label: "时间范围",
+              type: FieldType.DATE_RANGE_PICKER,
+              antdFieldProps: {
+                placeholder: ["开始时间", "结束时间"],
+              },
+            },
             // {
             //   key: "__placeholder",
             //   label: "占位",

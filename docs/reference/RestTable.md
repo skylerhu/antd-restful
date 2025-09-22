@@ -20,7 +20,7 @@
 | **远程数据相关** | | | | |
 | restful | RESTful API 接口地址 | `string` | - | - |
 | reqConfig | 请求配置，axios请求的额外配置 | `object` | - | - |
-| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` |
+| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | 0.1.14 |
 | urlDetailTemplate | 删除操作的自定义 URL 模板 | `string` | - | - |
 | baseParams | 基础请求参数 | `object` | - | - |
 | routeParams | 路由参数 | `object` | - | - |

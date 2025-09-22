@@ -15,6 +15,7 @@
 | className | 自定义类名 | `string` | - | - |
 | value | 当前值，支持数组、字符串、数字格式 | `array \| string \| number` | - | - |
 | onChange | 值变化时的回调函数 | `function(value)` | - | - |
+| defaultEmptyValue | 单个输入框为空时的默认值 | `undefined\|null\|''` | `null` | 0.2.0 |
 | labelTemplate | 只读场景下显示的模板，{0} 是 startValue，{1} 是 endValue | `string` | `'[{0},{1}]'` | - |
 | disabled | 是否禁用 | `boolean` | `false` | - |
 | readOnly | 是否只读模式 | `boolean` | `false` | - |

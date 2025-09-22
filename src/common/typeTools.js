@@ -20,7 +20,7 @@ export const isFunction = (value) => typeof value === "function";
 export const isAbsNumber = (value) => typeof value === "number" && isFinite(value);
 
 // 可能是数字、字符串类型的数值
-export const isNumber = (value) => isAbsNumber(value) || (isString(value) && !Number.isNaN(Number(value)));
+export const isNumber = (value) => isAbsNumber(value) || (!isBlank(value) && isString(value) && !Number.isNaN(Number(value)));
 
 // 或者：value instanceof Array
 export const isArray = (value) => Array.isArray(value);

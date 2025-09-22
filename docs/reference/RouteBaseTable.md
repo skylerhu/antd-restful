@@ -21,7 +21,18 @@
 | - | - | - | - | - |
 | baseParams | 基础请求参数，与 URL 参数相同时会被过滤 | `object` | - | - |
 | onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - |
+| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | 0.1.14 |
 | 其他参数 | 所有 RestTable 支持的参数 | - | - | - |
+
+
+**parseOptions.types 的特殊说明**
+- 在 `0.2.0` 版本开始，升级了 `query-string@9` ，支持 `parseOptions.types` 配置指定key值的解析类型
+- 会根据配置的 `columns` 和 `filterFormProps.fields` 初始化默认的 `types`，可详见 `parser.guessQueryTypes` 函数的实现
+  - `FiledType.INPUT` 默认解析成 `string`
+  - `FieldType.SELECT` 默认解析成数组
+  - `FieldType.CHECKBOX`, `FieldType.NUMBER_RANGE`, `FieldType.DATE_RANGE_PICKER` 默认解析成数组
+  - 若是展示和列 columns 配置了 `filters` 也默认解析成数组
+  - 数组都统一配置的 `number[]`，若是字符串也会正确处理
 
 ### 使用示例
 
@@ -82,6 +93,79 @@ const UserList = () => {
   );
 };
 ```
+
+#### 同时使用 filterFormProps?.fields 和 parseOptions.types
+
+```jsx
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { FieldType } from 'antd-restful';
+
+const UserListWithRangeFields = () => {
+
+  const restProps = {
+    restful: "api/users/",
+    columns={[
+      {
+        title: "年龄",
+        dataIndex: "age",
+        sorter: true,
+        filterDropdownConfig: {
+          type: FieldType.NUMBER_RANGE,
+        },
+      },
+      {
+        title: "创建时间",
+        dataIndex: "created_at",
+        sorter: true,
+        filterDropdownConfig: {
+          type: FieldType.DATE_RANGE_PICKER,
+        },
+      },
+    ]}
+    // 配置 URL 参数类型解析
+    parseOptions={{
+      parseNumbers: false,
+      types: {
+        age: "number[]",        // 年龄范围转换为数字数组
+        age__range: "number[]",        // 年龄范围转换为数字数组
+        created_at__range: "string[]", // 创建时间范围转换为字符串数组
+      }
+    }}
+    // 配置筛选表单字段
+    filterFormProps={{
+      advancedSearch: true,
+      antdListProps: {
+        grid: { gutter: 24, column: 2 },
+      },
+      fields: [
+        {
+          key: "age__range",
+          label: "年龄范围",
+          type: FieldType.NUMBER_RANGE,
+          antdFieldProps: {
+            placeholder: ["最小年龄", "最大年龄"],
+            min: 0,
+            max: 120,
+          },
+        }
+      ],
+    }}
+  };
+  // RouteTable 在上一个示例中已声明
+  return (
+    <RouteTable { ...restProps } />
+  );
+};
+```
+
+### 关键特性说明
+
+#### 路由联动机制
+- **URL 参数同步**：范围字段的值会自动同步到 URL 查询参数中
+- **状态保持**：页面刷新后自动恢复之前的范围筛选状态
+- **链接分享**：支持分享带范围筛选条件的链接
+
 
 ### 注意事项
 

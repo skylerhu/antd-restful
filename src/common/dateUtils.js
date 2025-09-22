@@ -60,9 +60,12 @@ export function createDate(dateInput, format = null) {
       // dayjs is required for antd5+
       return null;
     }
-
     try {
-      return dayjsInstance(dateInput);
+      if (format) {
+        return dayjsInstance(dateInput, format);
+      } else {
+        return dayjsInstance(dateInput);
+      }
     } catch (e) {
       // Failed to parse date with dayjs
       return null;
@@ -74,7 +77,6 @@ export function createDate(dateInput, format = null) {
       // moment is required for antd4
       return null;
     }
-
     try {
       if (format) {
         return momentInstance(dateInput, format);
