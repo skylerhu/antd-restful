@@ -314,10 +314,10 @@ const RestTable = forwardRef(
     const [showColumnsKeys, setShowColumnsKeys] = useState([]);
 
     // 因为有未使用 FieldsSettings的场景，所以不能直接使用 value 作为设置的值设置, 无法监听columns的变化
-    const onToolsFilterChange = useCallback((_, keys) => {
+    const onToolsFilterChange = useCallback((keys) => {
       setFilterFieldKeys(keys);
     }, []);
-    const onToolsSettingsChange = useCallback((_, keys) => {
+    const onToolsSettingsChange = useCallback((keys) => {
       setShowColumnsKeys(keys);
     }, []);
 
@@ -377,13 +377,6 @@ const RestTable = forwardRef(
       }
       return opts;
     }, [pageSize, defaultPageSize, antdTableProps?.pagination?.pageSizeOptions, memBaseParams, fieldPageSize]);
-
-    const filterFormAllFields = useDeepCompareMemoize(
-      filterFormProps?.fields?.map((field) => ({
-        key: genColumnKey(field),
-        type: field.type,
-      })) || []
-    );
 
     const formFiltersRef = useRef({});
     const [filterState, setFilterState] = useDictState({
@@ -827,11 +820,13 @@ const RestTable = forwardRef(
                     });
                   }}
                   onReset={(values) => {
-                    // 仅重置可以清除隐藏的表单项
+                    // 重置：可以清除隐藏的表单项
                     const newV = { ...values };
-                    filterFormAllFields.forEach((field) => {
-                      if (!filterFieldKeys.includes(field.key)) {
-                        newV[field.key] = null;
+                    filterFormProps?.fields?.forEach((field) => {
+                      const key = genColumnKey(field);
+                      if (!filterFieldKeys.includes(key)) {
+                        // 不再显示值范围内
+                        newV[key] = null;
                       }
                     });
                     formFiltersRef.current = newV;
@@ -910,14 +905,15 @@ const RestTable = forwardRef(
                       <Button icon={<DownloadOutlined />} />
                     </Dropdown>
                   )}
-                  {restful && filterFormProps && innerTools.advancedSearch && (
+                  {restful && filterFormProps?.fields?.length && innerTools.advancedSearch && (
                     <FieldsSetting
                       value={filterFormProps.fields.map((field) => {
+                        const k = genColumnKey(field);
                         // 若是表单有值，设置了隐藏，路由上的参数不会被重置
-                        const hasFormValue = !isEmpty(filterState.formFilters[field.key]);
+                        const hasFormValue = !isEmpty(filterState.formFilters[k]);
                         return {
                           ...field,
-                          hidden: !hasFormValue,
+                          hidden: hasFormValue ? false : field.hidden,
                           tip: field.tip || (hasFormValue ? "表单项有值，请先重置/清除后再设置隐藏" : undefined),
                         };
                       })}

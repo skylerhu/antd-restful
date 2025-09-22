@@ -17,20 +17,14 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
     filterFormProps,
   } = restProps;
   const searchRef = useRef(location.search);
+
+  const memParseOptions = useDeepCompareMemoize(parseOptions);
   // 后续可以废弃
   const memParseTypes = useDeepCompareMemoize(parseTypes);
+  // 猜测的类型
+  const [guessTypes, setGuessTypes] = useState(null);
 
   const [params, setParams] = useState();
-  // 猜测的类型
-  const [guessTypes, setGuessTypes] = useState({});
-  // 合并猜测的类型和配置的类型
-  const memParseOptions = useDeepCompareMemoize({
-    ...parseOptions,
-    types: {
-      ...guessTypes,
-      ...parseOptions.types,
-    },
-  });
 
   useEffect(() => {
     setGuessTypes((oldV) => {
@@ -43,7 +37,19 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
   }, [columns, filterFormProps?.fields]);
 
   useEffect(() => {
-    let query = globalConfig.queryParse(location.search, memParseOptions);
+    if (guessTypes === null) {
+      // 猜测类型未完成，不进行初始化
+      return;
+    }
+    // 合并猜测的类型和配置的类型
+    const options = {
+      ...memParseOptions,
+      types: {
+        ...guessTypes,
+        ...memParseOptions?.types,
+      },
+    };
+    let query = globalConfig.queryParse(location.search, options);
     if (memParseTypes) {
       // query-string > 9 支持直接 parasOptions 配置字段类型，但这个低版本node又不能使用
       // 主要是为了解决低版本 query参数中 超大int溢出 和 普通 int存在的场景，需要额外指定参数类型
@@ -56,7 +62,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
       }
       return newV;
     });
-  }, [location.search, memParseOptions, memParseTypes]);
+  }, [location.search, memParseOptions, memParseTypes, guessTypes]);
 
   const onChange = useCallback(
     (values) => {
@@ -81,7 +87,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
     [onFiltersChange, onSearchChange, memParseOptions]
   );
 
-  if (params === undefined || params === null) {
+  if (params === undefined || params === null || guessTypes === null) {
     // 等待params根据search初始化完成
     return null;
   }

@@ -1,14 +1,43 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Checkbox, Space, Tooltip } from "antd";
 import { QuestionCircleOutlined, SettingOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { genColumnKey, genFields } from "src/common/parser";
+import { genColumnKey } from "src/common/parser";
 import { isFunction } from "src/common/typeTools";
 import { useSettingsStorage } from "src/hooks/index";
 
+
+export const initFileds = (fields) => {
+  return fields?.map((field) => {
+    const key = genColumnKey(field);
+    return {
+      key,
+      value: key,
+      label: field.label || field.title || key,
+      tip: field.tip,
+      // 如果强制设置的 false，则禁止配置
+      disabled: field.hidden === false,
+    };
+  }) || [];
+};
+
+
 const FieldsSetting = ({ style, className, title, storageKey, value, onChange, children }) => {
-  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, value);
+
+  const [fields, setFields] = useState(initFileds(value));
+
+  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, fields);
+
+  useEffect(() => {
+    setFields(oldV => {
+      const newV = initFileds(value);
+      if (deepEqual(newV, oldV)) {
+        return oldV;
+      }
+      return newV || [];
+    });
+  }, [value]);
 
   // 全选
   const checkAll = useMemo(() => deepEqual(keys, allKeys), [keys, allKeys]);
@@ -16,38 +45,34 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   const checkIndeterminate = useMemo(() => keys.length > 0 && !checkAll, [keys, checkAll]);
 
   const data = useMemo(() => {
-    const options = value.map((column) => {
-      const key = genColumnKey(column);
+    const options = fields?.map((field) => {
       return {
+        ...field,
         label: (
           <div style={{ width: 100 }}>
-            {column.label || column.title || key}
+            {field.label}
             &nbsp;&nbsp;
-            {column.tip && (
-              <Tooltip title={column.tip}>
+            {field.tip && (
+              <Tooltip title={field.tip}>
                 <QuestionCircleOutlined />
               </Tooltip>
             )}
           </div>
         ),
-        value: key,
-        // 如果强制设置的 false，则禁止配置
-        disabled: column.hidden === false,
       };
     });
-    const forceChecks = options.filter((option) => option.disabled).map((option) => option.value);
+    const forceChecks = fields?.filter((option) => option.disabled).map((option) => option.value);
     return {
       options,
       forceChecks,
     };
-  }, [value]);
+  }, [fields]);
 
   useEffect(() => {
-    const _columns = genFields(value, keys);
     if (isFunction(onChange)) {
-      onChange(_columns, keys);
+      onChange(keys);
     }
-  }, [value, keys, onChange]);
+  }, [keys, onChange]);
 
   return (
     <Tooltip
@@ -70,8 +95,8 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
           <Checkbox.Group
             value={keys}
             options={data.options}
-            onChange={(value) => {
-              setKeys(value);
+            onChange={(v) => {
+              setKeys(v);
             }}
           />
         </Space>

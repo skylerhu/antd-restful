@@ -2,7 +2,10 @@ import { useMemo, useReducer, useRef } from "react";
 import { dequal as deepEqual } from "dequal";
 
 
-// 用于处理object参数频繁变更的问题
+/**
+ * 用于处理object参数频繁变更的问题
+ * 不建议 value 是动态生成；会频繁计算value的值影响性能
+ */
 export function useDeepCompareMemoize(value) {
   const ref = useRef(value);
 

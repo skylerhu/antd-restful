@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dequal as deepEqual } from "dequal";
-import { genColumnKey } from "src/common/parser";
 import { isString } from "src/common/typeTools";
 import { useDeepCompareMemoize } from "./base";
 
@@ -97,19 +96,21 @@ function genStorage(storage) {
 export const useLocalStorage = genStorage(window.localStorage);
 export const useSessionStorage = genStorage(window.sessionStorage);
 
+/**
+ * columns 数据格式示例：
+ * [
+ *  {
+ *    key: "id",  // 必须
+ *    label: "ID",  // 可选
+ *    hidden: false,  // 可选
+ *  }
+ * ]
+ */
 export const useSettingsStorage = (key, columns) => {
   // {allKeys: [], keys: []}, keys 是实际显示的列； allKeys 是所有列, 用标记cloumns是否发生过变动，如果发生过变动，则keys失效
   const [config, setConfig] = useLocalStorage(key, {});
 
-  const memoColumns = useDeepCompareMemoize(
-    columns.map((column) => ({
-      key: genColumnKey(column),
-      hidden: column.hidden,
-      label: column.label || column.title,
-      // 如果强制设置的 false，则禁止配置
-      disabled: column.hidden === false,
-    }))
-  );
+  const memoColumns = useDeepCompareMemoize(columns || []);
   // 所有的keys
   const allKeys = useMemo(() => memoColumns.map((column) => column.key), [memoColumns]);
   // 默认显示的keys
@@ -149,6 +150,5 @@ export const useSettingsStorage = (key, columns) => {
     allKeys,
     keys: showKeys,
     setKeys,
-    options: memoColumns,
   };
 };

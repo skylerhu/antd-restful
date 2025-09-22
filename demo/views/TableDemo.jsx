@@ -24,15 +24,15 @@ const TableDemo = () => {
         联动路由
       </Checkbox>
       <Component
-        parseOptions={{
-          parseNumbers: false,
-          // types: {
-          //   user: "number",
-          // },
-        }}
-        parseTypes={{
-          user: "number",
-        }}
+        // parseOptions={{
+        //   parseNumbers: false,
+        //   // types: {
+        //   //   user: "number",
+        //   // },
+        // }}
+        // parseTypes={{
+        //   user: "number",
+        // }}
         restful="api/users/"
         baseParams={{
           search: "u",
@@ -163,13 +163,12 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
-              hidden: true,
+              hidden: false,
             },
             {
               key: "search",
               label: "搜索",
               type: FieldType.INPUT,
-              hidden: false,
             },
             {
               key: "user",
