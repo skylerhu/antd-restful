@@ -163,16 +163,16 @@ const TableDemo = () => {
             {
               key: "age",
               type: FieldType.NUMBER,
-              hidden: false,
             },
             {
               key: "search",
               label: "搜索",
               type: FieldType.INPUT,
+              hidden: false,
             },
             {
               key: "user",
-              label: "用户",
+              label: (<span>用户</span>),
               type: FieldType.SELECT,
               antdFieldProps: {
                 restful: "api/users/",

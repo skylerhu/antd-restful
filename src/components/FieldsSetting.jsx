@@ -117,7 +117,7 @@ FieldsSetting.propTypes = {
   value: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string,
-      label: PropTypes.string,
+      label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
       hidden: PropTypes.bool,
     })
   ),

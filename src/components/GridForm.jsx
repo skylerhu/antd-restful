@@ -279,7 +279,7 @@ GridForm.propTypes = {
   fields: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
-      label: PropTypes.string,
+      label: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
       antdFormItemProps: PropTypes.object,
       type: PropTypes.oneOf(FieldType.map((o) => o.value)),
       antdFieldProps: PropTypes.object,
