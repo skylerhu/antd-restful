@@ -8,7 +8,8 @@
 - fix: `parser.queryString` 使用 `query-sting` 默认参数中去掉了 `{skipNull:true, skipEmptyString: true}`
     - 为了解决 Range 组件有null值的场景，例如 [null, 1] 需要处理成 ",1"
     - 会在 RestTable 组件中自行调用 `clearEmptyValue` 处理远程请求时去掉空值
-- fix: 修复 RangeStrPicker 在 antd>=5 版本场景下，dayjs 未正确处理 format 的问题；
+- fix: 修复 RangeStrPicker 在 antd>=5 版本场景下，dayjs 未正确处理 format 的问题
+- fix: 修复 `typeTools.isNumber` 判断问题，`""` 不是数值
 
 ## 0.1.18
 - fix: 修复 RestTable 表单值在路由参数变更时频繁更新的问题
