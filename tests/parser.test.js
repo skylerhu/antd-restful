@@ -886,6 +886,161 @@ describe("Parser", () => {
       expect(result[0].title).toBe("Name 1");
       expect(result[1].title).toBe("Name 2");
     });
+
+    test("should set hidden to false when field is selected by keys", () => {
+      const fieldsWithHidden = [
+        { key: "name", title: "Name", hidden: true },
+        { key: "age", title: "Age", hidden: true },
+        { key: "email", title: "Email", hidden: false },
+        { key: "phone", title: "Phone", hidden: true },
+      ];
+      const keys = ["name", "email"];
+      const result = parser.genFields(fieldsWithHidden, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        key: "name",
+        title: "Name",
+        hidden: false, // 原本是 true，现在被设置为 false
+      });
+      expect(result[1]).toEqual({
+        key: "email",
+        title: "Email",
+        hidden: false, // 原本是 false，现在仍然是 false
+      });
+    });
+
+    test("should set hidden to false for fields without hidden property", () => {
+      const fieldsWithoutHidden = [
+        { key: "name", title: "Name" },
+        { key: "age", title: "Age" },
+        { key: "email", title: "Email" },
+      ];
+      const keys = ["name", "email"];
+      const result = parser.genFields(fieldsWithoutHidden, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        key: "name",
+        title: "Name",
+        hidden: false, // 新增 hidden 属性并设置为 false
+      });
+      expect(result[1]).toEqual({
+        key: "email",
+        title: "Email",
+        hidden: false, // 新增 hidden 属性并设置为 false
+      });
+    });
+
+    test("should handle mixed hidden states", () => {
+      const mixedFields = [
+        { key: "visible1", title: "Visible 1", hidden: false },
+        { key: "hidden1", title: "Hidden 1", hidden: true },
+        { key: "visible2", title: "Visible 2" }, // 没有 hidden 属性
+        { key: "hidden2", title: "Hidden 2", hidden: true },
+        { key: "visible3", title: "Visible 3", hidden: false },
+      ];
+      const keys = ["visible1", "hidden1", "visible2"];
+      const result = parser.genFields(mixedFields, keys);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({
+        key: "visible1",
+        title: "Visible 1",
+        hidden: false, // 保持 false
+      });
+      expect(result[1]).toEqual({
+        key: "hidden1",
+        title: "Hidden 1",
+        hidden: false, // 从 true 变为 false
+      });
+      expect(result[2]).toEqual({
+        key: "visible2",
+        title: "Visible 2",
+        hidden: false, // 新增并设置为 false
+      });
+    });
+
+    test("should preserve other field properties when setting hidden to false", () => {
+      const complexFields = [
+        {
+          key: "user",
+          title: "User",
+          dataIndex: "user_name",
+          hidden: true,
+          width: 200,
+          sorter: true,
+          filters: [{ text: "Active", value: "active" }],
+          customProp: "customValue",
+        },
+        {
+          key: "email",
+          title: "Email",
+          hidden: false,
+          required: true,
+          type: "input",
+        },
+      ];
+      const keys = ["user", "email"];
+      const result = parser.genFields(complexFields, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        key: "user",
+        title: "User",
+        dataIndex: "user_name",
+        hidden: false, // 从 true 变为 false
+        width: 200,
+        sorter: true,
+        filters: [{ text: "Active", value: "active" }],
+        customProp: "customValue",
+      });
+      expect(result[1]).toEqual({
+        key: "email",
+        title: "Email",
+        hidden: false, // 保持 false
+        required: true,
+        type: "input",
+      });
+    });
+
+    test("should handle fields with array keys and hidden property", () => {
+      const fieldsWithArrayKey = [
+        { key: ["user", "name"], title: "User Name", hidden: true },
+        { key: ["user", "age"], title: "User Age", hidden: false },
+        { key: "email", title: "Email", hidden: true },
+      ];
+      const keys = ["user__name", "email"];
+      const result = parser.genFields(fieldsWithArrayKey, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        key: ["user", "name"],
+        title: "User Name",
+        hidden: false, // 从 true 变为 false
+      });
+      expect(result[1]).toEqual({
+        key: "email",
+        title: "Email",
+        hidden: false, // 从 true 变为 false
+      });
+    });
+
+    test("should handle fields with dataIndex and hidden property", () => {
+      const fieldsWithDataIndex = [
+        { dataIndex: "name", title: "Name", hidden: true },
+        { dataIndex: "age", title: "Age", hidden: false },
+        { key: "email", title: "Email", hidden: true },
+      ];
+      const keys = ["name", "email"];
+      const result = parser.genFields(fieldsWithDataIndex, keys);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        dataIndex: "name",
+        title: "Name",
+        hidden: false, // 从 true 变为 false
+      });
+      expect(result[1]).toEqual({
+        key: "email",
+        title: "Email",
+        hidden: false, // 从 true 变为 false
+      });
+    });
   });
 
   describe("genColumnKey 测试", () => {

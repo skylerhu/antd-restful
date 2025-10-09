@@ -16,7 +16,9 @@ export const initFileds = (fields) => {
       value: key,
       label: field.label || field.title || key,
       tip: field.tip,
-      // 如果强制设置的 false，则禁止配置
+      // 原有antd columns的配置项
+      hidden: field.hidden,
+      // 如果强制设置的 false，则禁止配置； 用于Checkbox
       disabled: field.hidden === false,
     };
   }) || [];

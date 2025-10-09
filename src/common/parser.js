@@ -398,7 +398,11 @@ export const genFields = (fields, keys) => {
   if (!keys?.length) {
     return fields;
   }
-  const _fields = fields.filter((field) => keys.includes(genColumnKey(field)));
+  const _fields = fields.filter((field) => keys.includes(genColumnKey(field))).map((field) => ({
+    ...field,
+    // 手动设置了显示后，隐藏属性失效
+    hidden: false,
+  }));
   return _fields;
 };
 

@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.2.2
+- fix: 修复 RestTable 设置隐藏列不生效问题
+    - 未将 columns 中配置的 `hidden: True` 在手动设置后 未设置为 `False`
+
 ## 0.2.1
 - fix: 调整 `useSettingsStorage`: 当字段配置列发生变化时，之前手动配置的显示字段依然生效
 
