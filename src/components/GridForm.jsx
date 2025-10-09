@@ -68,7 +68,7 @@ const GridForm = forwardRef(
       return fields?.find((item) => item.key === activeFieldKey);
     }, [fields, activeFieldKey]);
 
-    const setFieldsValue = useCallback(
+    const setFieldsValueAndActiveKey = useCallback(
       (values) => {
         form.setFieldsValue(values);
         initActiveKey(values);
@@ -80,9 +80,9 @@ const GridForm = forwardRef(
     useImperativeHandle(
       ref,
       () => ({
-        getFormInstance: () => ({ ...form, setFieldsValue }),
+        getFormInstance: () => ({ ...form, setFieldsValueAndActiveKey }),
       }),
-      [form, setFieldsValue]
+      [form, setFieldsValueAndActiveKey]
     );
 
     const handleValues = useCallback((values) => handleFormValues(values, fields), [fields]);

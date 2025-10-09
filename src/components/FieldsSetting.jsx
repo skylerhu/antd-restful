@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Checkbox, Space, Tooltip } from "antd";
 import { QuestionCircleOutlined, SettingOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { genColumnKey } from "src/common/parser";
+import { genColumnKey, genFields } from "src/common/parser";
 import { isFunction } from "src/common/typeTools";
 import { useSettingsStorage } from "src/hooks/index";
 
 
-export const initFileds = (fields, simple = false) => {
+export const initFileds = (fields) => {
   return fields?.map((field) => {
     const key = genColumnKey(field);
     const item = {
@@ -16,14 +16,7 @@ export const initFileds = (fields, simple = false) => {
       value: key,
       // 原有antd columns的配置项
       hidden: field.hidden,
-      // 如果强制设置的 false，则禁止配置； 用于Checkbox
-      disabled: field.hidden === false,
     };
-    if (!simple) {
-      // 若是配置的node类型，在 dequal 中会报错，显示字段不用于对比
-      item.label = field.label || field.title || key;
-      item.tip = field.tip;
-    }
     return item;
   }) || [];
 };
@@ -31,23 +24,19 @@ export const initFileds = (fields, simple = false) => {
 
 const FieldsSetting = ({ style, className, title, storageKey, value, onChange, children }) => {
 
-  const [fieldConf, setFieldConf] = useState({
-    fields: initFileds(value),
-    simple: initFileds(value, true),
-  });
+  const valueRef = useRef(value);
+  const [fields, setFields] = useState(initFileds(value));
 
-  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, fieldConf.simple);
+  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, fields);
 
   useEffect(() => {
-    setFieldConf(oldV => {
-      const simple = initFileds(value, true);
-      if (deepEqual(simple, oldV.simple)) {
+    valueRef.current = value;
+    setFields(oldV => {
+      const newV = initFileds(value);
+      if (deepEqual(newV, oldV)) {
         return oldV;
       }
-      return {
-        simple,
-        fields: initFileds(value),
-      };
+      return newV;
     });
   }, [value]);
 
@@ -57,12 +46,18 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   const checkIndeterminate = useMemo(() => keys.length > 0 && !checkAll, [keys, checkAll]);
 
   const data = useMemo(() => {
-    const options = fieldConf.fields?.map((field) => {
+    const options = value?.map((field) => {
+      const key = genColumnKey(field);
+      // 若是配置的node类型，在 dequal 中会报错，所以没有放在 fields 中
+      const label = field.label || field.title || key;
       return {
-        ...field,
+        key,
+        value: key,
+        // 如果强制设置的 false，则禁止配置； 用于Checkbox
+        disabled: field.hidden === false,
         label: (
           <div style={{ width: 100 }}>
-            {field.label}
+            {label}
             &nbsp;&nbsp;
             {field.tip && (
               <Tooltip title={field.tip}>
@@ -73,16 +68,17 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
         ),
       };
     });
-    const forceChecks = fieldConf.fields?.filter((option) => option.disabled).map((option) => option.value);
+    const forceChecks = options?.filter((option) => option.disabled).map((option) => option.value);
     return {
       options,
       forceChecks,
     };
-  }, [fieldConf.fields]);
+  }, [value]);
 
   useEffect(() => {
     if (isFunction(onChange)) {
-      onChange(keys);
+      const _fields = genFields(valueRef.current, keys);
+      onChange(keys, _fields);
     }
   }, [keys, onChange]);
 

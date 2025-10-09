@@ -18,7 +18,6 @@ import {
   commonFormat,
   findDataByPath,
   genColumnKey,
-  genFields,
   handleFormValues,
   tableSorterToApiSorter,
   toBeString,
@@ -309,34 +308,30 @@ const RestTable = forwardRef(
     const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(filterFormProps?.advancedSearch || false);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
     // 控制显示的表单字段
-    const [filterFieldKeys, setFilterFieldKeys] = useState([]);
+    const [filterFieldConf, setFilterFieldConf] = useState({ keys: [], fields: [] });
     // 控制显示的列
-    const [showColumnsKeys, setShowColumnsKeys] = useState([]);
+    const [showColumns, setShowColumns] = useState([]);
 
     // 因为有未使用 FieldsSettings的场景，所以不能直接使用 value 作为设置的值设置, 无法监听columns的变化
-    const onToolsFilterChange = useCallback((keys) => {
-      setFilterFieldKeys(keys);
+    const onToolsFilterChange = useCallback((keys, fields) => {
+      setFilterFieldConf({ keys, fields });
     }, []);
-    const onToolsSettingsChange = useCallback((keys) => {
-      setShowColumnsKeys(keys);
+    const onToolsSettingsChange = useCallback((keys, fields) => {
+      setShowColumns(fields);
     }, []);
 
-    const filterFields = useMemo(
-      () => {
-        const fields = genFields(filterFormProps?.fields, filterFieldKeys);
-        fields?.forEach((field) => {
-          if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
-            field.antdFieldProps = {
-              defaultEmptyValue: "",
-              ...field.antdFieldProps,
-            };
-          }
-        });
-        return fields;
-      },
-      [filterFormProps?.fields, filterFieldKeys]
-    );
-    const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
+    const filterFields = useMemo(() => {
+      return filterFieldConf.fields.map((field) => {
+        const item = { ...field };
+        if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
+          item.antdFieldProps = {
+            defaultEmptyValue: "",
+            ...field.antdFieldProps,
+          };
+        }
+        return item;
+      });
+    }, [filterFieldConf.fields]);
 
     useEffect(() => {
       if (isArray(dataSource)) {
@@ -424,7 +419,7 @@ const RestTable = forwardRef(
           setEnableAdvancedSearch(true);
         }
       }
-      filterFormRef.current?.getFormInstance()?.setFieldsValue(formFilters);
+      filterFormRef.current?.getFormInstance()?.setFieldsValueAndActiveKey(formFilters);
     }, [filterState.formFilters, innerTools.advancedSearch]);
 
     // setInnerFilters
@@ -454,15 +449,7 @@ const RestTable = forwardRef(
         }
         return newV;
       });
-    }, [
-      fieldPage,
-      fieldPageSize,
-      defaultPageSize,
-      memBaseParams,
-      memRouteParams,
-      memForceParams,
-      filterState,
-    ]);
+    }, [fieldPage, fieldPageSize, defaultPageSize, memBaseParams, memRouteParams, memForceParams, filterState]);
 
     // 处理筛选条件变化 onFiltersChange
     useEffect(() => {
@@ -837,7 +824,7 @@ const RestTable = forwardRef(
                     const newV = { ...values };
                     filterFormProps?.fields?.forEach((field) => {
                       const key = genColumnKey(field);
-                      if (!filterFieldKeys.includes(key)) {
+                      if (!filterFieldConf.keys.includes(key)) {
                         // 不再显示值范围内
                         newV[key] = null;
                       }

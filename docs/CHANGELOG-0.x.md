@@ -1,7 +1,8 @@
 # Release Notes
 
 ## 0.2.3
-- fix: 修复 `FieldsSettings` 若设置的label是node类型dequal对比会报错的问题
+- fix: 修复 FieldsSettings 若设置的label是node类型dequal对比会报错的问题
+- perf: 优化 FieldsSettings 统一处理使用的 fields （重置默认的hidden值为false）
 
 ## 0.2.2
 - fix: 修复 RestTable 设置隐藏列不生效问题
