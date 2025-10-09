@@ -127,14 +127,18 @@ export const useSettingsStorage = (key, columns) => {
       if (!isString(key) || !config) {
         // 非字符串，则直接返回
         keys = defaultShowKeys;
-      } else if (!config.keys || !deepEqual(config.allKeys, allKeys)) {
-        // 未配置；或者 配置的keys 和 当前的keys 不一致，则之前的配置不生效
+      } else if (!config.keys) {
+        // 未配置时使用默认的
         keys = defaultShowKeys;
+      } else if (!deepEqual(config.allKeys, allKeys)) {
+        // 如果allKeys 发生变动，仅配置的keys会生效
+        const _keys = config.keys.filter((key) => allKeys.includes(key));
+        // 如果配置的keys为空，则使用默认的
+        keys = _keys.length === 0 ? defaultShowKeys : _keys;
       } else {
         keys = config.keys;
       }
-      const _keys = deepEqual(keys, oldV) ? oldV : keys;
-      return _keys;
+      return deepEqual(keys, oldV) ? oldV : keys;
     });
   }, [allKeys, config, defaultShowKeys, key]);
 
