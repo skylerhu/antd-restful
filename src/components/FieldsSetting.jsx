@@ -11,13 +11,12 @@ import { useSettingsStorage } from "src/hooks/index";
 export const initFileds = (fields) => {
   return fields?.map((field) => {
     const key = genColumnKey(field);
-    const item = {
+    return {
       key,
       value: key,
       // 原有antd columns的配置项
       hidden: field.hidden,
     };
-    return item;
   }) || [];
 };
 
