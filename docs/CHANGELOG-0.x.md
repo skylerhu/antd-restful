@@ -1,7 +1,8 @@
 # Release Notes
 
 ## 0.2.3
-- fix: 修复 FieldsSettings 若设置的label是node类型dequal对比会报错的问题
+- fix: 修复 FieldsSettings 若设置的label是node类型，dequal对比会报错的问题
+    - 不是必现，主要出现在 value 频繁变更的场景下
 - fix: 修复 GridForm 未配置表单项时调用 form.setFieldsValue 方法出现warning问题
     - Warning: Instance created by `useForm` is not connected to any Form element. Forget to pass `form` prop?
     - 因为未配置表单项时 Form 不会渲染
