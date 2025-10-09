@@ -2,7 +2,9 @@
 
 ## 0.2.3
 - fix: 修复 FieldsSettings 若设置的label是node类型dequal对比会报错的问题
-- perf: 优化 FieldsSettings 统一处理使用的 fields （重置默认的hidden值为false）
+- fix: 修复 GridForm 未配置表单项时调用 form.setFieldsValue 方法出现warning问题
+    - Warning: Instance created by `useForm` is not connected to any Form element. Forget to pass `form` prop?
+    - 因为未配置表单项时 Form 不会渲染
 
 ## 0.2.2
 - fix: 修复 RestTable 设置隐藏列不生效问题
