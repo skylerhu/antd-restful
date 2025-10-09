@@ -40,6 +40,9 @@ const GridForm = forwardRef(
           value: item.key,
         }));
     }, [fields]);
+    const isShowForm = useMemo(() => {
+      return fields && fields?.length > 0;
+    }, [fields]);
 
     const fieldKeys = useDeepCompareMemoize(options.map((item) => item.value));
 
@@ -70,10 +73,12 @@ const GridForm = forwardRef(
 
     const setFieldsValueAndActiveKey = useCallback(
       (values) => {
-        form.setFieldsValue(values);
+        if (isShowForm) {
+          form.setFieldsValue(values);
+        }
         initActiveKey(values);
       },
-      [form, initActiveKey]
+      [form, initActiveKey, isShowForm]
     );
 
     // 暴露给ref调用的方法
@@ -99,11 +104,13 @@ const GridForm = forwardRef(
 
     const handleReset = useCallback(() => {
       const newV = handleValues(initValuesRef.current);
-      form.setFieldsValue(newV);
+      if (isShowForm) {
+        form.setFieldsValue(newV);
+      }
       if (isFunction(onReset)) {
         onReset(newV);
       }
-    }, [form, onReset, handleValues, initValuesRef]);
+    }, [form, onReset, handleValues, initValuesRef, isShowForm]);
 
     const renderItem = useCallback(
       (item) => {
@@ -189,7 +196,7 @@ const GridForm = forwardRef(
       return antdFormProps?.labelCol?.flex || "80px";
     }, [antdFormProps?.labelCol]);
 
-    if (!fields || fields.length === 0) {
+    if (!isShowForm) {
       // 没有配置字段，不显示
       return null;
     }
