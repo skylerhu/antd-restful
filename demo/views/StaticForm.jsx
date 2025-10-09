@@ -300,8 +300,8 @@ export default function StaticForm() {
   ];
 
   // 方便调试单个组件
-  const showFields = [];
-  // const showFields = ["table"];
+  // const showFields = [];
+  const showFields = ["table"];
 
   return (
     <div>

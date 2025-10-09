@@ -14,12 +14,8 @@ export const initFileds = (fields) => {
     return {
       key,
       value: key,
-      label: field.label || field.title || key,
-      tip: field.tip,
       // 原有antd columns的配置项
       hidden: field.hidden,
-      // 如果强制设置的 false，则禁止配置； 用于Checkbox
-      disabled: field.hidden === false,
     };
   }) || [];
 };
@@ -37,7 +33,7 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
       if (deepEqual(newV, oldV)) {
         return oldV;
       }
-      return newV || [];
+      return newV;
     });
   }, [value]);
 
@@ -47,12 +43,18 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   const checkIndeterminate = useMemo(() => keys.length > 0 && !checkAll, [keys, checkAll]);
 
   const data = useMemo(() => {
-    const options = fields?.map((field) => {
+    const options = value?.map((field) => {
+      const key = genColumnKey(field);
+      // 若是配置的node类型，在 dequal 中会报错，所以没有放在 fields 中
+      const label = field.label || field.title || key;
       return {
-        ...field,
+        key,
+        value: key,
+        // 如果强制设置的 false，则禁止配置； 用于Checkbox
+        disabled: field.hidden === false,
         label: (
           <div style={{ width: 100 }}>
-            {field.label}
+            {label}
             &nbsp;&nbsp;
             {field.tip && (
               <Tooltip title={field.tip}>
@@ -63,14 +65,15 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
         ),
       };
     });
-    const forceChecks = fields?.filter((option) => option.disabled).map((option) => option.value);
+    const forceChecks = options?.filter((option) => option.disabled).map((option) => option.value);
     return {
       options,
       forceChecks,
     };
-  }, [fields]);
+  }, [value]);
 
   useEffect(() => {
+    // 不能再回调中处理fields, 因为使用该组件的时候可能没有配置onChange
     if (isFunction(onChange)) {
       onChange(keys);
     }
