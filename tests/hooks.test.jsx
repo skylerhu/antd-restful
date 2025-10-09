@@ -711,8 +711,8 @@ describe("Hooks Tests", () => {
 
       const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
 
-      // Should fall back to default visible columns
-      expect(result.current.keys).toEqual(["name", "age", "address"]);
+      // Should filter stored keys to only include those in current allKeys
+      expect(result.current.keys).toEqual(["name"]);
     });
 
     it("should ignore stored config when keys are missing", () => {
@@ -880,6 +880,47 @@ describe("Hooks Tests", () => {
       // Should maintain the same state
       expect(result.current.allKeys).toEqual(firstResult.allKeys);
       expect(result.current.keys).toEqual(firstResult.keys);
+    });
+
+    it("should use configured keys even when it is empty array", () => {
+      const storedConfig = {
+        allKeys: ["name", "age", "email", "address"],
+        keys: [], // 配置的keys为空数组
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      // 当配置的keys为空数组时，应该使用配置的keys（空数组）
+      expect(result.current.keys).toEqual([]);
+    });
+
+    it("should use default keys when filtered keys becomes empty after allKeys change", () => {
+      // 设置一个配置，其中allKeys与当前不匹配，keys包含一些在当前allKeys中不存在的key
+      const storedConfig = {
+        allKeys: ["oldKey1", "oldKey2"], // 与当前的allKeys不匹配
+        keys: ["oldKey1", "oldKey2"], // 这些key在新的allKeys中不存在
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      // 当过滤后的keys为空时，应该使用默认的keys
+      expect(result.current.keys).toEqual(["name", "age", "address"]);
+    });
+
+    it("should use default keys when allKeys change and filtered keys is empty", () => {
+      // 设置一个配置，其中allKeys与当前不匹配，keys包含一些在当前allKeys中不存在的key
+      const storedConfig = {
+        allKeys: ["nonExistentKey1", "nonExistentKey2"], // 与当前的allKeys不匹配
+        keys: ["nonExistentKey1", "nonExistentKey2"], // 这些key在新的allKeys中不存在
+      };
+      localStorage.setItem("test-key", JSON.stringify(storedConfig));
+
+      const { result } = renderHook(() => hooks.useSettingsStorage("test-key", mockColumns));
+
+      // 当过滤后的keys为空时，应该使用默认的keys
+      expect(result.current.keys).toEqual(["name", "age", "address"]);
     });
   });
 });

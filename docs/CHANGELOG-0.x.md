@@ -1,5 +1,8 @@
 # Release Notes
 
+## 0.2.1
+- fix: 调整 `useSettingsStorage`: 当字段配置列发生变化时，之前手动配置的显示字段依然生效
+
 ## 0.2.0
 - perf: 优化 RestTable 和 RouteBaseTable 处理路由参数
     - 升级 query-string@9, `parseOptions` 支持通过 `types` 配置字段类型（连带打包无需额外安装）
