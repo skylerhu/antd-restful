@@ -18,6 +18,7 @@ import {
   commonFormat,
   findDataByPath,
   genColumnKey,
+  genFields,
   handleFormValues,
   tableSorterToApiSorter,
   toBeString,
@@ -308,30 +309,31 @@ const RestTable = forwardRef(
     const [enableAdvancedSearch, setEnableAdvancedSearch] = useState(filterFormProps?.advancedSearch || false);
     const [enableRefresh, setEnableRefresh] = useState(innerTools.refreshInterval > 0);
     // 控制显示的表单字段
-    const [filterFieldConf, setFilterFieldConf] = useState({ keys: [], fields: [] });
+    const [filterFieldKeys, setFilterFieldKeys] = useState([]);
     // 控制显示的列
-    const [showColumns, setShowColumns] = useState([]);
+    const [showColumnsKeys, setShowColumnsKeys] = useState([]);
 
     // 因为有未使用 FieldsSettings的场景，所以不能直接使用 value 作为设置的值设置, 无法监听columns的变化
-    const onToolsFilterChange = useCallback((keys, fields) => {
-      setFilterFieldConf({ keys, fields });
+    const onToolsFilterChange = useCallback((keys) => {
+      setFilterFieldKeys(keys);
     }, []);
-    const onToolsSettingsChange = useCallback((keys, fields) => {
-      setShowColumns(fields);
+    const onToolsSettingsChange = useCallback((keys) => {
+      setShowColumnsKeys(keys);
     }, []);
 
     const filterFields = useMemo(() => {
-      return filterFieldConf.fields.map((field) => {
-        const item = { ...field };
+      const fields = genFields(filterFormProps?.fields, filterFieldKeys);
+      fields?.forEach((field) => {
         if ([FieldType.NUMBER_RANGE, FieldType.DATE_RANGE_PICKER].includes(field.type)) {
-          item.antdFieldProps = {
+          field.antdFieldProps = {
             defaultEmptyValue: "",
             ...field.antdFieldProps,
           };
         }
-        return item;
       });
-    }, [filterFieldConf.fields]);
+      return fields;
+    }, [filterFieldKeys, filterFormProps?.fields]);
+    const showColumns = useMemo(() => genFields(columns, showColumnsKeys), [columns, showColumnsKeys]);
 
     useEffect(() => {
       if (isArray(dataSource)) {
@@ -824,7 +826,7 @@ const RestTable = forwardRef(
                     const newV = { ...values };
                     filterFormProps?.fields?.forEach((field) => {
                       const key = genColumnKey(field);
-                      if (!filterFieldConf.keys.includes(key)) {
+                      if (!filterFieldKeys.includes(key)) {
                         // 不再显示值范围内
                         newV[key] = null;
                       }

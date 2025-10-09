@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Checkbox, Space, Tooltip } from "antd";
 import { QuestionCircleOutlined, SettingOutlined } from "@ant-design/icons";
 import { dequal as deepEqual } from "dequal";
-import { genColumnKey, genFields } from "src/common/parser";
+import { genColumnKey } from "src/common/parser";
 import { isFunction } from "src/common/typeTools";
 import { useSettingsStorage } from "src/hooks/index";
 
@@ -23,13 +23,11 @@ export const initFileds = (fields) => {
 
 const FieldsSetting = ({ style, className, title, storageKey, value, onChange, children }) => {
 
-  const valueRef = useRef(value);
   const [fields, setFields] = useState(initFileds(value));
 
   const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, fields);
 
   useEffect(() => {
-    valueRef.current = value;
     setFields(oldV => {
       const newV = initFileds(value);
       if (deepEqual(newV, oldV)) {
@@ -75,9 +73,9 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   }, [value]);
 
   useEffect(() => {
+    // 不能再回调中处理fields, 因为使用该组件的时候可能没有配置onChange
     if (isFunction(onChange)) {
-      const _fields = genFields(valueRef.current, keys);
-      onChange(keys, _fields);
+      onChange(keys);
     }
   }, [keys, onChange]);
 
