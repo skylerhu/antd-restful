@@ -790,6 +790,19 @@ const RestTable = forwardRef(
       return false;
     }, [innerTools, extraTools, filterFormProps, restful]);
 
+    const filterSettingsValue = useMemo(() => {
+      return filterFormProps?.fields.map((field) => {
+        const k = genColumnKey(field);
+        // 若是表单有值，设置了隐藏，路由上的参数不会被重置
+        const hasFormValue = !isEmpty(filterState.formFilters[k]);
+        return {
+          ...field,
+          hidden: hasFormValue ? false : field.hidden,
+          tip: field.tip || (hasFormValue ? "表单项有值，请先重置/清除后再设置隐藏" : undefined),
+        };
+      });
+    }, [filterFormProps?.fields, filterState.formFilters]);
+
     return (
       <Space direction="vertical" {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
         {hasHeader && (
@@ -907,16 +920,7 @@ const RestTable = forwardRef(
                   )}
                   {restful && filterFormProps?.fields?.length && innerTools.advancedSearch && (
                     <FieldsSetting
-                      value={filterFormProps.fields.map((field) => {
-                        const k = genColumnKey(field);
-                        // 若是表单有值，设置了隐藏，路由上的参数不会被重置
-                        const hasFormValue = !isEmpty(filterState.formFilters[k]);
-                        return {
-                          ...field,
-                          hidden: hasFormValue ? false : field.hidden,
-                          tip: field.tip || (hasFormValue ? "表单项有值，请先重置/清除后再设置隐藏" : undefined),
-                        };
-                      })}
+                      value={filterSettingsValue}
                       title="设置搜索选项"
                       storageKey={isString(innerTools.advancedSearch) ? innerTools.advancedSearch : `${restful}-filter`}
                       onChange={onToolsFilterChange}

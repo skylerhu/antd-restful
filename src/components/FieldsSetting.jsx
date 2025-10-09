@@ -8,36 +8,46 @@ import { isFunction } from "src/common/typeTools";
 import { useSettingsStorage } from "src/hooks/index";
 
 
-export const initFileds = (fields) => {
+export const initFileds = (fields, simple = false) => {
   return fields?.map((field) => {
     const key = genColumnKey(field);
-    return {
+    const item = {
       key,
       value: key,
-      label: field.label || field.title || key,
-      tip: field.tip,
       // 原有antd columns的配置项
       hidden: field.hidden,
       // 如果强制设置的 false，则禁止配置； 用于Checkbox
       disabled: field.hidden === false,
     };
+    if (!simple) {
+      // 若是配置的node类型，在 dequal 中会报错，显示字段不用于对比
+      item.label = field.label || field.title || key;
+      item.tip = field.tip;
+    }
+    return item;
   }) || [];
 };
 
 
 const FieldsSetting = ({ style, className, title, storageKey, value, onChange, children }) => {
 
-  const [fields, setFields] = useState(initFileds(value));
+  const [fieldConf, setFieldConf] = useState({
+    fields: initFileds(value),
+    simple: initFileds(value, true),
+  });
 
-  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, fields);
+  const { keys, setKeys, allKeys } = useSettingsStorage(storageKey, fieldConf.simple);
 
   useEffect(() => {
-    setFields(oldV => {
-      const newV = initFileds(value);
-      if (deepEqual(newV, oldV)) {
+    setFieldConf(oldV => {
+      const simple = initFileds(value, true);
+      if (deepEqual(simple, oldV.simple)) {
         return oldV;
       }
-      return newV || [];
+      return {
+        simple,
+        fields: initFileds(value),
+      };
     });
   }, [value]);
 
@@ -47,7 +57,7 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
   const checkIndeterminate = useMemo(() => keys.length > 0 && !checkAll, [keys, checkAll]);
 
   const data = useMemo(() => {
-    const options = fields?.map((field) => {
+    const options = fieldConf.fields?.map((field) => {
       return {
         ...field,
         label: (
@@ -63,12 +73,12 @@ const FieldsSetting = ({ style, className, title, storageKey, value, onChange, c
         ),
       };
     });
-    const forceChecks = fields?.filter((option) => option.disabled).map((option) => option.value);
+    const forceChecks = fieldConf.fields?.filter((option) => option.disabled).map((option) => option.value);
     return {
       options,
       forceChecks,
     };
-  }, [fields]);
+  }, [fieldConf.fields]);
 
   useEffect(() => {
     if (isFunction(onChange)) {
