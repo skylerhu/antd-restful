@@ -241,13 +241,6 @@ const GridForm = forwardRef(
             <Button type="primary" htmlType="submit">
               搜索
             </Button>
-            {
-              fields.filter((item) => item.key !== activeItem?.key).map((item) => (
-                <Form.Item key={item.key} {...item.antdFormItemProps} name={item.key} hidden={true} noStyle>
-                  {renderItem(item)}
-                </Form.Item>
-              ))
-            }
           </Space>
         ) : (
           <>
