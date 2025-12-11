@@ -806,19 +806,29 @@ describe("Parser", () => {
       { key: "phone", title: "Phone", dataIndex: "phone", hidden: true },
     ];
 
-    test("should filter fields by keys", () => {
+    test("should set hidden property based on keys", () => {
       const keys = ["name", "email"];
       const result = parser.genFields(testFields, keys);
-      expect(result).toHaveLength(2);
-      expect(result[0].key).toBe("name");
-      expect(result[1].key).toBe("email");
+      // 返回所有 fields，但根据 keys 设置 hidden
+      expect(result).toHaveLength(5);
+      expect(result[0]).toEqual({ key: "name", title: "Name", dataIndex: "name", hidden: false });
+      expect(result[1]).toEqual({ key: "age", title: "Age", dataIndex: "age", hidden: true });
+      expect(result[2]).toEqual({ key: "email", title: "Email", dataIndex: "email", hidden: false });
+      expect(result[3]).toEqual({ dataIndex: "address", title: "Address", hidden: true });
+      expect(result[4]).toEqual({ key: "phone", title: "Phone", dataIndex: "phone", hidden: true });
     });
 
     test("should handle fields without key (using dataIndex)", () => {
       const keys = ["address"];
       const result = parser.genFields(testFields, keys);
-      expect(result).toHaveLength(1);
-      expect(result[0].dataIndex).toBe("address");
+      expect(result).toHaveLength(5);
+      // address 使用 dataIndex 作为 key，应该 hidden: false
+      expect(result[3]).toEqual({ dataIndex: "address", title: "Address", hidden: false });
+      // 其他都应该是 hidden: true
+      expect(result[0].hidden).toBe(true);
+      expect(result[1].hidden).toBe(true);
+      expect(result[2].hidden).toBe(true);
+      expect(result[4].hidden).toBe(true);
     });
 
     test("should handle array keys in fields", () => {
@@ -829,9 +839,10 @@ describe("Parser", () => {
       ];
       const keys = ["user__name", "email"];
       const result = parser.genFields(fieldsWithArrayKey, keys);
-      expect(result).toHaveLength(2);
-      expect(result[0].key).toEqual(["user", "name"]);
-      expect(result[1].key).toBe("email");
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ key: ["user", "name"], title: "User Name", hidden: false });
+      expect(result[1]).toEqual({ key: ["user", "age"], title: "User Age", hidden: true });
+      expect(result[2]).toEqual({ key: "email", title: "Email", hidden: false });
     });
 
     test("should return all fields when keys is empty", () => {
@@ -844,10 +855,14 @@ describe("Parser", () => {
       expect(parser.genFields(testFields, undefined)).toEqual(testFields);
     });
 
-    test("should return empty array when no matching fields", () => {
+    test("should set all fields hidden when no matching keys", () => {
       const keys = ["nonExistent"];
       const result = parser.genFields(testFields, keys);
-      expect(result).toEqual([]);
+      // 返回所有 fields，但都设置为 hidden: true
+      expect(result).toHaveLength(5);
+      result.forEach((field) => {
+        expect(field.hidden).toBe(true);
+      });
     });
 
     test("should handle empty fields array", () => {
@@ -863,8 +878,8 @@ describe("Parser", () => {
       const keys = ["customKey", "age"];
       const result = parser.genFields(fieldsWithBoth, keys);
       expect(result).toHaveLength(2);
-      expect(result[0].key).toBe("customKey");
-      expect(result[1].key).toBe("age");
+      expect(result[0]).toEqual({ key: "customKey", dataIndex: "name", title: "Name", hidden: false });
+      expect(result[1]).toEqual({ key: "age", title: "Age", hidden: false });
     });
 
     test("should not modify original fields array", () => {
@@ -882,9 +897,11 @@ describe("Parser", () => {
       ];
       const keys = ["name"];
       const result = parser.genFields(fieldsWithDuplicates, keys);
-      expect(result).toHaveLength(2);
-      expect(result[0].title).toBe("Name 1");
-      expect(result[1].title).toBe("Name 2");
+      // 返回所有 fields，重复的 key 都会被设置为 hidden: false
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ key: "name", title: "Name 1", hidden: false });
+      expect(result[1]).toEqual({ key: "name", title: "Name 2", hidden: false });
+      expect(result[2]).toEqual({ key: "age", title: "Age", hidden: true });
     });
 
     test("should set hidden to false when field is selected by keys", () => {
@@ -896,16 +913,26 @@ describe("Parser", () => {
       ];
       const keys = ["name", "email"];
       const result = parser.genFields(fieldsWithHidden, keys);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(4);
       expect(result[0]).toEqual({
         key: "name",
         title: "Name",
         hidden: false, // 原本是 true，现在被设置为 false
       });
       expect(result[1]).toEqual({
+        key: "age",
+        title: "Age",
+        hidden: true, // 不在 keys 中，设置为 true
+      });
+      expect(result[2]).toEqual({
         key: "email",
         title: "Email",
-        hidden: false, // 原本是 false，现在仍然是 false
+        hidden: false, // 在 keys 中，设置为 false
+      });
+      expect(result[3]).toEqual({
+        key: "phone",
+        title: "Phone",
+        hidden: true, // 不在 keys 中，设置为 true
       });
     });
 
@@ -917,16 +944,21 @@ describe("Parser", () => {
       ];
       const keys = ["name", "email"];
       const result = parser.genFields(fieldsWithoutHidden, keys);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(result[0]).toEqual({
         key: "name",
         title: "Name",
-        hidden: false, // 新增 hidden 属性并设置为 false
+        hidden: false, // 在 keys 中，设置为 false
       });
       expect(result[1]).toEqual({
+        key: "age",
+        title: "Age",
+        hidden: true, // 不在 keys 中，设置为 true
+      });
+      expect(result[2]).toEqual({
         key: "email",
         title: "Email",
-        hidden: false, // 新增 hidden 属性并设置为 false
+        hidden: false, // 在 keys 中，设置为 false
       });
     });
 
@@ -940,25 +972,35 @@ describe("Parser", () => {
       ];
       const keys = ["visible1", "hidden1", "visible2"];
       const result = parser.genFields(mixedFields, keys);
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(5);
       expect(result[0]).toEqual({
         key: "visible1",
         title: "Visible 1",
-        hidden: false, // 保持 false
+        hidden: false, // 在 keys 中
       });
       expect(result[1]).toEqual({
         key: "hidden1",
         title: "Hidden 1",
-        hidden: false, // 从 true 变为 false
+        hidden: false, // 在 keys 中，从 true 变为 false
       });
       expect(result[2]).toEqual({
         key: "visible2",
         title: "Visible 2",
-        hidden: false, // 新增并设置为 false
+        hidden: false, // 在 keys 中
+      });
+      expect(result[3]).toEqual({
+        key: "hidden2",
+        title: "Hidden 2",
+        hidden: true, // 不在 keys 中
+      });
+      expect(result[4]).toEqual({
+        key: "visible3",
+        title: "Visible 3",
+        hidden: true, // 不在 keys 中
       });
     });
 
-    test("should preserve other field properties when setting hidden to false", () => {
+    test("should preserve other field properties when setting hidden", () => {
       const complexFields = [
         {
           key: "user",
@@ -1008,13 +1050,18 @@ describe("Parser", () => {
       ];
       const keys = ["user__name", "email"];
       const result = parser.genFields(fieldsWithArrayKey, keys);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(result[0]).toEqual({
         key: ["user", "name"],
         title: "User Name",
         hidden: false, // 从 true 变为 false
       });
       expect(result[1]).toEqual({
+        key: ["user", "age"],
+        title: "User Age",
+        hidden: true, // 不在 keys 中
+      });
+      expect(result[2]).toEqual({
         key: "email",
         title: "Email",
         hidden: false, // 从 true 变为 false
@@ -1029,13 +1076,18 @@ describe("Parser", () => {
       ];
       const keys = ["name", "email"];
       const result = parser.genFields(fieldsWithDataIndex, keys);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(result[0]).toEqual({
         dataIndex: "name",
         title: "Name",
         hidden: false, // 从 true 变为 false
       });
       expect(result[1]).toEqual({
+        dataIndex: "age",
+        title: "Age",
+        hidden: true, // 不在 keys 中
+      });
+      expect(result[2]).toEqual({
         key: "email",
         title: "Email",
         hidden: false, // 从 true 变为 false
