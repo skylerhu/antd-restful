@@ -177,7 +177,7 @@ const GridForm = forwardRef(
 
     const dataSource = useMemo(() => {
       const column = antdListProps?.grid?.column || 3;
-      const _fields = [...fields];
+      const _fields = fields.filter((item) => !item.hidden);
       if (enablePlaceholder && column > 0 && (_fields.length + 1) % column === 0) {
         // 会被工具按钮遮挡，添加占位字段
         _fields.push({
@@ -189,7 +189,10 @@ const GridForm = forwardRef(
         });
       }
       _fields.push({ key: "__submit" });
-      return _fields;
+      return {
+        columns: _fields,
+        hiddenColumns: fields.filter((item) => item.hidden),
+      };
     }, [antdListProps?.grid?.column, fields, enablePlaceholder]);
 
     const labelFlex = useMemo(() => {
@@ -240,39 +243,48 @@ const GridForm = forwardRef(
             </Button>
           </Space>
         ) : (
-          <List
-            grid={{
-              gutter: 10,
-              column: 3,
-            }}
-            {...antdListProps}
-            dataSource={dataSource}
-            renderItem={(item) => (
-              <List.Item key={item.key}>
-                {item.key === "__submit" ? (
-                  <Form.Item style={{ marginBottom: 0 }}>
-                    <Space style={{ marginLeft: labelFlex }}>
-                      <Button type="primary" htmlType="submit">
-                        {submitTitle}
-                      </Button>
-                      <Button htmlType="reset" onClick={() => handleReset()}>
-                        {resetTitle}
-                      </Button>
-                    </Space>
-                  </Form.Item>
-                ) : (
-                  <Form.Item
-                    style={{ marginBottom: 0 }}
-                    {...item.antdFormItemProps}
-                    name={item.key}
-                    label={item.label || item.key}
-                  >
-                    {renderItem(item)}
-                  </Form.Item>
-                )}
-              </List.Item>
-            )}
-          />
+          <>
+            <List
+              grid={{
+                gutter: 10,
+                column: 3,
+              }}
+              {...antdListProps}
+              dataSource={dataSource.columns}
+              renderItem={(item) => (
+                <List.Item key={item.key}>
+                  {item.key === "__submit" ? (
+                    <Form.Item style={{ marginBottom: 0 }}>
+                      <Space style={{ marginLeft: labelFlex }}>
+                        <Button type="primary" htmlType="submit">
+                          {submitTitle}
+                        </Button>
+                        <Button htmlType="reset" onClick={() => handleReset()}>
+                          {resetTitle}
+                        </Button>
+                      </Space>
+                    </Form.Item>
+                  ) : (
+                    <Form.Item
+                      style={{ marginBottom: 0 }}
+                      {...item.antdFormItemProps}
+                      name={item.key}
+                      label={item.label || item.key}
+                    >
+                      {renderItem(item)}
+                    </Form.Item>
+                  )}
+                </List.Item>
+              )}
+            />
+            {
+              dataSource.hiddenColumns.map((item) => (
+                <Form.Item key={item.key} {...item.antdFormItemProps} name={item.key} hidden={true} noStyle>
+                  {renderItem(item)}
+                </Form.Item>
+              ))
+            }
+          </>
         )}
       </Form>
     );
