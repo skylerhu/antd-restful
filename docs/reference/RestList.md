@@ -14,34 +14,39 @@
 ### 参数说明
 
 
-| 参数                  | 说明                                                                             | 类型                      | 默认值           | 版本  |
-| ------------------- | ------------------------------------------------------------------------------ | ----------------------- | ------------- | --- |
-| style               | 自定义样式                                                                          | `object`                | -             | -   |
-| className           | 自定义类名                                                                          | `string`                | -             | -   |
-| **远程数据相关**          |                                                                                |                         |               |     |
-| restful             | RESTful API 接口地址                                                               | `string`                | -             | -   |
-| reqConfig           | 请求配置，axios 请求的额外配置                                                             | `object`                | -             | -   |
-| parseOptions        | 解析 query 参数的选项，[query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object`                | -             | -   |
-| baseParams          | 基础请求参数                                                                         | `object`                | -             | -   |
-| routeParams         | 路由参数                                                                           | `object`                | -             | -   |
-| forceParams         | 强制参数，会覆盖路由参数和表单参数                                                              | `object`                | -             | -   |
-| fieldPage           | 分页字段名                                                                          | `string`                | `'page'`      | -   |
-| fieldPageSize       | 每页条数字段名                                                                        | `string`                | `'page_size'` | -   |
-| defaultPageSize     | 默认每页条数                                                                         | `number`                | `20`          | -   |
-| parseRowsPath       | 解析数据行的路径                                                                       | `string`                | `'results'`   | -   |
-| parseTotalPath      | 解析总数的路径                                                                        | `string`                | `'count'`     | -   |
-| **显示和交互**           |                                                                                |                         |               |     |
-| isActive            | 是否激活，为 false 时不更新数据                                                            | `boolean`               | `true`        | -   |
-| onFiltersChange     | 筛选条件变化回调                                                                       | `function(filters)`     | -             | -   |
-| onDataSourceChange  | 数据源变化回调                                                                        | `function(dataSource)`  | -             | -   |
-| rowKey              | 行数据的 key                                                                       | `string`                | `'id'`        | -   |
-| dataSource          | 静态数据源，设置后不使用 restful                                                           | `array`                 | -             | -   |
-| renderItem          | 自定义列表项渲染函数，不封装 List.Item                                                       | `function(item, index)` | -             | -   |
-| grid                | 列表栅格配置                                                                         | `object`                | -             | -   |
-| pagination          | 分页器配置，设置后启用分页模式（优先级高于 loadMore）                                                | `boolean | object`      | -             | -   |
-| filterFormProps     | 筛选表单配置，详见 [GridForm](./GridForm.md)                                            | `object`                | -             | -   |
-| **Ant Design 原生配置** |                                                                                |                         |               |     |
-| antdListProps       | Ant Design [List](https://ant.design/components/list-cn) 组件的属性                 | `object`                | -             | -   |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| --- | --- | --- | --- | --- | --- |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 List `style` | - |
+| className | 自定义类名 | `string` | - | 透传 List `className` | - |
+| **数据与渲染** | | | | | |
+| dataSource | 静态数据源，设置后不使用 restful 远程加载 | `array` | - | 覆盖 List `dataSource`，由内部管理 | - |
+| renderItem | 自定义列表项渲染函数，不封装 List.Item | `function(item, index)` | - | 透传 List `renderItem` | - |
+| rowKey | 行数据的唯一标识字段名 | `string` | `'id'` | 透传 List `rowKey` | - |
+| **分页与布局** | | | | | |
+| pagination | 分页器配置，设置后启用分页模式（优先级高于 loadMore） | `boolean \| object` | - | 覆盖 List `pagination`，内部封装分页逻辑 | - |
+| grid | 列表栅格配置，详见下方 grid 配置项 | `object` | - | 透传 List `grid`，增加 column 倍数校验 | - |
+| **回调函数** | | | | | |
+| onDataSourceChange | 数据源变化回调 | `function({ dataSource, total })` | - | - | - |
+| onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - | - |
+| **远程数据配置** | | | | | |
+| restful | RESTful API 接口地址 | `string` | - | - | - |
+| reqConfig | 请求配置，axios 请求的额外配置 | `object` | - | - | - |
+| parseOptions | 解析 query 参数的选项，[query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | - | - |
+| baseParams | 基础请求参数 | `object` | - | - | - |
+| routeParams | 路由参数 | `object` | - | - | - |
+| forceParams | 强制参数，会覆盖路由参数和表单参数 | `object` | - | - | - |
+| **请求字段配置** | | | | | |
+| fieldPage | 分页字段名 | `string` | `'page'` | - | - |
+| fieldPageSize | 每页条数字段名 | `string` | `'page_size'` | - | - |
+| defaultPageSize | 默认每页条数 | `number` | `20` | - | - |
+| parseRowsPath | 解析数据行的路径 | `string` | `'results'` | - | - |
+| parseTotalPath | 解析总数的路径 | `string` | `'count'` | - | - |
+| **控制与筛选** | | | | | |
+| isActive | 是否激活，为 false 时不请求数据 | `boolean` | `true` | - | - |
+| filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | 内部生成 List `header` | - |
+| **Ant Design 原生配置** | | | | | |
+| antdListProps | Ant Design [List](https://ant.design/components/list-cn) 的其余属性。注意 `loading` / `header` / `loadMore` / `pagination` / `dataSource` / `renderItem` / `rowKey` 由 RestList 内部管理，通过此属性设置会被覆盖 | `object` | - | 透传剩余属性 | - |
 
 
 **grid 配置项：**
