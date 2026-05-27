@@ -275,64 +275,7 @@ function MyComponent() {
 
 ### useSafeRequest
 
-提供安全的 HTTP 请求功能，支持请求取消和防抖。
-
-**签名：**
-```javascript
-const [makeRequest] = useSafeRequest()
-```
-
-**返回值：**
-- `makeRequest` (function): 请求函数，接受配置选项，返回包含各种 HTTP 方法的对象
-
-**特性：**
-- 自动处理组件卸载后的请求取消
-- 支持请求防抖
-- 支持请求去重
-- 提供完整的 HTTP 方法（get, post, put, patch, delete 等）
-
-**使用示例：**
-```javascript
-import { useSafeRequest } from 'src/requests';
-
-function MyComponent() {
-  const [makeRequest] = useSafeRequest();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await makeRequest({ delay: 300, key: 'fetch-data' })
-        .get('/api/data');
-      setData(response.data);
-    } catch (error) {
-      console.error('Fetch failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createItem = async (itemData) => {
-    try {
-      const response = await makeRequest({ key: 'create-item' })
-        .post('/api/items', itemData);
-      console.log('Item created:', response.data);
-    } catch (error) {
-      console.error('Create failed:', error);
-    }
-  };
-
-  return (
-    <div>
-      <button onClick={fetchData} disabled={loading}>
-        {loading ? 'Loading...' : 'Fetch Data'}
-      </button>
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
-    </div>
-  );
-}
-```
+> 已迁移至 [请求模块文档](./requests.md#usesaferequest)，包含完整的 API 说明、防抖行为、请求去重及拦截器用法。
 
 ## 最佳实践
 
@@ -352,14 +295,12 @@ function MyComponent() {
 - 使用 `useDictState` 管理相关的多个状态值
 
 ### 4. 请求 Hooks 使用建议
-- 使用 `useSafeRequest` 替代直接的 axios 调用
-- 合理设置请求的 key 和 delay 参数
-- 在组件卸载时自动取消未完成的请求
+- 详见 [请求模块文档](./requests.md)
 
 ## 注意事项
 
 1. **存储限制**：localStorage 和 sessionStorage 有存储大小限制（通常为 5-10MB）
 2. **序列化**：存储 Hooks 会自动进行 JSON 序列化，不支持存储函数等特殊类型
 3. **性能考虑**：`useDeepCompareMemoize` 的深度比较可能影响性能，避免在频繁更新的场景中使用
-4. **请求取消**：`useSafeRequest` 会自动处理请求取消，但建议在组件卸载前手动取消重要的请求
+4. **请求取消**：详见 [请求模块文档](./requests.md)
 5. **定时器清理**：虽然 Hooks 会自动清理定时器，但在复杂场景下建议手动控制定时器的生命周期
