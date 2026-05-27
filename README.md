@@ -74,10 +74,11 @@ setGlobalConfig({
 | 组件 | 说明 |
 |------|------|
 | [RestTable](./docs/reference/RestTable.md) | Table 的 RESTful 封装，支持远程数据加载、筛选、工具栏及列设置 |
+| [RestList](./docs/reference/RestList.md) | List 的 RESTful 封装，支持 loadMore / pagination 两种分页模式、筛选表单及 Grid 布局 |
 | [GridForm](./docs/reference/GridForm.md) | 响应式栅格表单，支持多种字段类型与校验 |
 | [LongText](./docs/reference/LongText.md) | 长文本截断展示，支持弹窗查看完整内容与模板格式化 |
 | [CopyView](./docs/reference/CopyView.md) | 一键复制文本，支持字符串、数组、对象等多种数据类型 |
-| [RouteBaseTable](./docs/reference/RouteBaseTable.md) | RestTable 变体，将筛选参数同步到 URL，刷新后恢复筛选状态 |
+| [RouteBaseTable](./docs/reference/RouteBaseTable.md) | RestTable/RestList 的路由联动封装，通过 viewType 切换表格/列表，将筛选参数同步到 URL |
 
 ### 2.2 表单项 (formitems)
 
@@ -106,5 +107,6 @@ setGlobalConfig({
 
 
 ## 三、应用场景
-- [依赖restful接口的列表数据展示](./demo/views/TableDemo.jsx)
+- [依赖restful接口的表格数据展示](./demo/views/TableDemo.jsx)
+- [依赖restful接口的列表数据展示](./demo/views/ListDemo.jsx)
 - [动态表单中的应用](./demo/views/JSONForm.jsx)

@@ -1,14 +1,22 @@
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { dequal as deepEqual } from "dequal";
+import { ViewType } from "src/common/constants";
 import { guessQueryTypes, parseQueryTypes } from "src/common/parser";
 import { isEmpty, isFunction } from "src/common/typeTools";
+import RestList from "src/components/RestList";
 import RestTable from "src/components/RestTable";
 import globalConfig from "src/config";
 import { useDeepCompareMemoize } from "src/hooks";
 
 // 因为兼容不了react-router v5和v6 版本，所以传递 location 进来，然后父类组件实现路由的变更
-const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref) => {
+// viewType="list" 一般与 pagination 配合使用；loadMore 模式数据追加累积，不适合通过 URL 参数还原状态
+const VIEW_TYPE_MAP = {
+  [ViewType.LIST]: RestList,
+  [ViewType.TABLE]: RestTable,
+};
+
+const RouteBaseTable = forwardRef(({ location, onSearchChange, viewType = ViewType.TABLE, restProps }, ref) => {
   const {
     parseOptions,
     parseTypes,
@@ -16,6 +24,7 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
     columns,
     filterFormProps,
   } = restProps;
+  const ViewComponent = VIEW_TYPE_MAP[viewType] || RestTable;
   const searchRef = useRef(location.search);
 
   const memParseOptions = useDeepCompareMemoize(parseOptions);
@@ -88,16 +97,16 @@ const RouteBaseTable = forwardRef(({ location, onSearchChange, restProps }, ref)
   );
 
   if (params === undefined || params === null || guessTypes === null) {
-    // 等待params根据search初始化完成
     return null;
   }
 
-  return <RestTable ref={ref} {...restProps} routeParams={params} onFiltersChange={onChange} />;
+  return <ViewComponent ref={ref} {...restProps} routeParams={params} onFiltersChange={onChange} />;
 });
 
 RouteBaseTable.propTypes = {
   location: PropTypes.object,
   onSearchChange: PropTypes.func,
+  viewType: PropTypes.oneOf(ViewType.map((o) => o.value)),
   restProps: PropTypes.object,
 };
 

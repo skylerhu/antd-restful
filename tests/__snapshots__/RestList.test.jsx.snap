@@ -1,0 +1,407 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RestList 快照测试 should match snapshot with basic props 1`] = `
+<div
+  class="ant-list ant-list-split css-dev-only-do-not-override-1kf000u"
+>
+  <div
+    class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+  >
+    <div
+      class="ant-spin-container"
+    >
+      <ul
+        class="ant-list-items"
+      >
+        <li
+          class="ant-list-item"
+        >
+          张三
+        </li>
+        <li
+          class="ant-list-item"
+        >
+          李四
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RestList 快照测试 should match snapshot with filter form 1`] = `
+<div
+  class="ant-list ant-list-split ant-list-loading css-dev-only-do-not-override-1kf000u"
+>
+  <div
+    class="ant-list-header"
+  >
+    <div
+      class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+    >
+      <div
+        class="ant-spin-container"
+      >
+        <form
+          class="ant-form ant-form-horizontal css-dev-only-do-not-override-1kf000u"
+        >
+          <div
+            class="ant-list ant-list-split ant-list-grid css-dev-only-do-not-override-1kf000u"
+          >
+            <div
+              class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+            >
+              <div
+                class="ant-spin-container"
+              >
+                <div
+                  class="ant-row css-dev-only-do-not-override-1kf000u"
+                  style="margin-left: -5px; margin-right: -5px;"
+                >
+                  <div
+                    style="width: 33.333333333333336%; max-width: 33.333333333333336%;"
+                  >
+                    <div
+                      class="ant-col css-dev-only-do-not-override-1kf000u"
+                      style="padding-left: 5px; padding-right: 5px; flex: 1 1 auto;"
+                    >
+                      <div
+                        class="ant-list-item"
+                      >
+                        <div
+                          class="ant-form-item css-dev-only-do-not-override-1kf000u ant-form-item-has-success"
+                          style="margin-bottom: 0px;"
+                        >
+                          <div
+                            class="ant-row ant-form-item-row css-dev-only-do-not-override-1kf000u"
+                          >
+                            <div
+                              class="ant-col ant-form-item-label css-dev-only-do-not-override-1kf000u"
+                              style="flex: 0 0 80px;"
+                            >
+                              <label
+                                class=""
+                                for="name"
+                                title="姓名"
+                              >
+                                姓名
+                              </label>
+                            </div>
+                            <div
+                              class="ant-col ant-form-item-control css-dev-only-do-not-override-1kf000u"
+                            >
+                              <div
+                                class="ant-form-item-control-input"
+                              >
+                                <div
+                                  class="ant-form-item-control-input-content"
+                                >
+                                  <input
+                                    class="ant-input css-dev-only-do-not-override-1kf000u ant-input-outlined ant-input-status-success"
+                                    id="name"
+                                    type="text"
+                                    value=""
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="width: 33.333333333333336%; max-width: 33.333333333333336%;"
+                  >
+                    <div
+                      class="ant-col css-dev-only-do-not-override-1kf000u"
+                      style="padding-left: 5px; padding-right: 5px; flex: 1 1 auto;"
+                    >
+                      <div
+                        class="ant-list-item"
+                      >
+                        <div
+                          class="ant-form-item css-dev-only-do-not-override-1kf000u"
+                          style="margin-bottom: 0px;"
+                        >
+                          <div
+                            class="ant-row ant-form-item-row css-dev-only-do-not-override-1kf000u"
+                          >
+                            <div
+                              class="ant-col ant-form-item-control css-dev-only-do-not-override-1kf000u"
+                            >
+                              <div
+                                class="ant-form-item-control-input"
+                              >
+                                <div
+                                  class="ant-form-item-control-input-content"
+                                >
+                                  <div
+                                    class="ant-space css-dev-only-do-not-override-1kf000u ant-space-horizontal ant-space-align-center ant-space-gap-row-small ant-space-gap-col-small"
+                                    style="margin-left: 80px;"
+                                  >
+                                    <div
+                                      class="ant-space-item"
+                                    >
+                                      <button
+                                        class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-primary ant-btn-color-primary ant-btn-variant-solid"
+                                        type="submit"
+                                      >
+                                        <span>
+                                          搜 索
+                                        </span>
+                                      </button>
+                                    </div>
+                                    <div
+                                      class="ant-space-item"
+                                    >
+                                      <button
+                                        class="ant-btn css-dev-only-do-not-override-1kf000u ant-btn-default ant-btn-color-default ant-btn-variant-outlined"
+                                        type="reset"
+                                      >
+                                        <span>
+                                          重 置
+                                        </span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div
+    class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+  >
+    <div
+      class="ant-spin-container"
+    >
+      <div
+        style="min-height: 53px;"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RestList 快照测试 should match snapshot with grid 1`] = `
+<div
+  class="ant-list ant-list-split ant-list-grid css-dev-only-do-not-override-1kf000u"
+>
+  <div
+    class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+  >
+    <div
+      class="ant-spin-container"
+    >
+      <div
+        class="ant-row css-dev-only-do-not-override-1kf000u"
+        style="margin-left: -8px; margin-right: -8px;"
+      >
+        <div
+          style="width: 50%; max-width: 50%;"
+        >
+          <div
+            class="ant-col css-dev-only-do-not-override-1kf000u"
+            style="padding-left: 8px; padding-right: 8px; flex: 1 1 auto;"
+          >
+            <div
+              class="ant-list-item"
+            >
+              张三
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`RestList 快照测试 should match snapshot with pagination 1`] = `
+<div
+  class="ant-list ant-list-split ant-list-loading ant-list-something-after-last-item css-dev-only-do-not-override-1kf000u"
+>
+  <div
+    class="ant-spin-nested-loading css-dev-only-do-not-override-1kf000u"
+  >
+    <div
+      class="ant-spin-container"
+    >
+      <div
+        style="min-height: 53px;"
+      />
+    </div>
+  </div>
+  <div
+    class="ant-list-pagination"
+  >
+    <ul
+      class="ant-pagination ant-pagination-end ant-pagination-mini css-dev-only-do-not-override-1kf000u"
+    >
+      <li
+        class="ant-pagination-total-text"
+      >
+        <span>
+          总计：
+          0
+           条
+        </span>
+      </li>
+      <li
+        aria-disabled="true"
+        class="ant-pagination-prev ant-pagination-disabled"
+        title="Previous Page"
+      >
+        <button
+          class="ant-pagination-item-link"
+          disabled=""
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            aria-label="left"
+            class="anticon anticon-left"
+            role="img"
+          >
+            <svg
+              aria-hidden="true"
+              data-icon="left"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="64 64 896 896"
+              width="1em"
+            >
+              <path
+                d="M724 218.3V141c0-6.7-7.7-10.4-12.9-6.3L260.3 486.8a31.86 31.86 0 000 50.3l450.8 352.1c5.3 4.1 12.9.4 12.9-6.3v-77.3c0-4.9-2.3-9.6-6.1-12.6l-360-281 360-281.1c3.8-3 6.1-7.7 6.1-12.6z"
+              />
+            </svg>
+          </span>
+        </button>
+      </li>
+      <li
+        class="ant-pagination-item ant-pagination-item-1 ant-pagination-item-disabled"
+        tabindex="0"
+        title="1"
+      >
+        <a
+          rel="nofollow"
+        >
+          1
+        </a>
+      </li>
+      <li
+        aria-disabled="true"
+        class="ant-pagination-next ant-pagination-disabled"
+        title="Next Page"
+      >
+        <button
+          class="ant-pagination-item-link"
+          disabled=""
+          tabindex="-1"
+          type="button"
+        >
+          <span
+            aria-label="right"
+            class="anticon anticon-right"
+            role="img"
+          >
+            <svg
+              aria-hidden="true"
+              data-icon="right"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="64 64 896 896"
+              width="1em"
+            >
+              <path
+                d="M765.7 486.8L314.9 134.7A7.97 7.97 0 00302 141v77.3c0 4.9 2.3 9.6 6.1 12.6l360 281.1-360 281.1c-3.9 3-6.1 7.7-6.1 12.6V883c0 6.7 7.7 10.4 12.9 6.3l450.8-352.1a31.96 31.96 0 000-50.4z"
+              />
+            </svg>
+          </span>
+        </button>
+      </li>
+      <li
+        class="ant-pagination-options"
+      >
+        <div
+          aria-label="Page Size"
+          class="ant-select ant-select-sm ant-select-outlined ant-pagination-options-size-changer css-dev-only-do-not-override-1kf000u ant-select-single ant-select-show-arrow ant-select-show-search"
+        >
+          <div
+            class="ant-select-selector"
+          >
+            <span
+              class="ant-select-selection-wrap"
+            >
+              <span
+                class="ant-select-selection-search"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls="rc_select_TEST_OR_SSR_list"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-label="Page Size"
+                  aria-owns="rc_select_TEST_OR_SSR_list"
+                  autocomplete="off"
+                  class="ant-select-selection-search-input"
+                  id="rc_select_TEST_OR_SSR"
+                  role="combobox"
+                  type="search"
+                  value=""
+                />
+              </span>
+              <span
+                class="ant-select-selection-item"
+                title="20 / page"
+              >
+                20 / page
+              </span>
+            </span>
+          </div>
+          <span
+            aria-hidden="true"
+            class="ant-select-arrow"
+            style="user-select: none;"
+            unselectable="on"
+          >
+            <span
+              aria-label="down"
+              class="anticon anticon-down ant-select-suffix"
+              role="img"
+            >
+              <svg
+                aria-hidden="true"
+                data-icon="down"
+                fill="currentColor"
+                focusable="false"
+                height="1em"
+                viewBox="64 64 896 896"
+                width="1em"
+              >
+                <path
+                  d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"
+                />
+              </svg>
+            </span>
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+`;
