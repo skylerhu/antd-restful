@@ -21,14 +21,36 @@
 
 使用示例：
 ```jsx
+// 默认导入（CommonJS 兼容场景）
 import antdRestful from "antd-restful";
+// 某些构建环境下需要使用 namespace import
+// import * as antdRestful from "antd-restful";
 
 const {
   GridForm, RestTable,
-  formitems: { RestSelect, RestTable },
+  request,
+  formitems: { RestSelect },
+  apiTools: { useSafeRequest },
   constants: { FieldType },
   typeTools: { isEmpty },
 } = antdRestful;
+```
+
+最常见的用法——在组件中发起安全的 HTTP 请求：
+```jsx
+import antdRestful from "antd-restful";
+const { apiTools: { useSafeRequest } } = antdRestful;
+
+function UserList() {
+  const [makeRequest] = useSafeRequest();
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    makeRequest().get('/api/users').then((resp) => setUsers(resp.data));
+  }, []);
+
+  return <RestTable dataSource={users} columns={[{ title: '名称', dataIndex: 'name' }]} />;
+}
 ```
 
 ## 二. 使用(Usage)
@@ -78,7 +100,7 @@ setGlobalConfig({
 
 | 模块 | 说明 |
 |------|------|
-| [requests](./docs/reference/requests.md) | HTTP 请求模块，提供 axios 实例、拦截器、useSafeRequest 等 |
+| [apiTools](./docs/reference/requests.md) | HTTP 请求模块，提供 axios 实例、拦截器、useSafeRequest 等 |
 | [hooks](./docs/reference/hooks.md) | React Hooks 集合：localStorage/sessionStorage、定时器、防抖等 |
 | [typeTools](./docs/reference/typeTools.md) | 类型判断工具函数：isNull、isBlank 等 |
 

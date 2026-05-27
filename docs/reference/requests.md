@@ -1,6 +1,21 @@
-# 请求模块 (requests)
+# 请求模块 (apiTools)
 
 本文档介绍 antd-restful 的 HTTP 请求模块，基于 [axios](https://axios-http.com/) 封装，提供统一的请求实例、拦截器机制、错误通知、请求取消与防抖等能力。
+
+**导入方式：**
+
+```javascript
+import antdRestful from 'antd-restful';
+
+// request 实例（axios）直接从顶层获取
+const { request } = antdRestful;
+
+// 其他工具函数和 Hook 通过 apiTools 命名空间获取
+const { apiTools: { useSafeRequest, makeSafeRequest, formatRequestError, getCookie } } = antdRestful;
+
+// 拦截器 ID 也在 apiTools 下
+const { apiTools: { reqInterceptor, resInterceptor } } = antdRestful;
+```
 
 ## useSafeRequest
 
@@ -36,7 +51,8 @@ const [makeRequest] = useSafeRequest()
 最常见的用法——不传 `key`，每次调用自动分配独立 ID，组件卸载时统一取消：
 
 ```javascript
-import { useSafeRequest } from 'src/requests';
+import antdRestful from 'antd-restful';
+const { apiTools: { useSafeRequest } } = antdRestful;
 
 function MyComponent() {
   const [makeRequest] = useSafeRequest();
@@ -79,7 +95,8 @@ function MyComponent() {
 需要防抖或去重时，传入 `delay` 和 `key`：
 
 ```javascript
-import { useSafeRequest } from 'src/requests';
+import antdRestful from 'antd-restful';
+const { apiTools: { useSafeRequest } } = antdRestful;
 
 function SearchComponent() {
   const [makeRequest] = useSafeRequest();
@@ -134,7 +151,8 @@ const onTabChange = (tabKey) => {
 模块默认导出一个预配置的 axios 实例，可直接用于所有标准的 axios 方法：
 
 ```javascript
-import request from 'src/requests';
+import antdRestful from 'antd-restful';
+const { request } = antdRestful;
 
 const response = await request.get('/api/users');
 ```
@@ -178,7 +196,7 @@ setGlobalConfig({
 模块内置了一个请求拦截器，自动为写操作（POST / PUT / PATCH / DELETE）附加 Django CSRF Token：
 
 ```javascript
-import { reqInterceptor } from 'src/requests';
+const { apiTools: { reqInterceptor } } = antdRestful;
 ```
 
 Token 获取顺序：
@@ -191,7 +209,7 @@ Token 获取顺序：
 模块内置了一个响应拦截器，统一处理请求错误：
 
 ```javascript
-import { resInterceptor } from 'src/requests';
+const { apiTools: { resInterceptor } } = antdRestful;
 ```
 
 默认行为：
@@ -207,7 +225,8 @@ import { resInterceptor } from 'src/requests';
 #### 添加自定义拦截器
 
 ```javascript
-import request, { reqInterceptor, resInterceptor } from 'src/requests';
+import antdRestful from 'antd-restful';
+const { request, apiTools: { reqInterceptor, resInterceptor } } = antdRestful;
 
 // 添加请求拦截器：注入 Authorization 头
 request.interceptors.request.use((config) => {
@@ -237,7 +256,8 @@ request.interceptors.response.use(
 如果内置拦截器不满足需求，可以移除后替换为自定义实现：
 
 ```javascript
-import request, { reqInterceptor, resInterceptor } from 'src/requests';
+import antdRestful from 'antd-restful';
+const { request, apiTools: { reqInterceptor, resInterceptor } } = antdRestful;
 
 // 移除内置拦截器
 request.interceptors.request.eject(reqInterceptor);
@@ -265,7 +285,7 @@ request.interceptors.response.use(
 #### 禁用单次请求的错误通知
 
 ```javascript
-import request from 'src/requests';
+const { request } = antdRestful;
 
 // disableNotiError 会阻止内置响应拦截器弹出通知
 request.get('/api/silent', { disableNotiError: true });
@@ -276,7 +296,8 @@ request.get('/api/silent', { disableNotiError: true });
 非 Hook 版本的安全请求工厂，适用于非 React 组件的场景。使用方式与 `useSafeRequest` 返回的 `makeRequest` 相同，但需要手动调用 `unmount()` 释放资源。
 
 ```javascript
-import { makeSafeRequest } from 'src/requests';
+import antdRestful from 'antd-restful';
+const { apiTools: { makeSafeRequest } } = antdRestful;
 
 const makeRequest = makeSafeRequest();
 
@@ -294,7 +315,7 @@ makeRequest.unmount();
 格式化 axios 错误对象为通知友好的格式。
 
 ```javascript
-import { formatRequestError } from 'src/requests';
+const { apiTools: { formatRequestError } } = antdRestful;
 
 const { message, description } = formatRequestError(error);
 // message: "HttpError(404)" 或 "未知错误"
@@ -306,23 +327,22 @@ const { message, description } = formatRequestError(error);
 从 `document.cookie` 中读取指定名称的 Cookie 值。
 
 ```javascript
-import { getCookie } from 'src/requests';
+const { apiTools: { getCookie } } = antdRestful;
 
 const token = getCookie('csrftoken');
 ```
 
 ## 导出总览
 
-
-| 导出名                  | 类型       | 说明                     |
-| -------------------- | -------- | ---------------------- |
-| `default`            | axios 实例 | 预配置的 axios 实例          |
-| `reqInterceptor`     | number   | 内置请求拦截器 ID，可用于 `eject` |
-| `resInterceptor`     | number   | 内置响应拦截器 ID，可用于 `eject` |
-| `useSafeRequest`     | Hook     | React Hook，组件级安全请求     |
-| `makeSafeRequest`    | function | 非 Hook 版安全请求工厂         |
-| `formatRequestError` | function | 错误格式化工具                |
-| `getCookie`          | function | Cookie 读取工具            |
-| `AbortablePromise`   | class    | 可中止的 Promise 实现        |
+| 访问路径 | 类型 | 说明 |
+|------|------|------|
+| `antdRestful.request` | axios 实例 | 预配置的 axios 实例 |
+| `antdRestful.apiTools.reqInterceptor` | number | 内置请求拦截器 ID，可用于 `eject` |
+| `antdRestful.apiTools.resInterceptor` | number | 内置响应拦截器 ID，可用于 `eject` |
+| `antdRestful.apiTools.useSafeRequest` | Hook | React Hook，组件级安全请求 |
+| `antdRestful.apiTools.makeSafeRequest` | function | 非 Hook 版安全请求工厂 |
+| `antdRestful.apiTools.formatRequestError` | function | 错误格式化工具 |
+| `antdRestful.apiTools.getCookie` | function | Cookie 读取工具 |
+| `antdRestful.apiTools.AbortablePromise` | class | 可中止的 Promise 实现 |
 
 
