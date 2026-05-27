@@ -1,6 +1,6 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { Button, List, Spin } from "antd";
+import { Button, List, Space, Spin } from "antd";
 import { dequal as deepEqual } from "dequal";
 import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE, DEFAULT_ROWS_PATH, FieldType } from "src/common/constants";
 import { clearEmptyValue, findDataByPath, genColumnKey, genFields, handleFormValues } from "src/common/parser";
@@ -39,7 +39,9 @@ const RestList = forwardRef(
       grid,
       pagination,
       antdListProps,
+      antdSpaceProps,
       filterFormProps,
+      loadMoreProps,
     },
     ref
   ) => {
@@ -280,14 +282,17 @@ const RestList = forwardRef(
       if (usePagination || !restful || !hasMore) {
         return null;
       }
+      if (isFunction(loadMoreProps?.render)) {
+        return loadMoreProps.render(fetchMore, loadingMore, hasMore);
+      }
       return (
-        <div style={{ textAlign: "center", marginTop: 12, marginBottom: 12 }}>
+        <div style={{ textAlign: "center", marginTop: 12, marginBottom: 12, ...loadMoreProps?.style }}>
           <Button onClick={fetchMore} loading={loadingMore}>
-            加载更多
+            {loadMoreProps?.text || "加载更多"}
           </Button>
         </div>
       );
-    }, [usePagination, restful, hasMore, fetchMore, loadingMore]);
+    }, [usePagination, restful, hasMore, fetchMore, loadingMore, loadMoreProps]);
 
     const paginationConfig = useMemo(() => {
       if (!usePagination) {
@@ -337,50 +342,47 @@ const RestList = forwardRef(
         return undefined;
       }
       return (
-        <Spin spinning={loading}>
-          <GridForm
-            key="filterForm"
-            submitTitle="搜索"
-            {...filterFormProps}
-            fields={filterFields}
-            initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
-            ref={filterFormRef}
-            onSubmit={(values) => {
-              const newV = { ...values };
-              formFiltersRef.current = newV;
-              setFilterState({
-                paginationFilters: {
-                  ...filterState.paginationFilters,
-                  [fieldPage]: 1,
-                  [REFRESH_COUNTER_KEY]: (filterState.paginationFilters[REFRESH_COUNTER_KEY] || 0) + 1,
-                },
-                formFilters: newV,
-              });
-            }}
-            onReset={(values) => {
-              const newV = { ...values };
-              filterFormProps?.fields?.forEach((field) => {
-                const key = genColumnKey(field);
-                if (!filterFieldKeys.includes(key)) {
-                  newV[key] = null;
-                }
-              });
-              formFiltersRef.current = newV;
-              setFilterState({
-                paginationFilters: {
-                  ...filterState.paginationFilters,
-                  [fieldPage]: 1,
-                  [REFRESH_COUNTER_KEY]: (filterState.paginationFilters[REFRESH_COUNTER_KEY] || 0) + 1,
-                },
-                formFilters: newV,
-              });
-            }}
-          />
-        </Spin>
+        <GridForm
+          key="filterForm"
+          submitTitle="搜索"
+          {...filterFormProps}
+          fields={filterFields}
+          initialValues={{ ...memBaseParams, ...filterFormProps?.initialValues }}
+          ref={filterFormRef}
+          onSubmit={(values) => {
+            const newV = { ...values };
+            formFiltersRef.current = newV;
+            setFilterState({
+              paginationFilters: {
+                ...filterState.paginationFilters,
+                [fieldPage]: 1,
+                [REFRESH_COUNTER_KEY]: (filterState.paginationFilters[REFRESH_COUNTER_KEY] || 0) + 1,
+              },
+              formFilters: newV,
+            });
+          }}
+          onReset={(values) => {
+            const newV = { ...values };
+            filterFormProps?.fields?.forEach((field) => {
+              const key = genColumnKey(field);
+              if (!filterFieldKeys.includes(key)) {
+                newV[key] = null;
+              }
+            });
+            formFiltersRef.current = newV;
+            setFilterState({
+              paginationFilters: {
+                ...filterState.paginationFilters,
+                [fieldPage]: 1,
+                [REFRESH_COUNTER_KEY]: (filterState.paginationFilters[REFRESH_COUNTER_KEY] || 0) + 1,
+              },
+              formFilters: newV,
+            });
+          }}
+        />
       );
     }, [
       hasHeader,
-      loading,
       filterFormProps,
       filterFields,
       memBaseParams,
@@ -391,19 +393,22 @@ const RestList = forwardRef(
     ]);
 
     return (
-      <List
-        style={style}
-        className={className}
-        grid={grid}
-        {...antdListProps}
-        loading={loading && !loadingMore}
-        header={headerView}
-        loadMore={loadMoreView}
-        pagination={paginationConfig}
-        rowKey={rowKey}
-        dataSource={innerData.dataSource}
-        renderItem={renderItem}
-      />
+      <Spin spinning={loading && !loadingMore}>
+        <Space direction="vertical" {...antdSpaceProps} style={{ width: "100%", ...antdSpaceProps?.style }}>
+          {headerView}
+          <List
+            style={style}
+            className={className}
+            grid={grid}
+            {...antdListProps}
+            loadMore={loadMoreView}
+            pagination={paginationConfig}
+            rowKey={rowKey}
+            dataSource={innerData.dataSource}
+            renderItem={renderItem}
+          />
+        </Space>
+      </Spin>
     );
   }
 );
@@ -443,6 +448,12 @@ RestList.propTypes = {
   pagination: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
   filterFormProps: PropTypes.object,
   antdListProps: PropTypes.object,
+  antdSpaceProps: PropTypes.object,
+  loadMoreProps: PropTypes.shape({
+    style: PropTypes.object,
+    text: PropTypes.string,
+    render: PropTypes.func,
+  }),
 };
 RestList.displayName = "RestList";
 RestList.Item = List.Item;

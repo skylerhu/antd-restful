@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Card, Tag } from "antd";
+import { Avatar, Button, Card, Tag } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router";
 import libs from "demo/libs";
@@ -69,11 +69,15 @@ const ListDemo = () => {
         }}
       />
 
-      <h3 style={{ marginTop: 40 }}>基础列表（loadMore）</h3>
+      <h3 style={{ marginTop: 40 }}>基础列表（loadMore + loadMoreProps 自定义文案和样式）</h3>
       <RestList
         restful="api/users/"
         defaultPageSize={2}
         rowKey="id"
+        loadMoreProps={{
+          text: "点击加载更多用户",
+          style: { marginTop: 20, marginBottom: 20 },
+        }}
         filterFormProps={{
           advancedSearch: true,
           antdListProps: {
@@ -120,12 +124,21 @@ const ListDemo = () => {
         )}
       />
 
-      <h3 style={{ marginTop: 40 }}>Grid 卡片列表（loadMore + grid）</h3>
+      <h3 style={{ marginTop: 40 }}>Grid 卡片列表（loadMore + grid + loadMoreProps.render 自定义渲染）</h3>
       <RestList
         restful="api/users/"
         defaultPageSize={4}
         rowKey="id"
         grid={{ gutter: 16, column: 2 }}
+        loadMoreProps={{
+          render: (fetchMore, loadingMore) => (
+            <div style={{ textAlign: "center", padding: "16px 0" }}>
+              <Button type="dashed" onClick={fetchMore} loading={loadingMore} style={{ width: 200 }}>
+                {loadingMore ? "努力加载中..." : "展开更多卡片"}
+              </Button>
+            </div>
+          ),
+        }}
         renderItem={(item) => (
           <RestList.Item key={item.id} style={{ height: "100%" }}>
             <Card style={{ height: "100%" }}>

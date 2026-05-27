@@ -292,6 +292,86 @@ describe("RestList", () => {
     });
   });
 
+  describe("loadMoreProps 自定义测试", () => {
+    it("should render custom text from loadMoreProps.text", async () => {
+      mockMakeRequest.mockReturnValue({
+        get: jest.fn().mockResolvedValue({
+          data: { results: [{ id: 1, name: "张三" }], count: 5 },
+        }),
+      });
+
+      render(
+        <RestList
+          restful="/api/users"
+          defaultPageSize={2}
+          loadMoreProps={{ text: "展开更多" }}
+          renderItem={(item) => <RestList.Item key={item.id}>{item.name}</RestList.Item>}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("展开更多")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("加载更多")).not.toBeInTheDocument();
+    });
+
+    it("should apply custom style from loadMoreProps.style", async () => {
+      mockMakeRequest.mockReturnValue({
+        get: jest.fn().mockResolvedValue({
+          data: { results: [{ id: 1, name: "张三" }], count: 5 },
+        }),
+      });
+
+      render(
+        <RestList
+          restful="/api/users"
+          defaultPageSize={2}
+          loadMoreProps={{ style: { marginTop: 30 } }}
+          renderItem={(item) => <RestList.Item key={item.id}>{item.name}</RestList.Item>}
+        />
+      );
+
+      await waitFor(() => {
+        const btn = screen.getByRole("button", { name: "加载更多" });
+        const container = btn.parentElement;
+        expect(container).toHaveStyle("margin-top: 30px");
+        expect(container).toHaveStyle("text-align: center");
+      });
+    });
+
+    it("should use custom render function from loadMoreProps.render", async () => {
+      mockMakeRequest.mockReturnValue({
+        get: jest.fn().mockResolvedValue({
+          data: { results: [{ id: 1, name: "张三" }], count: 5 },
+        }),
+      });
+
+      const customRender = jest.fn((fetchMore, loadingMore) => (
+        <button onClick={fetchMore} disabled={loadingMore}>
+          自定义加载
+        </button>
+      ));
+
+      render(
+        <RestList
+          restful="/api/users"
+          defaultPageSize={2}
+          loadMoreProps={{ render: customRender }}
+          renderItem={(item) => <RestList.Item key={item.id}>{item.name}</RestList.Item>}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("自定义加载")).toBeInTheDocument();
+      });
+      expect(customRender).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.any(Boolean),
+        expect.any(Boolean)
+      );
+    });
+  });
+
   describe("pagination 模式测试", () => {
     it("should not show load more button when pagination is enabled", async () => {
       const mockResponse = {
@@ -450,7 +530,7 @@ describe("RestList", () => {
   });
 
   describe("filterFormProps 测试", () => {
-    it("should render filter form in header when filterFormProps is provided", () => {
+    it("should render filter form when filterFormProps is provided", () => {
       mockMakeRequest.mockReturnValue({
         get: jest.fn().mockResolvedValue({
           data: { results: [], count: 0 },

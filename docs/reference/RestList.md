@@ -44,9 +44,21 @@
 | parseTotalPath | 解析总数的路径 | `string` | `'count'` | - | - |
 | **控制与筛选** | | | | | |
 | isActive | 是否激活，为 false 时不请求数据 | `boolean` | `true` | - | - |
-| filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | 内部生成 List `header` | - |
+| filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md)。筛选表单渲染在 List 上方（独立于 List 组件外部） | `object` | - | - | - |
+| loadMoreProps | loadMore 加载更多区域的自定义配置，详见下方 loadMoreProps 配置项 | `object` | - | - | - |
 | **Ant Design 原生配置** | | | | | |
-| antdListProps | Ant Design [List](https://ant.design/components/list-cn) 的其余属性。注意 `loading` / `header` / `loadMore` / `pagination` / `dataSource` / `renderItem` / `rowKey` 由 RestList 内部管理，通过此属性设置会被覆盖 | `object` | - | 透传剩余属性 | - |
+| antdListProps | Ant Design [List](https://ant.design/components/list-cn) 的其余属性。注意 `loading` / `loadMore` / `pagination` / `dataSource` / `renderItem` / `rowKey` 由 RestList 内部管理，通过此属性设置会被覆盖 | `object` | - | 透传剩余属性 | - |
+| antdSpaceProps | 外层容器 Ant Design [Space](https://ant.design/components/space-cn) 组件的属性，用于控制筛选表单与列表之间的间距等样式 | `object` | - | 透传 Space 属性 | - |
+
+
+**loadMoreProps 配置项：**
+
+
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| style | 自定义加载更多区域的容器样式，会与默认样式合并 | `object` | `{ textAlign: 'center', marginTop: 12, marginBottom: 12 }` |
+| text | 自定义按钮文案 | `string` | `'加载更多'` |
+| render | 完全自定义渲染函数，设置后 style 和 text 不生效 | `function(fetchMore, loadingMore, hasMore)` | - |
 
 
 **grid 配置项：**
