@@ -5,6 +5,7 @@ import ReadView from "./views/ReadView";
 import DynamicForm from "./views/StaticForm";
 import JSONForm from "./views/JSONForm";
 import TableDemo from "./views/TableDemo";
+import ListDemo from "./views/ListDemo";
 
 export default function Main() {
   const navigate = useNavigate();
@@ -34,6 +35,11 @@ export default function Main() {
           key: "table",
           label: "TableDemo & RouteTable",
           children: <TableDemo />,
+        },
+        {
+          key: "list",
+          label: "ListDemo",
+          children: <ListDemo />,
         },
       ]}
       onChange={(key) => {

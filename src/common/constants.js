@@ -29,6 +29,11 @@ export const FieldType = new Enum([
   { key: "UPLOAD", value: "upload", label: "上传" },
 ]);
 
+export const ViewType = new Enum([
+  { key: "TABLE", value: "table", label: "表格" },
+  { key: "LIST", value: "list", label: "列表" },
+]);
+
 export const READ_ONLY_CLASS = "cls-antd-restful-readonly";
 
 export const FilterType = new Enum([

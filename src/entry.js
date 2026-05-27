@@ -1,6 +1,7 @@
 export { default as formitems } from "./components/formitems/index";
 
 export { default as RestTable } from "./components/RestTable";
+export { default as RestList } from "./components/RestList";
 export { default as LongText } from "./components/LongText";
 export { default as CopyView } from "./components/CopyView";
 export { default as GridForm } from "./components/GridForm";

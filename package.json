@@ -1,6 +1,6 @@
 {
   "name": "antd-restful",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "author": "SkylerHu",
   "private": false,
   "main": "dist/index.js",
@@ -111,13 +111,13 @@
     "resttable",
     "restselect"
   ],
-  "homepage": "https://github.com/SkylerHu/antd-restful",
+  "homepage": "https://github.com/skylerhu/antd-restful",
   "repository": {
     "type": "git",
-    "url": "git@github.com:SkylerHu/antd-restful.git"
+    "url": "git@github.com:skylerhu/antd-restful.git"
   },
   "bugs": {
-    "url": "https://github.com/SkylerHu/antd-restful/issues"
+    "url": "https://github.com/skylerhu/antd-restful/issues"
   },
   "license": "MIT"
 }

@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.3.0
+- feat: 新增 `RestList` 组件，基于 Ant Design List 封装，支持远程数据加载
+    - 支持 loadMore（加载更多）和 pagination（分页器）两种模式，pagination 优先级高于 loadMore
+    - 支持 filterFormProps 筛选表单，渲染在 List header 中
+    - 支持 grid 栅格布局，并校验 page_size 与 grid.column 的倍数关系（不满足时 console.error）
+    - renderItem 直接暴露，不封装 List.Item；提供 `RestList.Item` 等同于 `List.Item`
+- feat: 新增 `ViewType` 枚举（`constants.ViewType`），包含 TABLE 和 LIST 两个值
+- feat: `RouteBaseTable` 新增 `viewType` 参数，支持通过 `ViewType.LIST` 切换为 RestList 渲染
+    - viewType="list" 推荐与 pagination 配合使用，不推荐与 loadMore 结合
+- docs: 优化组件使用说明文档
+
 ## 0.2.4
 - fix: 调整 `GridFrom` 对于隐藏的字段使用 `<Form.item hidden/>` 处理，并非完全过滤不处理
 
