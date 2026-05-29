@@ -38,6 +38,7 @@ const [makeRequest] = useSafeRequest()
 
 **支持的 HTTP 方法：**
 
+- `request(config)` - 使用原始 axios config 发起请求
 - `get(url, config)`
 - `head(url, config)`
 - `options(url, config)`
@@ -185,7 +186,7 @@ setGlobalConfig({
 | 字段 | 类型 | 默认行为 | 说明 |
 |------|------|----------|------|
 | `queryStringify` | `(params, options?) => string` | `query-string.stringify`，`arrayFormat: "comma"` | 将对象序列化为 URL 查询字符串 |
-| `queryParse` | `(string, options?) => object` | `query-string.parse`，`arrayFormat: "comma"` | 将 URL 查询字符串解析为对象 |
+| `queryParse` | `(string, options?) => object` | `query-string.parse`，`arrayFormat: "comma"`、`parseNumbers: true`、`parseBooleans: true` | 将 URL 查询字符串解析为对象，自动转换数字和布尔值 |
 
 该配置影响所有通过 axios 实例发出的请求的查询参数序列化，同时也被 `RouteBaseTable` 等组件用于 URL 参数的解析与生成。
 

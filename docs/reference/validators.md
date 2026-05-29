@@ -144,9 +144,11 @@ remoteValidator(value, rule, ctx) => Promise
   - `rule.remoteValidator.reqConfig` - 请求配置，会合并到请求选项中（可选）
   - `rule.remoteValidator.makeRequestOptions` - makeRequest 的配置选项（可选）
     - `rule.remoteValidator.makeRequestOptions.delay` - 防抖延迟时间，默认 200ms（可选）
-    - `rule.remoteValidator.makeRequestOptions.key` - 防抖标识键（可选）
+    - `rule.remoteValidator.makeRequestOptions.key` - 防抖标识键，需全局唯一，否则不同校验器之间会相互取消请求（可选，默认为 `${fieldName}-${restful}`）
   - `rule.message` - 校验失败时的错误提示信息（可选）
-- `ctx` - 上下文对象，可配合 formily 使用，包含表单和字段信息
+- `ctx` - 上下文对象，包含当前字段和表单信息
+  - `ctx.fieldName` - 当前校验字段名（字符串）
+  - `ctx.formValues` - 表单所有字段的值（对象，withForm=true 时会发送给服务端）
 
 ### 返回值
 
@@ -163,7 +165,7 @@ remoteValidator(value, rule, ctx) => Promise
 - `reqConfig` - 请求配置，会合并到请求选项中（可选）
 - `makeRequestOptions` - makeRequest 的配置选项（可选）
   - `makeRequestOptions.delay` - 防抖延迟时间，默认 200ms（可选）
-  - `makeRequestOptions.key` - 防抖标识键（可选）
+  - `makeRequestOptions.key` - 防抖标识键，需全局唯一，否则不同校验器之间会相互取消请求（可选，默认为 `${fieldName}-${restful}`）
 
 ### 使用示例
 
@@ -173,8 +175,8 @@ remoteValidator(value, rule, ctx) => Promise
 const rule = {
   remoteValidator: {
     restful: "api/validate/remote/",
-    message: "验证失败"
-  }
+  },
+  message: "验证失败"
 };
 ```
 
@@ -187,7 +189,14 @@ const rule = {
     extraParams: { type: "user" },
     restful: "api/validate/remote/",
     reqConfig: { timeout: 5000 }
-  }
+  },
+  message: "验证失败"
+};
+
+// ctx 参数格式
+const ctx = {
+  fieldName: "username",       // 当前校验字段名
+  formValues: { username: "test", email: "test@example.com" }  // 表单所有值（withForm=true 时使用）
 };
 ```
 
@@ -403,8 +412,8 @@ const CustomForm = () => {
           },
           message: '用户名已存在'
         }, {
-          field: { path: { entire: 'username' } },
-          form: { values: form.getFieldsValue() }
+          fieldName: 'username',
+          formValues: form.getFieldsValue()
         })
       }
     ]

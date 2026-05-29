@@ -12,17 +12,20 @@
 - 集成在多个表单组件中，提供统一的复制体验
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 需要复制的值 | `string \| number \| boolean \| array \| object` | - | - |
-| short | 截取前N个字符进行展示，仅对字符串生效，复制时仍为完整内容 | `number` | `0` | - |
-| showIcon | 是否显示复制按钮图标 | `boolean` | `false` | - |
-| hiddenValue | 是否隐藏值，配合只展示按钮使用 | `boolean` | `false` | - |
-| children | 直接展示的文本内容，优先级高于 value | `node` | - | - |
-| disabled | 是否禁用复制功能 | `boolean` | `false` | - |
-| separator | 复制时值之间的分隔符 | `string` | `','` | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | - | - |
+| className | 自定义类名 | `string` | - | - | - |
+| **数据与显示** | | | | | |
+| value | 需要复制的值 | `string \| number \| boolean \| array \| object` | - | - | - |
+| short | 截取前N个字符进行展示，仅对字符串生效，复制时仍为完整内容 | `number` | `0` | - | - |
+| showIcon | 是否显示复制按钮图标 | `boolean` | `false` | - | - |
+| hiddenValue | 是否隐藏值，配合只展示按钮使用 | `boolean` | `false` | - | - |
+| children | 直接展示的文本内容，优先级高于 value | `node` | - | - | - |
+| **交互控制** | | | | | |
+| disabled | 是否禁用复制功能 | `boolean` | `false` | - | - |
+| separator | 复制时值之间的分隔符 | `string` | `','` | - | - |
 
 ### 使用示例
 
@@ -199,16 +202,6 @@ import { Space, Tag, Tooltip } from 'antd';
 <CopyView value="" />
 <CopyView value={null} />
 <CopyView value={undefined} />
-
-// 复制失败时不会显示成功消息
-<CopyView
-  value="test-content"
-  onCopy={(success) => {
-    if (!success) {
-      message.error('复制失败，请手动复制');
-    }
-  }}
-/>
 ```
 
 ### 在表单组件中的应用

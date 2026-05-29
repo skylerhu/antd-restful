@@ -5,88 +5,92 @@
 - 远程数据加载：基于 Ant Design Table 组件实现，支持从 RESTful API 接口加载数据
 - 静态数据支持：除了远程加载，也支持直接传入静态数据源
 - 模板支持：支持 {field} 格式的标签模板
-- 多种筛选类型：支持输入框、下拉选择等筛选方式
+- 多种筛选类型：支持输入框、下拉选择、数字输入、数字范围、日期范围等筛选方式
 - 灵活配置：高度可配置的列定义和表格行为
 - 工具栏功能：内置高级搜索、刷新、下载、列显示设置等工具
 - 智能筛选：支持表头筛选和表单筛选，自动处理参数合并
 - 本地存储：支持列显示设置的本地存储
 - 自动刷新：支持间隔自动刷新数据
+- 展开行支持：支持配置展开行以 Descriptions 形式展示详细信息
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| **远程数据相关** | | | | |
-| restful | RESTful API 接口地址 | `string` | - | - |
-| reqConfig | 请求配置，axios请求的额外配置 | `object` | - | - |
-| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | 0.1.14 |
-| urlDetailTemplate | 删除操作的自定义 URL 模板 | `string` | - | - |
-| baseParams | 基础请求参数 | `object` | - | - |
-| routeParams | 路由参数 | `object` | - | - |
-| forceParams | 强制参数，会覆盖路由参数和表单参数 | `object` | - | - |
-| fieldPage | 分页字段名 | `string` | `'page'` | - |
-| fieldPageSize | 每页条数字段名 | `string` | `'page_size'` | - |
-| defaultPageSize | 默认页数 | `number` | `20` | - |
-| fieldOrdering | 排序字段名 | `string` | `'ordering'` | - |
-| parseRowsPath | 解析数据行的路径 | `string` | `'results'` | - |
-| parseTotalPath | 解析总数的路径 | `string` | `'count'` | - |
-| showHeaderTags | 是否显示表格header上的筛选条件 | `boolean` | `false` | 0.1.5 |
-| **显示和交互** | | | | |
-| isActive | 是否激活，为 false 时不更新数据 | `boolean` | `true` | - |
-| tools | 工具栏配置 | `object \| boolean` | `{ advancedSearch: true, refreshInterval: 0, settings: true }` | - |
-| extraTools | 其他操作工具 | `node` | - | 0.1.9 |
-| onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - |
-| onDataSourceChange | 数据源变化回调 | `function(dataSource)` | - | - |
-| rowKey | 行数据的 key | `string` | `'id'` | - |
-| columns | 表格列配置 | `array` | - | - |
-| dataSource | 静态数据源，设置后不使用 restful | `array` | - | - |
-| expandFieldPath | 根据字段判断是否使用展开，不配置字段默认根据columns的配置展示 | `boolean` | - | 0.1.9 |
-| expandAntdProps | 展开列使用Descptions展示，配置其props | `objects` | - | 0.1.9 |
-| expandedAllRows | 未启用tools时也可以配置展开所有行 | `boolean` | - | 0.1.9 |
-| filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | - |
-| **Ant Design 原生配置** | | | | |
-| antdTableProps | Ant Design [Table](https://ant.design/components/table-cn) 组件的属性 | `object` | - | - |
-| antdSpaceProps | 定义选中和列表的间距，Ant Design [Space](https://ant.design/components/space-cn) 组件的属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 Table `style` | - |
+| className | 自定义类名 | `string` | - | 透传 Table `className` | - |
+| **远程数据相关** | | | | | |
+| restful | RESTful API 接口地址 | `string` | - | - | - |
+| reqConfig | 请求配置，axios请求的额外配置 | `object` | - | - | - |
+| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | - | 0.1.14 |
+| urlDetailTemplate | 删除操作的自定义 URL 模板 | `string` | - | - | - |
+| baseParams | 基础请求参数 | `object` | - | - | - |
+| routeParams | 路由参数 | `object` | - | - | - |
+| forceParams | 强制参数，会覆盖路由参数和表单参数 | `object` | - | - | - |
+| fieldPage | 分页字段名 | `string` | `'page'` | - | - |
+| fieldPageSize | 每页条数字段名 | `string` | `'page_size'` | - | - |
+| defaultPageSize | 默认页数 | `number` | `20` | - | - |
+| fieldOrdering | 排序字段名 | `string` | `'ordering'` | - | - |
+| parseRowsPath | 解析数据行的路径 | `string` | `'results'` | - | - |
+| parseTotalPath | 解析总数的路径 | `string` | `'count'` | - | - |
+| showHeaderTags | 是否显示表格header上的筛选条件 | `boolean` | `false` | - | 0.1.5 |
+| **显示和交互** | | | | | |
+| isActive | 是否激活，为 false 时不更新数据 | `boolean` | `true` | - | - |
+| tools | 工具栏配置 | `object \| boolean` | `true` | - | - |
+| extraTools | 其他操作工具 | `node` | - | - | 0.1.9 |
+| onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - | - |
+| onDataSourceChange | 数据源变化回调 | `function(dataSource)` | - | - | - |
+| rowKey | 行数据的 key | `string` | `'id'` | 透传 Table `rowKey` | - |
+| columns | 表格列配置 | `array` | - | 覆盖 Table `columns`，内部增强处理 | - |
+| dataSource | 静态数据源，设置后不使用 restful | `array` | - | 覆盖 Table `dataSource`，由内部管理 | - |
+| expandFieldPath | 根据字段判断是否使用展开，不配置字段默认根据columns的配置展示 | `boolean` | - | - | 0.1.9 |
+| expandAntdProps | 展开列使用Descptions展示，配置其props | `objects` | - | 透传 Descriptions 属性 | 0.1.9 |
+| expandedAllRows | 未启用tools时也可以配置展开所有行 | `boolean` | - | - | 0.1.9 |
+| filterFormProps | 筛选表单配置，详见 [GridForm](./GridForm.md) | `object` | - | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdTableProps | Ant Design [Table](https://ant.design/components/table-cn) 组件的属性 | `object` | - | 透传 Table 属性，`loading` / `rowKey` / `columns` / `dataSource` / `pagination` / `onChange` / `expandable` 由内部管理 | - |
+| antdSpaceProps | 外层容器 Ant Design [Space](https://ant.design/components/space-cn) 组件的属性 | `object` | - | 透传 Space 属性 | - |
 
 **tools 配置项：**
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| advancedSearch | 是否显示高级搜索切换按钮 | `boolean` | `true` | - |
-| refreshInterval | 刷新间隔（毫秒），0为手动刷新，>0为自动刷新，<0为隐藏刷新按钮 | `number` | `0` | - |
-| downloadKey | 下载功能的参数名，true时使用'_download'，字符串时使用自定义参数名，false时禁用下载 | `boolean \| string` | `false` | - |
-| settings | 列显示设置，true时使用restful作为存储key，字符串时使用自定义key，false时禁用 | `boolean \| string` | `true` | - |
-| expandedAllRows | 控制是否默认展开所有行，为false时默认不展开 | `boolean` | - | 0.1.9 |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| advancedSearch | 是否显示高级搜索切换按钮 | `boolean` | `true` | - | - |
+| refreshInterval | 刷新间隔（毫秒），0为手动刷新，>0为自动刷新，<0为隐藏刷新按钮 | `number` | `0` | - | - |
+| downloadKey | 下载功能的参数名，true时使用'_download'，字符串时使用自定义参数名，false时禁用下载 | `boolean \| string` | `false` | - | - |
+| settings | 列显示设置，true时使用restful作为存储key，字符串时使用自定义key，false时禁用 | `boolean \| string` | `true` | - | - |
+| expandedAllRows | 控制是否默认展开所有行，为false时默认不展开 | `boolean` | - | - | 0.1.9 |
 
 **columns 配置项：**
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| title | 列标题 | `string` | - | - |
-| dataIndex | 列数据在数据项中对应的路径 | `string` | - | - |
-| key | 列的唯一标识 | `string` | - | - |
-| labelTemplate | 列值显示模板，支持 `{field}` 格式 | `string` | - | - |
-| copyProps | 开启复制功能的配置，详见 [CopyView](#copyview) | `object` | - | - |
-| copyField | dataIndex配置的值是字典时，可以用此配置复制时使用的字段 | `string` | - | 0.1.9 |
-| filterDropdownConfig | 自定义筛选下拉框配置 | `object` | - | - |
-| dropdownLocalConfig | 前端Table刷选的配置 | `object` | - | - |
-| filterMultiple | 是否支持多选筛选 | `boolean` | - | - |
-| fieldName | 本地筛选时使用的真实字段名 | `string` | - | - |
-| hidden | 是否默认隐藏该列 | `boolean` | `false` | - |
-| sorter | 排序配置 | `boolean \| function` | - | - |
-| filters | 筛选选项 | `array` | - | - |
-| expandable | 是否在展开功能中显示 | `boolean` | - | 0.1.9 |
-| expandableItemProps | 展示样式配置 | `object` | - | 0.1.9 |
-| render | 自定义渲染函数 | `function(text, record, index)` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| title | 列标题 | `string` | - | 透传 Column `title` | - |
+| dataIndex | 列数据在数据项中对应的路径 | `string` | - | 透传 Column `dataIndex` | - |
+| key | 列的唯一标识 | `string` | - | 透传 Column `key` | - |
+| labelTemplate | 列值显示模板，支持 `{field}` 格式 | `string` | - | - | - |
+| copyProps | 开启复制功能的配置，详见 [CopyView](#copyview) | `object` | - | - | - |
+| copyField | dataIndex配置的值是字典时，可以用此配置复制时使用的字段 | `string` | - | - | 0.1.9 |
+| showTag | 是否按照 Tag 展示，数据为数组时有用 | `boolean` | - | - | - |
+| filterDropdownConfig | 自定义筛选下拉框配置 | `object` | - | 覆盖 Column `filterDropdown` / `filterIcon` | - |
+| dropdownLocalConfig | 前端Table筛选的配置 | `object` | - | - | - |
+| filterMultiple | 是否支持多选筛选 | `boolean` | - | 透传 Column `filterMultiple` | - |
+| fieldName | 本地筛选时使用的真实字段名 | `string` | - | - | - |
+| hidden | 是否默认隐藏该列 | `boolean` | `false` | - | - |
+| sorter | 排序配置 | `boolean \| function` | - | 透传 Column `sorter`，远程模式下内部管理 `sortOrder` | - |
+| filters | 筛选选项 | `array` | - | 透传 Column `filters` | - |
+| expandable | 是否在展开功能中显示 | `boolean` | - | - | 0.1.9 |
+| expandableItemProps | 展示样式配置 | `object` | - | 透传 Descriptions.Item 属性 | 0.1.9 |
+| render | 自定义渲染函数 | `function(text, record, index)` | - | 透传 Column `render` | - |
 
 **filterDropdownConfig 配置项：**
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| type | 筛选类型 | `'input' \| 'select'` | - | - |
-| dropdownProps | 下拉框组件的属性，Ant Design 官方 `filterDropdown` 配置 | `object` | - | - |
-| **style** | **筛选下拉框的自定义样式** | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| type | 筛选类型 | `'input' \| 'select' \| 'number' \| 'number-range' \| 'date-range-picker'` | - | - | - |
+| style | 筛选下拉框的自定义样式 | `object` | - | - | - |
+| antdSpaceProps | 控制输入组件和按钮的排列位置 | `object` | - | 透传 Space 属性 | - |
+| dropdownProps | 下拉框组件的属性 | `object` | - | 透传对应筛选组件属性 | - |
 
 **Ref 方法：**
 

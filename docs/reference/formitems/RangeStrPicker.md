@@ -9,22 +9,23 @@
 - 自动处理字符串与 dayjs 对象的转换
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前选中的日期范围（字符串或字符串数组） | `string \| array<string>` | - | - |
-| onChange | 值变化时的回调函数 | `function(dateStrings, dates)` | - | - |
-| **日期配置** | | | | |
-| defaultEmptyValue | 单个输入框为空时的默认值 | `undefined\|null\|''` | `null` | 0.2.0 |
-| defaultValue | 默认日期范围（字符串或字符串数组） | `string \| array<string>` | - | - |
-| format | 日期格式 | `string` | - | - |
-| isTime | 是否为时间选择器 | `boolean` | `false` | - |
-| **状态控制** | | | | |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdRangePickerProps | Ant Design RangePicker 组件的原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 RangePicker `style` | - |
+| className | 自定义类名 | `string` | - | 透传 RangePicker `className` | - |
+| value | 当前选中的日期范围（字符串或字符串数组） | `string \| array<string>` | - | 覆盖 RangePicker `value`，内部处理字符串与 dayjs 转换 | - |
+| onChange | 值变化时的回调函数 | `function(dateStrings, dates)` | - | 覆盖 RangePicker `onChange`，输出字符串格式 | - |
+| **日期配置** | | | | | |
+| defaultEmptyValue | 单个输入框为空时的默认值 | `undefined\|null\|''` | `null` | - | 0.2.0 |
+| defaultValue | 默认日期范围（字符串或字符串数组） | `string \| array<string>` | - | 覆盖 RangePicker `defaultValue`，内部转换为 dayjs | - |
+| format | 日期格式 | `string` | - | 透传 RangePicker `format` | - |
+| isTime | 是否为时间选择器 | `boolean` | `false` | - | - |
+| **状态控制** | | | | | |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 RangePicker `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdRangePickerProps | Ant Design [RangePicker](https://ant.design/components/date-picker-cn) 组件的原生属性 | `object` | - | 透传 RangePicker 属性，`value` / `onChange` / `defaultValue` 由内部管理 | - |
 
 ### 使用示例
 

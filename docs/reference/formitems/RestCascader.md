@@ -11,29 +11,30 @@
 - 支持父子关系动态加载
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 选中的值（数组格式，表示路径） | `array` | - | - |
-| onChange | 值变化时的回调函数 | `function(value, selectedOptions, treeOpts)` | - | - |
-| **远程数据相关** | | | | |
-| restful | 远程数据接口地址 | `string` | - | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| baseParams | 基础请求参数 | `object` | - | - |
-| fieldParent | 父级字段名 | `string` | `'parent'` | - |
-| parseRowsPath | 解析数据路径 | `string` | `'data.results'` | - |
-| **显示和交互** | | | | |
-| enableCopy | 是否启用复制功能 | `boolean` | `false` | - |
-| separator | 复制时，路径之间的分隔符 | `string` | `' / '` | - |
-| **原生组件支持** | | | | |
-| options | 静态数据 | `array` | - | - |
-| fieldNames | 字段映射配置 | `object` | - | - |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
-| antdCascaderProps | Ant Design Cascader 组件的原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 Cascader `style` | - |
+| className | 自定义类名 | `string` | - | 透传 Cascader `className` | - |
+| value | 选中的值（数组格式，表示路径） | `array` | - | 透传 Cascader `value` | - |
+| onChange | 值变化时的回调函数 | `function(value, selectedOptions, treeOpts)` | - | 覆盖 Cascader `onChange`，增加 treeOpts 参数 | - |
+| **远程数据相关** | | | | | |
+| restful | 远程数据接口地址 | `string` | - | - | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| baseParams | 基础请求参数 | `object` | - | - | - |
+| fieldParent | 父级字段名 | `string` | `'parent'` | - | - |
+| parseRowsPath | 解析数据路径 | `string` | `'data.results'` | - | - |
+| **显示和交互** | | | | | |
+| enableCopy | 是否启用复制功能 | `boolean` | `false` | - | - |
+| separator | 复制时，路径之间的分隔符 | `string` | `' / '` | - | - |
+| **原生组件支持** | | | | | |
+| options | 静态数据 | `array` | - | 覆盖 Cascader `options`，远程模式由内部管理 | - |
+| fieldNames | 字段映射配置 | `object` | - | 透传 Cascader `fieldNames` | - |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 Cascader `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的原生属性 | `object` | - | 透传 Space 属性 | - |
+| antdCascaderProps | Ant Design [Cascader](https://ant.design/components/cascader-cn) 组件的原生属性 | `object` | - | 透传 Cascader 属性，`value` / `onChange` / `options` / `loadData` 由内部管理 | - |
 
 ### 字段映射配置 (fieldNames)
 ```javascript

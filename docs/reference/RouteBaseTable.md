@@ -5,24 +5,28 @@
 - 路由联动：表格筛选参数自动同步到 URL 查询字符串
 - 状态保持：页面刷新后自动恢复之前的筛选状态
 - 参数过滤：自动过滤与默认参数相同的参数，避免冗余的 URL 参数
+- 多视图支持：通过 viewType 支持 table 和 list 两种视图模式
 - 兼容性：兼容 react-router v5 和 v6 版本
 - 深度比较：使用深度比较确保参数变化的准确性
+- 智能类型推断：根据 columns 和 filterFormProps 自动推断 URL 参数解析类型
 - 回调支持：支持筛选变化和搜索变化的自定义回调
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| location | 路由 location 对象，包含当前 URL 信息 | `object` | - | - |
-| onSearchChange | 搜索参数变化回调，用于更新路由 | `function(search)` | - | - |
-| restProps | 传递给 RestTable 的所有属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| location | 路由 location 对象，包含当前 URL 信息 | `object` | - | - | - |
+| onSearchChange | 搜索参数变化回调，用于更新路由 | `function(search)` | - | - | - |
+| viewType | 视图类型，支持 `'table'` 和 `'list'` 两种模式 | `string` | `'table'` | - | - |
+| restProps | 传递给 RestTable/RestList 的所有属性 | `object` | - | - | - |
 
 **restProps 中的关键参数：**
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| baseParams | 基础请求参数，与 URL 参数相同时会被过滤 | `object` | - | - |
-| onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - |
-| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | 0.1.14 |
-| 其他参数 | 所有 RestTable 支持的参数 | - | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| baseParams | 基础请求参数，与 URL 参数相同时会被过滤 | `object` | - | - | - |
+| onFiltersChange | 筛选条件变化回调 | `function(filters)` | - | - | - |
+| parseOptions | 解析query参数的选项, [query-string](https://www.npmjs.com/package/query-string) 的配置项 | `object` | - | - | 0.1.14 |
+| parseTypes | （已废弃）指定字段解析类型，用于解决低版本 query-string 中超大数值丢失精度问题 | `object` | - | - | - |
+| 其他参数 | 所有 RestTable/RestList 支持的参数 | - | - | - | - |
 
 
 **parseOptions.types 的特殊说明**

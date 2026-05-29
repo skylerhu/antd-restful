@@ -10,28 +10,29 @@
 - 支持自定义标签模板
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前输入的值 | `string` | - | - |
-| onChange | 值变化时的回调函数 | `function(value)` | - | - |
-| **远程数据相关** | | | | |
-| restful | 远程数据接口地址 | `string` | - | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| baseParams | 基础请求参数 | `object` | - | - |
-| searchKey | 搜索关键字参数名 | `string` | `'search'` | - |
-| searchMinEnter | 最少输入字符数 | `number` | `0` | - |
-| parseRowsPath | 解析接口返回数据的路径 | `string` | `'data.results'` | - |
-| **扩展配置** | | | | |
-| fieldNames | 字段名称映射配置 | `object` | - | - |
-| labelTemplate | 远程接口返回数据的 label 模板 | `string` | - | - |
-| inValue | 是否在值中包含提及信息 | `boolean` | `false` | - |
-| **状态控制** | | | | |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdMentionsProps | Ant Design Mentions 组件原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 Mentions `style` | - |
+| className | 自定义类名 | `string` | - | 透传 Mentions `className` | - |
+| value | 当前输入的值 | `string` | - | 透传 Mentions `value` | - |
+| onChange | 值变化时的回调函数 | `function(value)` | - | 透传 Mentions `onChange` | - |
+| **远程数据相关** | | | | | |
+| restful | 远程数据接口地址 | `string` | - | - | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| baseParams | 基础请求参数 | `object` | - | - | - |
+| searchKey | 搜索关键字参数名 | `string` | `'search'` | - | - |
+| searchMinEnter | 最少输入字符数 | `number` | `0` | - | - |
+| parseRowsPath | 解析接口返回数据的路径 | `string` | `'data.results'` | - | - |
+| **扩展配置** | | | | | |
+| fieldNames | 字段名称映射配置 | `object` | - | - | - |
+| labelTemplate | 远程接口返回数据的 label 模板 | `string` | - | - | - |
+| inValue | 是否在值中包含提及信息 | `boolean` | `false` | - | - |
+| **状态控制** | | | | | |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 Mentions `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdMentionsProps | Ant Design [Mentions](https://ant.design/components/mentions-cn) 组件原生属性 | `object` | - | 透传 Mentions 属性，`value` / `onChange` / `onSearch` / `options` / `loading` 由内部管理 | - |
 
 ### 使用示例
 

@@ -9,21 +9,24 @@
 - 支持分别配置起始和结束输入框属性
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前值，支持数组、字符串、数字格式 | `array \| string \| number` | - | - |
-| onChange | 值变化时的回调函数 | `function(value)` | - | - |
-| defaultEmptyValue | 单个输入框为空时的默认值 | `undefined\|null\|''` | `null` | 0.2.0 |
-| labelTemplate | 只读场景下显示的模板，{0} 是 startValue，{1} 是 endValue | `string` | `'[{0},{1}]'` | - |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
-| antdInputProps | 两个 InputNumber 组件的共同属性 | `object` | - | - |
-| antdStartProps | 起始 InputNumber 组件的专属属性 | `object` | - | - |
-| antdEndProps | 结束 InputNumber 组件的专属属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 Space.Compact `style` | - |
+| className | 自定义类名 | `string` | - | 透传 Space.Compact `className` | - |
+| value | 当前值，支持数组、字符串、数字格式 | `array \| string \| number` | - | - | - |
+| onChange | 值变化时的回调函数 | `function(value)` | - | - | - |
+| **数据配置** | | | | | |
+| defaultEmptyValue | 单个输入框为空时的默认值 | `undefined\|null\|''` | `null` | - | 0.2.0 |
+| labelTemplate | 只读场景下显示的模板，{0} 是 startValue，{1} 是 endValue | `string` | `'[{0},{1}]'` | - | - |
+| **状态控制** | | | | | |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 InputNumber `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdSpaceProps | Ant Design [Space.Compact](https://ant.design/components/space-cn) 组件的原生属性 | `object` | - | 透传 Space.Compact 属性 | - |
+| antdInputProps | 两个 InputNumber 组件的共同属性 | `object` | - | 透传 InputNumber 属性，`value` / `onChange` / `disabled` 由内部管理 | - |
+| antdStartProps | 起始 InputNumber 组件的专属属性 | `object` | - | 透传 InputNumber 属性，优先级高于 antdInputProps | - |
+| antdEndProps | 结束 InputNumber 组件的专属属性 | `object` | - | 透传 InputNumber 属性，优先级高于 antdInputProps | - |
 
 ### 值格式支持
 组件支持多种输入值格式：
