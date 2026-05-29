@@ -11,17 +11,20 @@
 - 支持自定义模态框配置
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 要显示的文本内容 | `any` | - | - |
-| maxLength | 最大显示长度，数组时为元素个数，字符串时为字符数 | `number` | `64` | - |
-| titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `"长度：{count}"` | - |
-| titleAggPath | 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 `{stat}` 占位符 | `string` | - | - |
-| separator | 数组元素间的分隔符 | `string` | `'\n'` | - |
-| labelTemplate | 对象或数组对象的显示模板，支持 `{field}` 格式 | `string` | - | - |
-| antdModalProps | Ant Design [Modal](https://ant.design/components/modal-cn) 组件的属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | - | - |
+| className | 自定义类名 | `string` | - | - | - |
+| **数据与显示** | | | | | |
+| value | 要显示的文本内容 | `any` | - | - | - |
+| maxLength | 最大显示长度，数组时为元素个数，字符串时为字符数 | `number` | `64` | - | - |
+| titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `"长度：{count}"` | - | - |
+| titleAggPath | 选中数据根据字段聚合统计显示在 title 上，titleTemplate 中使用 `{stat}` 占位符 | `string` | - | - | - |
+| separator | 数组元素间的分隔符 | `string` | `'\n'` | - | - |
+| labelTemplate | 对象或数组对象的显示模板，支持 `{field}` 格式 | `string` | - | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdModalProps | Ant Design [Modal](https://ant.design/components/modal-cn) 组件的属性 | `object` | - | 透传 Modal 属性，`open` / `onCancel` / `footer` / `title` 由内部管理 | - |
 
 ### 使用示例
 

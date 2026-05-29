@@ -11,34 +11,35 @@
 - 支持自定义标签模板
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 选中的值 | `any` | - | - |
-| onChange | 值变化时的回调函数 | `function(value, option)` | - | - |
-| **远程数据相关** | | | | |
-| restful | 远程获取数据的接口地址 | `string` | - | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| urlDetailTemplate | 根据 value 初始化能够 get 到对应 options 的接口地址；函数输入参数即初始化的 value，多选时是数组 | `string` | - | - |
-| baseParams | 接口筛选条件 | `object` | - | - |
-| searchKey | 模糊搜索使用的参数名 | `string` | `'search'` | - |
-| searchMinEnter | 最少输入字符数，为 0 时允许为空时获取远程 options | `number` | `0` | - |
-| parseRowsPath | 从接口返回值解析出列表数据的路径 | `string` | `'data.results'` | - |
-| **显示和交互** | | | | |
-| enableCopy | 是否启用复制功能 | `boolean` | `false` | - |
-| separator | 复制时，值之间的分隔符 | `string` | `','` | - |
-| labelTemplate | 远程接口返回数据的 label 模板 | `string` | - | - |
-| **原生组件支持** | | | | |
-| labelInValue | 使用该方式的时候，fieldNames 配置将失效 | `boolean` | `false` | - |
-| fieldNames | 通 antd 官方配置，配置 options 的 key/value 字段 | `object` | - | - |
-| options | 初始化的下拉选项 | `array` | - | - |
-| mode | 选择模式，默认单选，多选设置为 'multiple' | `string` | - | - |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
-| antdSelectProps | Ant Design Select 组件的原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 Select `style` | - |
+| className | 自定义类名 | `string` | - | 透传 Select `className` | - |
+| value | 选中的值 | `any` | - | 透传 Select `value` | - |
+| onChange | 值变化时的回调函数 | `function(value, option)` | - | 透传 Select `onChange` | - |
+| **远程数据相关** | | | | | |
+| restful | 远程获取数据的接口地址 | `string` | - | - | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| urlDetailTemplate | 根据 value 初始化能够 get 到对应 options 的接口地址；函数输入参数即初始化的 value，多选时是数组 | `string` | - | - | - |
+| baseParams | 接口筛选条件 | `object` | - | - | - |
+| searchKey | 模糊搜索使用的参数名 | `string` | `'search'` | - | - |
+| searchMinEnter | 最少输入字符数，为 0 时允许为空时获取远程 options | `number` | `0` | - | - |
+| parseRowsPath | 从接口返回值解析出列表数据的路径 | `string` | `'data.results'` | - | - |
+| **显示和交互** | | | | | |
+| enableCopy | 是否启用复制功能 | `boolean` | `false` | - | - |
+| separator | 复制时，值之间的分隔符 | `string` | `','` | - | - |
+| labelTemplate | 远程接口返回数据的 label 模板 | `string` | - | - | - |
+| **原生组件支持** | | | | | |
+| labelInValue | 使用该方式的时候，fieldNames 配置将失效 | `boolean` | `false` | 透传 Select `labelInValue` | - |
+| fieldNames | 通 antd 官方配置，配置 options 的 key/value 字段 | `object` | - | 透传 Select `fieldNames` | - |
+| options | 初始化的下拉选项 | `array` | - | 覆盖 Select `options`，由内部管理远程数据 | - |
+| mode | 选择模式，默认单选，多选设置为 'multiple' | `string` | - | 透传 Select `mode` | - |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 Select `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的原生属性 | `object` | - | 透传 Space 属性 | - |
+| antdSelectProps | Ant Design [Select](https://ant.design/components/select-cn) 组件的原生属性 | `object` | - | 透传 Select 属性，`value` / `onChange` / `options` / `loading` / `onSearch` 由内部管理 | - |
 
 ### 使用示例
 

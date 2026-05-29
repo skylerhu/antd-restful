@@ -73,29 +73,29 @@ setGlobalConfig({
 
 | 组件 | 说明 |
 |------|------|
-| [RestTable](./docs/reference/RestTable.md) | Table 的 RESTful 封装，支持远程数据加载、筛选、工具栏及列设置 |
-| [RestList](./docs/reference/RestList.md) | List 的 RESTful 封装，支持 loadMore / pagination 两种分页模式、筛选表单及 Grid 布局 |
-| [GridForm](./docs/reference/GridForm.md) | 响应式栅格表单，支持多种字段类型与校验 |
-| [LongText](./docs/reference/LongText.md) | 长文本截断展示，支持弹窗查看完整内容与模板格式化 |
-| [CopyView](./docs/reference/CopyView.md) | 一键复制文本，支持字符串、数组、对象等多种数据类型 |
-| [RouteBaseTable](./docs/reference/RouteBaseTable.md) | RestTable/RestList 的路由联动封装，通过 viewType 切换表格/列表，将筛选参数同步到 URL |
+| [RestTable](./docs/reference/RestTable.md) | 基于 Table 的 RESTful 封装，支持远程数据加载、多种表头筛选类型（输入/选择/数字范围/日期范围）、排序、工具栏（高级搜索/自动刷新/下载/列设置）及展开行 |
+| [RestList](./docs/reference/RestList.md) | 基于 List 的 RESTful 封装，支持 loadMore（加载更多）与 pagination（分页器）两种模式、筛选表单及 Grid 卡片布局 |
+| [GridForm](./docs/reference/GridForm.md) | 响应式栅格表单，支持 12 种字段类型、高级搜索/单项模式切换、自定义按钮文案、智能表单项激活策略及占位字段自动补充 |
+| [LongText](./docs/reference/LongText.md) | 长文本截断展示，支持数组/对象/字符串等多种数据类型、模板格式化、弹窗查看完整内容及原始数据切换 |
+| [CopyView](./docs/reference/CopyView.md) | 一键复制组件，支持字符串、数组、对象等多种数据类型，支持文本截断显示、自定义分隔符及隐藏值模式 |
+| [RouteBaseTable](./docs/reference/RouteBaseTable.md) | RestTable/RestList 的路由联动封装，通过 viewType 切换表格/列表视图，将筛选参数同步到 URL 并自动推断参数解析类型 |
 
 ### 2.2 表单项 (formitems)
 
 | 组件 | 说明 |
 |------|------|
-| [RestSelect](./docs/reference/formitems/RestSelect.md) | Select 远程选项加载，支持搜索、缓存与多选 |
-| [DateStrPicker](./docs/reference/formitems/DateStrPicker.md) | 日期选择器，以字符串而非 dayjs 对象读写值 |
-| [RangeStrPicker](./docs/reference/formitems/RangeStrPicker.md) | 日期范围选择器，以字符串或字符串数组读写值 |
-| [ExpansionView](./docs/reference/formitems/ExpansionView.md) | 花括号展开输入框，支持远程校验与错误提示 |
-| [NumberRange](./docs/reference/formitems/NumberRange.md) | 闭区间数字范围输入，适用于价格、年龄等范围场景 |
-| [TableSelect](./docs/reference/formitems/TableSelect.md) | 基于 RestTable 的多选弹窗，展示已选行并支持取消选择 |
-| [UploadView](./docs/reference/formitems/UploadView.md) | 文件上传，支持拖拽、进度条、预览及大小/数量限制 |
-| [CompareEdit](./docs/reference/formitems/CompareEdit.md) | 差异对比编辑器，可视化展示当前值与历史值的变更 |
-| [RestAutoComplete](./docs/reference/formitems/RestAutoComplete.md) | 远程搜索自动补全，支持防抖与自定义字段映射 |
-| [RestCascader](./docs/reference/formitems/RestCascader.md) | 远程级联选择，支持懒加载与多选 |
-| [RestTreeSelect](./docs/reference/formitems/RestTreeSelect.md) | 远程树形选择，支持懒加载与多选 |
-| [MentionView](./docs/reference/formitems/MentionView.md) | 远程 @提及输入框，支持搜索与防抖 |
+| [RestSelect](./docs/reference/formitems/RestSelect.md) | 基于 Select 的远程选择器，支持搜索防抖、数据缓存、多选、复制功能、labelTemplate 模板及只读模式 |
+| [DateStrPicker](./docs/reference/formitems/DateStrPicker.md) | 字符串格式日期选择器，自动处理字符串与 dayjs 对象转换，支持 date/time/week/month/year 等 picker 类型 |
+| [RangeStrPicker](./docs/reference/formitems/RangeStrPicker.md) | 字符串格式日期范围选择器，支持逗号分隔字符串与数组两种输入格式，支持时间范围选择 |
+| [ExpansionView](./docs/reference/formitems/ExpansionView.md) | 文本扩展输入组件，支持 brace-expansion 语法扩展与远程验证，可配合 expansionValidator 在表单中使用 |
+| [NumberRange](./docs/reference/formitems/NumberRange.md) | 闭区间数字范围输入，支持数组/字符串/数字多种输入格式，支持自定义只读模板及起止输入框分别配置 |
+| [TableSelect](./docs/reference/formitems/TableSelect.md) | 基于 RestTable 的表格选择器，支持多行选择、折叠面板展示已选数据、取消选择及聚合统计 |
+| [UploadView](./docs/reference/formitems/UploadView.md) | 文件上传组件，支持拖拽上传、自定义请求配置、进度显示、预览/下载及大小/数量限制 |
+| [CompareEdit](./docs/reference/formitems/CompareEdit.md) | 历史值对比编辑器，可视化展示新增/删除/未修改的差异，支持基础类型与数组对比及复制功能 |
+| [RestAutoComplete](./docs/reference/formitems/RestAutoComplete.md) | 基于 AutoComplete 的远程搜索自动补全，支持防抖、最小搜索字符数、自定义 fieldNames 映射及 labelTemplate |
+| [RestCascader](./docs/reference/formitems/RestCascader.md) | 基于 Cascader 的远程级联选择，支持子节点懒加载、多选、复制路径及只读展示 |
+| [RestTreeSelect](./docs/reference/formitems/RestTreeSelect.md) | 基于 TreeSelect 的远程树形选择，支持子节点懒加载、多选、复制功能及自定义字段映射 |
+| [MentionView](./docs/reference/formitems/MentionView.md) | 基于 Mentions 的远程 @提及输入框，支持搜索防抖、自定义 fieldNames 映射及 inValue 提及信息提取 |
 
 ### 2.3 工具与 Hooks
 
@@ -109,4 +109,4 @@ setGlobalConfig({
 ## 三、应用场景
 - [依赖restful接口的表格数据展示](./demo/views/TableDemo.jsx)
 - [依赖restful接口的列表数据展示](./demo/views/ListDemo.jsx)
-- [动态表单中的应用](./demo/views/JSONForm.jsx)
+- [动态表单中的应用](./demo/views/JSONForm.jsx)，特别是其中关于[RouteTable](./demo/views/RouteTable.jsx)的使用

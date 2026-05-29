@@ -87,15 +87,16 @@ function MyComponent() {
 
 **签名：**
 ```javascript
-const [runInterval, setEnable] = useInterval(callback, delay)
+const [runInterval, setEnable] = useInterval(callback, delay, immediate)
 ```
 
 **参数：**
 - `callback` (function): 要执行的函数
 - `delay` (number | null): 间隔时间（毫秒），`null` 表示暂停
+- `immediate` (boolean): 是否立即启用定时器，默认为 `false`
 
 **返回值：**
-- `runInterval` (function): 启动定时器的函数，可传入 `enableInterval` 参数控制是否持续运行
+- `runInterval` (function): 启动定时器的函数，接受可选参数 `enableInterval`（默认 true）控制是否持续运行；调用时会立即执行一次回调
 - `setEnable` (function): 设置定时器启用状态的函数
 
 **特性：**
@@ -239,6 +240,7 @@ const [state, setState] = useDictState(initialData)
 - 支持部分状态更新
 - 自动合并新状态与现有状态
 - 基于 useReducer 实现
+- 内置深度相等性检查：如果合并后的状态与当前状态深度相等，不会触发重渲染
 
 **使用示例：**
 ```javascript
@@ -269,6 +271,97 @@ function MyComponent() {
     </div>
   );
 }
+```
+
+## 设置管理 Hooks
+
+### useSettingsStorage
+
+用于管理表格列可见性配置，基于 localStorage 持久化存储用户的列显示偏好。当列定义发生变化时自动处理配置的兼容性。
+
+**签名：**
+```javascript
+const { allKeys, keys, setKeys } = useSettingsStorage(key, columns)
+```
+
+**参数：**
+- `key` (string): localStorage 存储键名
+- `columns` (Array): 列配置数组，每项包含：
+  - `key` (string, 必需): 列标识
+  - `label` (string, 可选): 列显示名称
+  - `hidden` (boolean, 可选): 是否默认隐藏
+
+**返回值：**
+- `allKeys` (Array): 所有列的 key 列表
+- `keys` (Array): 当前显示的列 key 列表
+- `setKeys` (function): 更新显示列的函数
+
+**特性：**
+- 持久化用户的列显示偏好到 localStorage
+- 当 columns 定义变更时自动兼容（仅保留仍存在的列配置）
+- 未设置配置时使用默认显示列（`hidden` 不为 true 的列）
+- 基于深度比较避免不必要的重渲染
+
+**使用示例：**
+```javascript
+import { useSettingsStorage } from 'src/hooks';
+
+function TableSettings() {
+  const columns = [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: '名称' },
+    { key: 'email', label: '邮箱' },
+    { key: 'createdAt', label: '创建时间', hidden: true },
+  ];
+
+  const { allKeys, keys, setKeys } = useSettingsStorage('user-table-columns', columns);
+
+  return (
+    <Checkbox.Group
+      options={allKeys.map(k => ({ label: columns.find(c => c.key === k)?.label, value: k }))}
+      value={keys}
+      onChange={setKeys}
+    />
+  );
+}
+```
+
+## 非 Hook 存储工具
+
+### myLocalStorage / mySessionStorage
+
+非 Hook 版本的存储管理器，适用于非 React 组件场景（如工具函数、初始化逻辑）。
+
+**签名：**
+```javascript
+const { value, getValue, setValue, removeValue } = myLocalStorage(key, defaultValue)
+const { value, getValue, setValue, removeValue } = mySessionStorage(key, defaultValue)
+```
+
+**参数：**
+- `key` (string): 存储键名
+- `defaultValue` (any): 默认值，默认为 `null`
+
+**返回值：**
+- `value` (any): 调用时的当前值（快照，不会响应式更新）
+- `getValue` (function): 获取最新值的函数
+- `setValue` (function): 设置值的函数
+- `removeValue` (function): 删除存储项的函数
+
+**使用示例：**
+```javascript
+import { myLocalStorage } from 'src/hooks';
+
+const tokenStorage = myLocalStorage('access_token', null);
+
+// 获取当前值
+const token = tokenStorage.getValue();
+
+// 设置值
+tokenStorage.setValue('new-token-value');
+
+// 删除值
+tokenStorage.removeValue();
 ```
 
 ## 请求相关 Hooks

@@ -12,31 +12,32 @@
 - 支持自定义输出模板
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前值对象，包含 input、output、error 等字段 | `object` | - | - |
-| onChange | 值变化时的回调函数 | `function(value)` | - | - |
-| **扩展功能** | | | | |
-| enableBraceExpansion | 开启后，支持 brace-expansion 的语法输入 | `boolean` | `false` | - |
-| **远程处理** | | | | |
-| restful | 远程处理接口地址 | `string` | - | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| inputKey | 输入的值作为 value，inputKey 是请求的 key | `string` | `'input'` | - |
-| inputMinEnter | 输入最小长度；仅在 restful 有值时有效 | `number` | `1` | - |
-| baseParams | 请求的额外参数 | `object` | - | - |
-| valueTemplate | 输出值的模板，{value} 则是输入的值，其余 key 值从 baseParams 中获取 | `string` | - | - |
-| **UI 配置** | | | | |
-| longTextProps | LongText 组件的属性 | `object` | - | - |
-| longErrorProps | 错误信息 LongText 组件的属性 | `object` | - | - |
-| **状态控制** | | | | |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
-| antdInputProps | Ant Design Input 组件的原生属性 | `object` | - | - |
-| antdAlertProps | Ant Design Alert 组件的原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | - | - |
+| className | 自定义类名 | `string` | - | - | - |
+| value | 当前值对象，包含 input、output、error 等字段 | `object` | - | - | - |
+| onChange | 值变化时的回调函数 | `function(value)` | - | - | - |
+| **扩展功能** | | | | | |
+| enableBraceExpansion | 开启后，支持 brace-expansion 的语法输入 | `boolean` | `false` | - | - |
+| **远程处理** | | | | | |
+| restful | 远程处理接口地址 | `string` | - | - | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| inputKey | 输入的值作为 value，inputKey 是请求的 key | `string` | `'input'` | - | - |
+| inputMinEnter | 输入最小长度；仅在 restful 有值时有效 | `number` | `1` | - | - |
+| baseParams | 请求的额外参数 | `object` | - | - | - |
+| valueTemplate | 输出值的模板，{value} 则是输入的值，其余 key 值从 baseParams 中获取 | `string` | - | - | - |
+| **UI 配置** | | | | | |
+| longTextProps | LongText 组件的属性 | `object` | - | - | - |
+| longErrorProps | 错误信息 LongText 组件的属性 | `object` | - | - | - |
+| **状态控制** | | | | | |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 Input `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | 透传 Input `readOnly` | - |
+| **Ant Design 原生配置** | | | | | |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的原生属性 | `object` | - | 透传 Space 属性，`direction` / `style` 有默认值 | - |
+| antdInputProps | Ant Design [Input](https://ant.design/components/input-cn) 组件的原生属性 | `object` | - | 透传 Input 属性，`value` / `onChange` / `disabled` / `readOnly` 由内部管理 | - |
+| antdAlertProps | Ant Design [Alert](https://ant.design/components/alert-cn) 组件的原生属性 | `object` | - | 透传 Alert 属性，`message` / `type` / `closable` 由内部管理 | - |
 
 ### 使用示例
 

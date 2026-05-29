@@ -10,22 +10,26 @@
 - 基于 Ant Design Space 和 Tag 组件实现
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| children | 子组件，用于编辑当前值 | `ReactNode` | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前选中的值 | `any` | - | - |
-| onChange | 值变化时的回调函数 | `function(val, ...args)` | - | - |
-| historyValue | 历史值，用于与当前值进行对比 | `any` | - | - |
-| labelTemplate | 格式化显示模板，必须是唯一的，能够观察出来区别 | `string` | - | - |
-| fieldValue | 从 options 中获取 value 的字段名 | `string` | `'value'` | - |
-| options | 当 value 是基础类型时，options 用于格式化 label | `array` | - | - |
-| emptyLabel | 空值显示标签 | `string` | `'(空)'` | - |
-| enableCopy | 是否启用复制功能 | `boolean` | `false` | - |
-| disabled | 是否禁用编辑功能 | `boolean` | `false` | - |
-| readOnly | 是否只读模式，只读时只显示对比结果 | `boolean` | `false` | - |
-| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| children | 子组件，用于编辑当前值 | `ReactNode` | - | - | - |
+| style | 自定义样式 | `object` | - | - | - |
+| className | 自定义类名 | `string` | - | - | - |
+| **数据与对比** | | | | | |
+| value | 当前选中的值 | `any` | - | - | - |
+| onChange | 值变化时的回调函数 | `function(val, ...args)` | - | - | - |
+| historyValue | 历史值，用于与当前值进行对比 | `any` | - | - | - |
+| labelTemplate | 格式化显示模板，必须是唯一的，能够观察出来区别 | `string` | - | - | - |
+| fieldValue | 从 options 中获取 value 的字段名 | `string` | `'value'` | - | - |
+| options | 当 value 是基础类型时，options 用于格式化 label | `array` | - | - | - |
+| emptyLabel | 空值显示标签 | `string` | `'(空)'` | - | - |
+| **交互控制** | | | | | |
+| enableCopy | 是否启用复制功能 | `boolean` | `false` | - | - |
+| disabled | 是否禁用编辑功能 | `boolean` | `false` | - | - |
+| readOnly | 是否只读模式，只读时只显示对比结果 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的属性 | `object` | - | 透传 Space 属性 | - |
 
 ### 对比规则
 - **未修改**：当历史值与当前值完全相等时，不显示任何对比标签

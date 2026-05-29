@@ -6,40 +6,50 @@
 - 基于 Ant Design Form 和 List 组件实现，继承其所有特性
 - 内置响应式网格布局，自动适配不同屏幕尺寸
 - 支持表单验证和自定义验证规则
-- 内置提交和重置按钮，支持自定义回调
+- 内置提交和重置按钮，支持自定义按钮文案
 - 支持自定义渲染函数，灵活扩展
 - 支持初始值设置和表单值变化监听
 - 自动处理 Enter 键提交表单
 - 支持单项模式和高级搜索模式切换
 - 智能的表单项激活策略，提升单项模式用户体验
+- 支持占位字段自动补充，避免工具栏遮挡
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| fields | 表单项配置数组 | `array` | - | - |
-| advancedSearch | 是否启用高级搜索模式，false时为单项模式 | `boolean` | `true` | - |
-| onSubmit | 表单提交回调 | `function(values)` | - | - |
-| onReset | 表单重置回调 | `function(values)` | - | - |
-| onValuesChange | 表单值变化回调 | `function(changedValues, allValues)` | - | - |
-| initialValues | 表单初始值 | `object` | - | - |
-| antdFormProps | Ant Design [Form](https://ant.design/components/form-cn) 组件的属性 | `object` | - | - |
-| antdListProps | Ant Design [List](https://ant.design/components/list-cn) 组件的属性 | `object` | `{ grid: { gutter: 10, xs: 1, sm: 2, md: 4 } }` | - |
+
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 Form `style` | - |
+| className | 自定义类名 | `string` | - | 透传 Form `className` | - |
+| **表单配置** | | | | | |
+| fields | 表单项配置数组 | `array` | - | - | - |
+| advancedSearch | 是否启用高级搜索模式，false 时为单项模式 | `boolean` | `true` | - | - |
+| initialValues | 表单初始值 | `object` | - | 透传 Form `initialValues` | - |
+| enablePlaceholder | 是否开启占位字段，当表单项数+1 刚好是 column 的倍数时自动添加占位项，避免按钮被遮挡 | `boolean` | `false` | - | - |
+| **回调函数** | | | | | |
+| onSubmit | 表单提交回调 | `function(values)` | - | - | - |
+| onReset | 表单重置回调 | `function(values)` | - | - | - |
+| onValuesChange | 表单值变化回调 | `function(changedValues, allValues)` | - | - | - |
+| **按钮配置** | | | | | |
+| submitTitle | 提交按钮文案 | `node` | `'提交'` | - | - |
+| resetTitle | 重置按钮文案 | `node` | `'重置'` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdFormProps | Ant Design [Form](https://ant.design/components/form-cn) 组件的属性 | `object` | - | 透传 Form 属性，`form` / `initialValues` / `onFinish` 由内部管理 | - |
+| antdListProps | Ant Design [List](https://ant.design/components/list-cn) 组件的属性，用于高级搜索模式下的网格布局 | `object` | `{ grid: { gutter: 10, column: 3 } }` | 透传 List 属性，`dataSource` / `renderItem` 由内部管理 | - |
 
 **fields 配置项：**
 
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| key | 字段唯一标识，同时作为表单字段的 name | `string` | - | - |
-| label | 字段标签，未设置时使用 key 值 | `string` | `key` | - |
-| type | 字段类型，详见下方支持的字段类型 | `string` | `'input'` | - |
-| tips | 在配置展示列时的提示信息 | `string` | - | - |
-| hidden | 设置true隐藏字段，若显示设置false则不可配置隐藏 | `bool` | undefined | - |
-| antdFormItemProps | Ant Design Form.Item 组件的属性，如验证规则等 | `object` | - | - |
-| antdFieldProps | 对应字段组件的属性 | `object` | - | - |
-| antdSingleProps | 单项模式下字段组件的特殊属性 | `object` | - | - |
-| render | 自定义渲染函数，返回完整的 Form.Item | `function(item)` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| key | 字段唯一标识，同时作为表单字段的 name | `string` | - | 透传 Form.Item `name` | - |
+| label | 字段标签，未设置时使用 key 值 | `string` | `key` | 透传 Form.Item `label` | - |
+| type | 字段类型，详见下方支持的字段类型 | `string` | `'input'` | - | - |
+| tips | 在配置展示列时的提示信息 | `string` | - | - | - |
+| hidden | 设置 true 隐藏字段，若显示设置 false 则不可配置隐藏 | `bool` | undefined | - | - |
+| antdFormItemProps | Ant Design Form.Item 组件的属性，如验证规则等 | `object` | - | 透传 Form.Item 属性 | - |
+| antdFieldProps | 对应字段组件的属性 | `object` | - | 透传对应字段组件属性 | - |
+| antdSingleProps | 单项模式下字段组件的特殊属性，会与 antdFieldProps 合并（优先级更高） | `object` | - | - | - |
+| render | 自定义渲染函数，返回完整的 Form.Item | `function(item)` | - | - | - |
 
 **支持的字段类型：**
 
@@ -62,7 +72,7 @@
 
 | 方法名 | 说明 | 参数 | 返回值 |
 | - | - | - | - |
-| getFormInstance | 获取 Ant Design 表单实例 | - | `FormInstance` |
+| getFormInstance | 获取 Ant Design 表单实例（扩展了 `setFieldsValueAndActiveKey` 方法） | - | `FormInstance` |
 
 ### 模式说明
 

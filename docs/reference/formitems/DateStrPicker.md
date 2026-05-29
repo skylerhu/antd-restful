@@ -9,21 +9,22 @@
 - 自动处理字符串与 dayjs 对象的转换
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前选中的日期字符串 | `string` | - | - |
-| onChange | 值变化时的回调函数 | `function(dateString, date)` | - | - |
-| **日期配置** | | | | |
-| defaultValue | 默认日期字符串 | `string` | - | - |
-| format | 日期格式 | `string` | - | - |
-| picker | 选择器类型 | `string` | `'date'` | - |
-| **状态控制** | | | | |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdPickerProps | Ant Design DatePicker/TimePicker 组件的原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 DatePicker `style` | - |
+| className | 自定义类名 | `string` | - | 透传 DatePicker `className` | - |
+| value | 当前选中的日期字符串 | `string` | - | 覆盖 DatePicker `value`，内部处理字符串与 dayjs 转换 | - |
+| onChange | 值变化时的回调函数 | `function(dateString, date)` | - | 覆盖 DatePicker `onChange`，输出字符串格式 | - |
+| **日期配置** | | | | | |
+| defaultValue | 默认日期字符串 | `string` | - | 覆盖 DatePicker `defaultValue`，内部转换为 dayjs | - |
+| format | 日期格式 | `string` | - | 透传 DatePicker `format` | - |
+| picker | 选择器类型 | `string` | `'date'` | 透传 DatePicker `picker` | - |
+| **状态控制** | | | | | |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 DatePicker `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdPickerProps | Ant Design [DatePicker](https://ant.design/components/date-picker-cn)/[TimePicker](https://ant.design/components/time-picker-cn) 组件的原生属性 | `object` | - | 透传 DatePicker/TimePicker 属性，`value` / `onChange` / `defaultValue` 由内部管理 | - |
 
 ### 使用示例
 

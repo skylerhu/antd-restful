@@ -10,28 +10,29 @@
 - 支持搜索最小字符数限制
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前选中的值 | `any` | - | - |
-| onChange | 值变化时的回调函数 | `function(value)` | - | - |
-| **远程数据相关** | | | | |
-| restful | 远程数据接口地址 | `string` | - | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| baseParams | 接口筛选条件 | `object` | - | - |
-| searchKey | 搜索关键字参数名 | `string` | `'search'` | - |
-| searchMinEnter | 最少输入字符数 | `number` | `1` | - |
-| parseRowsPath | 解析接口返回数据的路径 | `string` | `'data.results'` | - |
-| **显示和交互** | | | | |
-| options | 选项列表 | `array` | - | - |
-| fieldNames | 字段名称映射配置（原生组件并不支持如此配置） | `object` | - | - |
-| labelTemplate | 远程接口返回数据的 label 模板 | `string` | - | - |
-| **状态控制** | | | | |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdAutoCompleteProps | Ant Design AutoComplete 组件原生属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 AutoComplete `style` | - |
+| className | 自定义类名 | `string` | - | 透传 AutoComplete `className` | - |
+| value | 当前选中的值 | `any` | - | 透传 AutoComplete `value` | - |
+| onChange | 值变化时的回调函数 | `function(value)` | - | 透传 AutoComplete `onChange` | - |
+| **远程数据相关** | | | | | |
+| restful | 远程数据接口地址 | `string` | - | - | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| baseParams | 接口筛选条件 | `object` | - | - | - |
+| searchKey | 搜索关键字参数名 | `string` | `'search'` | - | - |
+| searchMinEnter | 最少输入字符数 | `number` | `1` | - | - |
+| parseRowsPath | 解析接口返回数据的路径 | `string` | `'data.results'` | - | - |
+| **显示和交互** | | | | | |
+| options | 选项列表 | `array` | - | 覆盖 AutoComplete `options`，远程模式由内部管理 | - |
+| fieldNames | 字段名称映射配置（原生组件并不支持如此配置） | `object` | - | - | - |
+| labelTemplate | 远程接口返回数据的 label 模板 | `string` | - | - | - |
+| **状态控制** | | | | | |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 AutoComplete `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdAutoCompleteProps | Ant Design [AutoComplete](https://ant.design/components/auto-complete-cn) 组件原生属性 | `object` | - | 透传 AutoComplete 属性，`value` / `onChange` / `options` / `onSearch` 由内部管理 | - |
 
 ### 字段映射配置 (fieldNames)
 ```javascript

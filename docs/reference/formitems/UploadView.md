@@ -10,32 +10,33 @@
 - 支持自定义上传参数
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| children | 自定义上传触发内容 | `ReactNode` | - | - |
-| value | 当前文件列表 | `FileObject \| FileObject[]` | - | - |
-| onChange | 文件变化时的回调函数 | `function(fileList)` | - | - |
-| **上传配置** | | | | |
-| method | 上传请求方法 | `string` | `'post'` | - |
-| uploadUrl | 上传接口地址（必需） | `string` | - | - |
-| timeout | 上传超时时间，单位毫秒 | `number` | `10000` | - |
-| name | 表单中文件字段名 | `string` | `'file'` | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| baseParams | 上传请求的额外参数 | `object` | - | - |
-| enableDragger | 是否支持拖拽文件 | `boolean` | `false` | - |
-| maxSize | 限制文件大小（字节） | `number` | `104857600` | - |
-| **原生组件支持** | | | | |
-| listType | 文件列表类型 | `string` | `'picture'` | - |
-| maxCount | 限制文件个数；0 表示不限制 | `number` | `1` | - |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| **Ant Design 原生配置** | | | | |
-| antdUploadProps | Ant Design Upload 组件的原生属性 | `object` | - | - |
-| antdButtonConfig | 上传按钮的配置 | `object` | - | - |
-| antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
-| antdReadonlyItemProps | 只读模式下文件项的属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | - | - |
+| className | 自定义类名 | `string` | - | - | - |
+| children | 自定义上传触发内容 | `ReactNode` | - | - | - |
+| value | 当前文件列表 | `FileObject \| FileObject[]` | - | 覆盖 Upload `fileList`，由内部管理 | - |
+| onChange | 文件变化时的回调函数 | `function(fileList)` | - | 覆盖 Upload `onChange`，输出标准化的文件对象 | - |
+| **上传配置** | | | | | |
+| method | 上传请求方法 | `string` | `'post'` | - | - |
+| uploadUrl | 上传接口地址（必需） | `string` | - | - | - |
+| timeout | 上传超时时间，单位毫秒 | `number` | `10000` | - | - |
+| name | 表单中文件字段名 | `string` | `'file'` | 透传 Upload `name` | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| baseParams | 上传请求的额外参数 | `object` | - | - | - |
+| enableDragger | 是否支持拖拽文件 | `boolean` | `false` | - | - |
+| maxSize | 限制文件大小（字节） | `number` | `104857600` | - | - |
+| **原生组件支持** | | | | | |
+| listType | 文件列表类型 | `string` | `'picture'` | 透传 Upload `listType` | - |
+| maxCount | 限制文件个数；0 表示不限制 | `number` | `1` | 透传 Upload `maxCount` | - |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 Upload `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| **Ant Design 原生配置** | | | | | |
+| antdUploadProps | Ant Design [Upload](https://ant.design/components/upload-cn) 组件的原生属性 | `object` | - | 透传 Upload 属性，`fileList` / `onChange` / `customRequest` 由内部管理 | - |
+| antdButtonConfig | 上传按钮的配置 | `object` | - | - | - |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的原生属性 | `object` | - | 透传 Space 属性 | - |
+| antdReadonlyItemProps | 只读模式下文件项的属性 | `object` | - | - | - |
 
 ### 文件对象类型定义
 组件的 value 支持单个文件对象或文件对象数组。每个文件对象包含以下属性：

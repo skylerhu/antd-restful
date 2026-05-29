@@ -10,24 +10,27 @@
 - 完全继承 RestTable 的所有功能
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| value | 值仅支持对象数组格式 | `array<object>` | - | - |
-| onChange | 值变化时的回调函数 | `function(selectedRows)` | - | - |
-| disabled | 禁用后只读 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| expandSelected | 是否默认展开显示选中数据 | `boolean` | `true` | - |
-| rowKey | 表格行的唯一键名 | `string` | `'id'` | - |
-| columns | 表格列配置 | `array` | `[]` | - |
-| titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `选中 {count} 条数据` | - |
-| titleAggPath | 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 `{stat}` 占位符 | `string` | - | 0.1.2 |
-| **Ant Design 原生配置** | | | | |
-| antdTableProps | Ant Design Table 组件的原生属性 | `object` | - | - |
-| antdTableReadProps | 用于配置只读的Table，覆盖 antdTableProps | `object` | - | - |
-| antdCollapseProps | Ant Design Collapse 组件的原生属性 | `object` | - | - |
-| antdSpaceProps | Ant Design Space 组件的原生属性 | `object` | - | - |
-| **RestTable 属性** | | | | |
-| ...restProps | 继承 RestTable 的所有其他属性 | - | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| value | 值仅支持对象数组格式 | `array<object>` | - | - | - |
+| onChange | 值变化时的回调函数 | `function(selectedRows)` | - | - | - |
+| **交互控制** | | | | | |
+| disabled | 禁用后只读 | `boolean` | `false` | - | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| expandSelected | 是否默认展开显示选中数据 | `boolean` | `true` | - | - |
+| **数据配置** | | | | | |
+| rowKey | 表格行的唯一键名 | `string` | `'id'` | 透传 Table `rowKey` | - |
+| columns | 表格列配置 | `array` | `[]` | 透传 Table `columns` | - |
+| titleTemplate | 选中个数的标题显示模板，必须包含 `{count}` 占位符 | `string` | `选中 {count} 条数据` | - | - |
+| titleAggPath | 选中数据根据字段聚合统计显示在title上，titleTemplate中使用 `{stat}` 占位符 | `string` | - | - | 0.1.2 |
+| **Ant Design 原生配置** | | | | | |
+| antdTableProps | Ant Design [Table](https://ant.design/components/table-cn) 组件的原生属性 | `object` | - | 透传 Table 属性，`rowSelection` / `dataSource` 由内部管理 | - |
+| antdTableReadProps | 用于配置只读的Table，覆盖 antdTableProps | `object` | - | 透传只读 Table 属性 | - |
+| antdCollapseProps | Ant Design [Collapse](https://ant.design/components/collapse-cn) 组件的原生属性 | `object` | - | 透传 Collapse 属性 | - |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件的原生属性 | `object` | - | 透传 Space 属性 | - |
+| **RestTable 属性** | | | | | |
+| ...restProps | 继承 RestTable 的所有其他属性 | - | - | - | - |
 
 ### 数据格式
 - **输入值**：必须是对象数组格式 `[{}, {}, ...]`

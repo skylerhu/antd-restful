@@ -10,31 +10,32 @@
 - 支持自定义字段名映射
 
 ### 参数说明
-| 参数 | 说明 | 类型 | 默认值 | 版本 |
-| - | - | - | - | - |
-| style | 自定义样式 | `object` | - | - |
-| className | 自定义类名 | `string` | - | - |
-| value | 当前选中的值 | `any` | - | - |
-| onChange | 值变化时的回调函数 | `function(value, nodes)` | - | - |
-| **远程数据相关** | | | | |
-| restful | 远程接口地址 | `string` | - | - |
-| reqConfig | axios 的配置选项 | `object` | - | - |
-| baseParams | 基础请求参数 | `object` | - | - |
-| labelTemplate | 标签模板 | `string` | - | - |
-| fieldParent | 父级字段名 | `string` | `'parent'` | - |
-| parseRowsPath | 解析数据路径 | `string` | `'data.results'` | - |
-| **字段映射** | | | | |
-| fieldNames | 字段映射 | `object` | - | - |
-| treeNodeLabelProp | 树节点标签属性 | `string` | - | - |
-| **状态控制** | | | | |
-| enableCopy | 是否启用复制功能 | `boolean` | `false` | - |
-| separator | 多选时复制值之间的分隔符 | `string` | `','` | - |
-| disabled | 是否禁用 | `boolean` | `false` | - |
-| readOnly | 是否只读模式 | `boolean` | `false` | - |
-| treeData | 静态树形数据 | `array` | - | - |
-| **Ant Design 原生配置** | | | | |
-| antdTreeSelectProps | Ant Design TreeSelect 组件属性 | `object` | - | - |
-| antdSpaceProps | Ant Design Space 组件属性 | `object` | - | - |
+| 参数 | 说明 | 类型 | 默认值 | antd 覆盖说明 | 版本 |
+| - | - | - | - | - | - |
+| **通用属性** | | | | | |
+| style | 自定义样式 | `object` | - | 透传 TreeSelect `style` | - |
+| className | 自定义类名 | `string` | - | 透传 TreeSelect `className` | - |
+| value | 当前选中的值 | `any` | - | 透传 TreeSelect `value` | - |
+| onChange | 值变化时的回调函数 | `function(value, nodes)` | - | 覆盖 TreeSelect `onChange`，增加 nodes 参数 | - |
+| **远程数据相关** | | | | | |
+| restful | 远程接口地址 | `string` | - | - | - |
+| reqConfig | axios 的配置选项 | `object` | - | - | - |
+| baseParams | 基础请求参数 | `object` | - | - | - |
+| labelTemplate | 标签模板 | `string` | - | - | - |
+| fieldParent | 父级字段名 | `string` | `'parent'` | - | - |
+| parseRowsPath | 解析数据路径 | `string` | `'data.results'` | - | - |
+| **字段映射** | | | | | |
+| fieldNames | 字段映射 | `object` | - | 透传 TreeSelect `fieldNames` | - |
+| treeNodeLabelProp | 树节点标签属性 | `string` | - | 透传 TreeSelect `treeNodeLabelProp` | - |
+| **状态控制** | | | | | |
+| enableCopy | 是否启用复制功能 | `boolean` | `false` | - | - |
+| separator | 多选时复制值之间的分隔符 | `string` | `','` | - | - |
+| disabled | 是否禁用 | `boolean` | `false` | 透传 TreeSelect `disabled` | - |
+| readOnly | 是否只读模式 | `boolean` | `false` | - | - |
+| treeData | 静态树形数据 | `array` | - | 覆盖 TreeSelect `treeData`，远程模式由内部管理 | - |
+| **Ant Design 原生配置** | | | | | |
+| antdTreeSelectProps | Ant Design [TreeSelect](https://ant.design/components/tree-select-cn) 组件属性 | `object` | - | 透传 TreeSelect 属性，`value` / `onChange` / `treeData` / `loadData` 由内部管理 | - |
+| antdSpaceProps | Ant Design [Space](https://ant.design/components/space-cn) 组件属性 | `object` | - | 透传 Space 属性 | - |
 
 ### 字段映射配置 (fieldNames)
 ```javascript
